@@ -114,9 +114,9 @@ def pd_readcsv_frompackage(filename):
     return pd_readcsv(full_filename)
 
 
-def pd_readcsv(filename, date_index_name="DATETIME"):
+def pd_readcsv(filename, date_index_name="DATETIME", date_index=0, header=0, date_format=None):
     """
-    Reads a pandas data frame, with time index labelled
+    Reads a pandas data frame, with time index
     package_name(/path1/path2.., filename
 
     :param filename: Filename with extension
@@ -125,15 +125,27 @@ def pd_readcsv(filename, date_index_name="DATETIME"):
     :param date_index_name: Column name of date index
     :type date_index_name: list of str
 
+    :param date_index: Column number of date index (used instead of date_index_name when header=None)
+    :type date_index: int
+
+    :param header: row index of column header, or None if there is no header
+    :type date_index_name: int or None
+
+    :param date_format: format of the date column
+    :type date_format: str
 
     :returns: pd.DataFrame
 
     """
 
-    ans = pd.read_csv(filename)
-    ans.index = pd.to_datetime(ans[date_index_name]).values
+    i = date_index_name
+    if header is None:
+        i = date_index
 
-    del ans[date_index_name]
+    ans = pd.read_csv(filename, header=header)
+    ans.index = pd.to_datetime(ans[i], format=date_format).values
+
+    del ans[i]
 
     ans.index.name = None
 
