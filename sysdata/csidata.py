@@ -266,6 +266,11 @@ class CsiFuturesData(FuturesData):
 
         return currency
 
+    def get_instrument_ib_symbol(self, instrument_code):
+        instr_data = self._get_instrument_data()
+        ib_symbol = instr_data.loc[instrument_code, 'IBSymbol']
+        return ib_symbol
+
     def _get_fx_data(self, currency1, currency2):
         """
         Get fx data
