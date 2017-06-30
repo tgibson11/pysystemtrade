@@ -123,3 +123,8 @@ class ibClient(EClient, brokerClient):
         # All these functions follow the same pattern: check if stale, if not return cache, else update values
 
         return self._account_cache.get_updated_cache(accountName, ACCOUNT_UPDATE_FLAG)
+
+    def get_accounting_value(self, accountName, key):
+        values = self.get_accounting_values(accountName)
+        val = [item for item in values if item[0] == key][0][1]
+        return val
