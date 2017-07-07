@@ -320,12 +320,6 @@ class Data(object):
 
         return asset_class
 
-    def get_instrument_ib_symbol(self, instrument_code):
-        error_msg = "You have created a Data() object; you need to use a more specific data object to use " \
-                    ".get_instrument_asset_classes "
-        self.log.critical(error_msg)
-
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
