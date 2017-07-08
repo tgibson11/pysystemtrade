@@ -271,6 +271,11 @@ class CsiFuturesData(FuturesData):
         ib_symbol = instr_data.loc[instrument_code, 'IBSymbol']
         return ib_symbol
 
+    def instrument_has_prev_month_expiry(self, instrument_code):
+        instr_data = self._get_instrument_data()
+        prev_month_expiry = instr_data.loc[instrument_code, 'PrevMonthExpiry']
+        return prev_month_expiry
+
     def _get_fx_data(self, currency1, currency2):
         """
         Get fx data
