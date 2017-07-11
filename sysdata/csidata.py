@@ -276,6 +276,11 @@ class CsiFuturesData(FuturesData):
         prev_month_expiry = instr_data.loc[instrument_code, 'PrevMonthExpiry']
         return prev_month_expiry
 
+    def get_instrument_roll_window(self, instrument_code):
+        instr_data = self._get_instrument_data()
+        roll_window = instr_data.loc[instrument_code, 'RollWindow']
+        return roll_window
+
     def _get_fx_data(self, currency1, currency2):
         """
         Get fx data
