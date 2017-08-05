@@ -123,13 +123,13 @@ def pd_readcsv(filename, date_index_name="DATETIME", date_index=0, header=0, dat
     :type filename: str
 
     :param date_index_name: Column name of date index
-    :type date_index_name: list of str
+    :type date_index_name: str
 
     :param date_index: Column number of date index (used instead of date_index_name when header=None)
     :type date_index: int
 
     :param header: row index of column header, or None if there is no header
-    :type date_index_name: int or None
+    :type header: int or None
 
     :param date_format: format of the date column
     :type date_format: str
