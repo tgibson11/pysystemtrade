@@ -13,6 +13,7 @@ from syscore.pdutils import pd_readcsv
 from syscore.genutils import str_of_int
 
 from sysdata.futuresdata import FuturesData
+import data
 """
 Static variables to store location of data
 """
