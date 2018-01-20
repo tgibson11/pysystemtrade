@@ -509,7 +509,7 @@ class listOfFuturesContracts(list):
 
         return listOfFuturesContracts(list_of_contracts)
 
-class futuresData(pd.dataFrame):
+class futuresData(pd.DataFrame):
     """
     Data frame in specific format
     """
@@ -520,7 +520,7 @@ class futuresData(pd.dataFrame):
         data_present.sort()
 
         try:
-            assert data_present == ['OPEN', 'CLOSE', 'HIGH', 'LOW', 'SETTLE', 'VOLUME', 'OPEN_INTEREST']
+            assert data_present == ['HIGH', 'LOW', 'OPEN', 'OPEN_INTEREST', 'SETTLE', 'VOLUME']
         except AssertionError:
             raise Exception("futuresData has to conform to pattern")
 

@@ -25,7 +25,7 @@ def quandl_get_futures_contract_historic_data(futures_contract):
 
     contract_data = quandl.get(quandl_contract.quandl_identifier())
 
-    return quandlFuturesContract(futures_contract, contract_data)
+    return quandlFuturesData(futures_contract, contract_data)
 
 class quandlFuturesData(futuresData):
     """
@@ -36,14 +36,16 @@ class quandlFuturesData(futuresData):
     def __init__(self, futures_contract, contract_data):
 
         new_data = pd.DataFrame(dict(OPEN = contract_data.Open,
-                                     CLOSE = contract_data.Close,
+                                     # 'Close' is not present in the data I'm getting from Quandl
+                                     # CLOSE = contract_data.Close,
                                      HIGH = contract_data.High,
                                      LOW = contract_data.Low,
                                      SETTLE = contract_data.Settle,
                                      VOLUME = contract_data.Volume,
+                                     # TODO Quandl results are inconsistent: sometimes "Previous" instead of "Prev."
                                      OPEN_INTEREST = contract_data['Prev. Day Open Interest']))
 
-        super().__init__(self, new_data)
+        super().__init__(new_data)
 
 
 class listOfQuandlFuturesContracts(listOfFuturesContracts):
