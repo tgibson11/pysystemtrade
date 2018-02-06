@@ -5,7 +5,7 @@ import pandas as pd
 
 from syscore.genutils import str_of_int
 from syscore.pdutils import pd_readcsv
-from sysdata.csvdata import csvFuturesData
+from sysdata.csv.csvfuturesdata import csvFuturesData
 
 
 class CsiFuturesData(csvFuturesData):
