@@ -52,7 +52,8 @@ class initCsvFuturesInstrumentData(futuresInstrumentData):
                                                   exchange = config_for_this_instrument.Exchange,
                                                   point_size = config_for_this_instrument.Pointsize,
                                                   currency = config_for_this_instrument.Currency,
-                                                  asset_class = config_for_this_instrument.Assetclass)
+                                                  asset_class = config_for_this_instrument.Assetclass,
+                                                  ib_symbol = config_for_this_instrument.IBSymbol)
         print(instrument_object)
 
         return instrument_object

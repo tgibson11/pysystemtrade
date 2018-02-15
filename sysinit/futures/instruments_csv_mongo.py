@@ -6,7 +6,7 @@ from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysinit.futures.instruments_from_csv import initCsvFuturesInstrumentData
 
 data_out = mongoFuturesInstrumentData()
-data_in = initCsvFuturesInstrumentData()
+data_in = initCsvFuturesInstrumentData(config_file="private.my_system.instrumentconfig.csv")
 
 instrument_list = data_in.get_list_of_instruments()
 
