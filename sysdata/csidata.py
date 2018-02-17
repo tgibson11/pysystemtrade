@@ -3,9 +3,12 @@ import os
 
 import pandas as pd
 
+from datetime import datetime
 from syscore.genutils import str_of_int
 from syscore.pdutils import pd_readcsv
 from sysdata.csv.csvfuturesdata import csvFuturesData
+from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
+from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 
 
 class CsiFuturesData(csvFuturesData):
@@ -73,15 +76,51 @@ class CsiFuturesData(csvFuturesData):
         ib_symbol = instr_data.loc[instrument_code, 'IBSymbol']
         return ib_symbol
 
-    def instrument_has_prev_month_expiry(self, instrument_code):
-        instr_data = self._get_instrument_data()
-        prev_month_expiry = instr_data.loc[instrument_code, 'PrevMonthExpiry']
-        return prev_month_expiry
+    @staticmethod
+    def instrument_has_prev_month_expiry(instrument_code):
+        data = mongoRollParametersData()
+        roll_params = data.get_roll_parameters(instrument_code)
+        return roll_params.approx_expiry_offset < 0
 
-    def get_instrument_roll_window(self, instrument_code):
-        instr_data = self._get_instrument_data()
-        roll_window = instr_data.loc[instrument_code, 'RollWindow']
-        return roll_window
+    @staticmethod
+    def get_roll_offset_days(instrument_code):
+        data = mongoRollParametersData()
+        roll_params = data.get_roll_parameters(instrument_code)
+        return roll_params.roll_offset_day
+
+    @staticmethod
+    def get_next_contract(instrument_code):
+        data = mongoRollParametersData()
+        roll_params = data.get_roll_parameters(instrument_code)
+        return roll_params.approx_first_held_contractDate_after_date(datetime.now())
+
+    def _get_instrument_data(self):
+        """
+        Get a data frame of interesting information about instruments from MongoDB
+
+        :returns: pd.DataFrame
+
+        """
+
+        self.log.msg("Loading MongoDB instrument config")
+
+        data = mongoFuturesInstrumentData()
+        instruments = data.get_list_of_instruments()
+
+        d = []
+        for instr_code in instruments:
+            instr = data.get_instrument_data(instr_code)
+            d.append(dict(Instrument=instr_code, Pointsize=instr.meta_data['point_size'],
+                          AssetClass=instr.meta_data['asset_class'], Currency=instr.meta_data['currency'],
+                          IBSymbol=instr.meta_data['ib_symbol'], CSISymbol=instr.meta_data['csi_symbol']))
+
+        df = pd.DataFrame.from_records(d).set_index('Instrument')
+        return df
+
+    def get_instrument_list(self):
+        data = mongoFuturesInstrumentData()
+        return data.get_list_of_instruments()
+
 
 if __name__ == '__main__':
     import doctest
