@@ -330,7 +330,7 @@ class rollParameters(object):
 
         # go forward according to contract offset
 
-        for contract_count in range(self.contract_offset):
+        for contract_count in range(int(self.contract_offset)):
             current_date_as_contract_with_roll_data = current_date_as_contract_with_roll_data.next_held_contract()
 
         return current_date_as_contract_with_roll_data
@@ -375,8 +375,8 @@ class contractDateWithRollParameters(contractDate):
         """
 
         if inherit_expiry_offset:
-            if "approx_expiry_offset" in kwargs.keys():
-                print("Ignoring passed approx_expiry_offset, and using one in rolldata")
+            # if "approx_expiry_offset" in kwargs.keys():
+                # print("Ignoring passed approx_expiry_offset, and using one in rolldata")
 
             kwargs["approx_expiry_offset"] = rolldata_object.approx_expiry_offset
 
