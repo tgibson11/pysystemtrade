@@ -13,6 +13,18 @@ from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 
 class CsiFuturesData(csvFuturesData):
 
+    def __init__(self, datapath=None, absolute_datapath=None):
+        super().__init__(datapath, absolute_datapath)
+        self._list_of_instruments = None
+        self._instrument_data = None
+        self._roll_parameters_data = None
+
+    def get_instrument_list(self):
+        if not self._list_of_instruments:
+            self.log.msg("Loading instrument config from MongoDB")
+            self._list_of_instruments = mongoFuturesInstrumentData().get_list_of_instruments()
+        return self._list_of_instruments
+
     def get_raw_price(self, instrument_code):
         """
         Get instrument price
@@ -76,22 +88,16 @@ class CsiFuturesData(csvFuturesData):
         ib_symbol = instr_data.loc[instrument_code, 'IBSymbol']
         return ib_symbol
 
-    @staticmethod
-    def instrument_has_prev_month_expiry(instrument_code):
-        data = mongoRollParametersData()
-        roll_params = data.get_roll_parameters(instrument_code)
+    def instrument_has_prev_month_expiry(self, instrument_code):
+        roll_params = self._get_roll_parameters(instrument_code)
         return roll_params.approx_expiry_offset < 0
 
-    @staticmethod
-    def get_roll_offset_days(instrument_code):
-        data = mongoRollParametersData()
-        roll_params = data.get_roll_parameters(instrument_code)
+    def get_roll_offset_days(self, instrument_code):
+        roll_params = self._get_roll_parameters(instrument_code)
         return roll_params.roll_offset_day
 
-    @staticmethod
-    def get_next_contract(instrument_code):
-        data = mongoRollParametersData()
-        roll_params = data.get_roll_parameters(instrument_code)
+    def get_next_contract(self, instrument_code):
+        roll_params = self._get_roll_parameters(instrument_code)
         return roll_params.approx_first_held_contractDate_after_date(datetime.now())
 
     def _get_instrument_data(self):
@@ -102,24 +108,28 @@ class CsiFuturesData(csvFuturesData):
 
         """
 
-        self.log.msg("Loading MongoDB instrument config")
+        if self._instrument_data is None:
+            self.log.msg("Loading instrument config from MongoDB")
 
-        data = mongoFuturesInstrumentData()
-        instruments = data.get_list_of_instruments()
+            instruments = self.get_instrument_list()
+            data = mongoFuturesInstrumentData()
 
-        d = []
-        for instr_code in instruments:
-            instr = data.get_instrument_data(instr_code)
-            d.append(dict(Instrument=instr_code, Pointsize=instr.meta_data['point_size'],
-                          AssetClass=instr.meta_data['asset_class'], Currency=instr.meta_data['currency'],
-                          IBSymbol=instr.meta_data['ib_symbol'], CSISymbol=instr.meta_data['csi_symbol']))
+            d = []
+            for instr_code in instruments:
+                instr = data.get_instrument_data(instr_code)
+                d.append(dict(Instrument=instr_code, Pointsize=instr.meta_data['point_size'],
+                              AssetClass=instr.meta_data['asset_class'], Currency=instr.meta_data['currency'],
+                              IBSymbol=instr.meta_data['ib_symbol'], CSISymbol=instr.meta_data['csi_symbol']))
 
-        df = pd.DataFrame.from_records(d).set_index('Instrument')
-        return df
+            self._instrument_data = pd.DataFrame.from_records(d).set_index('Instrument')
 
-    def get_instrument_list(self):
-        data = mongoFuturesInstrumentData()
-        return data.get_list_of_instruments()
+        return self._instrument_data
+
+    def _get_roll_parameters(self, instrument_code):
+        if not self._roll_parameters_data:
+            self.log.msg("Loading roll parameters from MongoDB")
+            self._roll_parameters_data = mongoRollParametersData()
+        return self._roll_parameters_data.get_roll_parameters(instrument_code)
 
 
 if __name__ == '__main__':
