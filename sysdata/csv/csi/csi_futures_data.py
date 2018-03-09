@@ -4,17 +4,20 @@ import os
 import pandas as pd
 
 from datetime import datetime
+from syscore.fileutils import get_pathname_for_package
 from syscore.genutils import str_of_int
 from syscore.pdutils import pd_readcsv
-from sysdata.csv.csvfuturesdata import csvFuturesData
+from sysdata.csv.csv_sim_futures_data import csvFuturesSimData
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 
 
-class CsiFuturesData(csvFuturesData):
+class CsiFuturesData(csvFuturesSimData):
 
-    def __init__(self, datapath=None, absolute_datapath=None):
-        super().__init__(datapath, absolute_datapath)
+    def __init__(self, override_datapath=None, datapath_dict=None):
+        if datapath_dict is None:
+            datapath_dict = {}
+        super().__init__(override_datapath, datapath_dict)
         self._list_of_instruments = None
         self._instrument_data = None
         self._roll_parameters_data = None
@@ -79,7 +82,8 @@ class CsiFuturesData(csvFuturesData):
 
     def get_instrument_filename(self, instrument_code):
         csisymbol = self._get_instrument_data().loc[instrument_code, 'CSISymbol']
-        pattern = os.path.join(self._datapath, csisymbol + "*.TXT")
+        path = get_pathname_for_package(self._resolve_path("adjusted_prices"))
+        pattern = os.path.join(path, csisymbol + "*.TXT")
         filename = glob.glob(pattern)[0]
         return filename
 
