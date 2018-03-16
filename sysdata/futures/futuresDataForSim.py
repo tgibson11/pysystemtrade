@@ -32,6 +32,16 @@ class futuresAdjustedPriceData(simData):
 
         self.log.critical(OVERIDE_ERROR)
 
+    def get_instrument_list(self):
+        """
+        list of instruments in this data set
+
+        :returns: list of str
+        """
+
+        self.log.critical(OVERIDE_ERROR)
+
+
 class futuresMultiplePriceData(simData):
     """
     Futures specific stuff related to carry, and optionally getting forward prices for back adjusting from scratch
@@ -99,11 +109,25 @@ class futuresConfigDataForSim(simData):
     Futures specific configuration data, eg costs etc
     """
 
-    def _get_all_cost_data(self):
+    def _get_default_costs(self):
         """
-        Get a data frame of cost data
+        Default costs, if we don't find any
 
-        :returns: pd.DataFrame
+        :return: dict
+        """
+        default_costs = dict(
+            price_slippage=0.0,
+            value_of_block_commission=0.0,
+            percentage_cost=0.0,
+            value_of_pertrade_commission=0.0)
+
+        return default_costs
+
+    def _get_instrument_object_with_cost_data(self, instrument_code):
+        """
+        Get a futures instrument where the meta data is cost data
+
+        :returns: futuresInstrument
 
         """
         self.log.critical(OVERIDE_ERROR)
@@ -127,36 +151,21 @@ class futuresConfigDataForSim(simData):
 
         """
 
-        default_costs = dict(
-            price_slippage=0.0,
-            value_of_block_commission=0.0,
-            percentage_cost=0.0,
-            value_of_pertrade_commission=0.0)
+        cost_data_object = self._get_instrument_object_with_cost_data(instrument_code)
 
-        cost_data = self._get_all_cost_data()
+        if cost_data_object.empty():
+            return self._get_default_costs()
 
-        if cost_data is None:
-            ##
-            return default_costs
+        cost_dict = dict(
+            price_slippage=cost_data_object.meta_data['Slippage'],
+            value_of_block_commission=cost_data_object.meta_data['PerBlock'],
+            percentage_cost=cost_data_object.meta_data['Percentage'],
+            value_of_pertrade_commission=cost_data_object.meta_data['PerTrade'])
 
-        try:
-            block_move_value = cost_data.loc[instrument_code, [
-                'Slippage', 'PerBlock', 'Percentage', 'PerTrade'
-            ]]
-        except KeyError:
-            self.log.warn(
-                "Cost data not found for %s, using zero" % instrument_code)
-            return default_costs
-
-        return dict(
-            price_slippage=block_move_value[0],
-            value_of_block_commission=block_move_value[1],
-            percentage_cost=block_move_value[2],
-            value_of_pertrade_commission=block_move_value[3])
+        return cost_dict
 
 
-
-    def _get_instrument_data(self):
+    def get_all_instrument_data(self):
         """
         Get a data frame of interesting information about instruments, either
         from a file or cached
@@ -167,22 +176,21 @@ class futuresConfigDataForSim(simData):
 
         self.log.critical(OVERIDE_ERROR)
 
-    def get_instrument_list(self):
+    def get_instrument_object(self, instrument_code):
         """
-        list of instruments in this data set
+        Get data about an instrument, as a futuresInstrument
 
-        :returns: list of str
+        :param instrument_code:
+        :return: futuresInstrument object
         """
 
-        instr_data = self._get_instrument_data()
-
-        return list(instr_data.Instrument)
+        self.log.critical(OVERIDE_ERROR)
 
     def get_instrument_asset_classes(self):
         """
         Returns dataframe with index of instruments, column AssetClass
         """
-        instr_data = self._get_instrument_data()
+        instr_data = self.get_instrument_data()
         instr_assets = instr_data.AssetClass
 
         return instr_assets
@@ -198,8 +206,8 @@ class futuresConfigDataForSim(simData):
 
         """
 
-        instr_data = self._get_instrument_data()
-        block_move_value = instr_data.loc[instrument_code, 'Pointsize']
+        instr_object = self.get_instrument_object(instrument_code)
+        block_move_value = instr_object.meta_data['Pointsize']
 
         return block_move_value
 
@@ -213,15 +221,18 @@ class futuresConfigDataForSim(simData):
         :returns: str
 
         """
-
-        instr_data = self._get_instrument_data()
-        currency = instr_data.loc[instrument_code, 'Currency']
+        instr_object = self.get_instrument_object(instrument_code)
+        currency = instr_object.meta_data['Currency']
 
         return currency
 
 
 
+"""
+This class isn't used; instead it shows the pattern for creating source specific versions of futuresSimData
 
+These would inherit directly from source specific versions of futuresAdjustedPriceData... etc
+"""
 class futuresSimData(futuresAdjustedPriceData, futuresConfigDataForSim, futuresMultiplePriceData):
     def __repr__(self):
         raise Exception(OVERIDE_ERROR)
