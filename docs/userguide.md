@@ -31,7 +31,7 @@ Table of Contents
          * [Using the standard data objects](#using-the-standard-data-objects)
             * [Generic data objects](#generic-data-objects)
             * [The <a href="/sysdata/csv/csv_sim_futures_data.py">csvFuturesSimData</a> object](#the-csvfuturessimdata-object)
-            * [The [arcticSimData] object](#the-arcticsimdata-object)
+            * [The arcticSimData object](#the-arcticsimdata-object)
          * [Creating your own data objects](#creating-your-own-data-objects)
             * [The Data() class](#the-data-class)
       * [Configuration](#configuration)
@@ -870,15 +870,14 @@ system.data.get_instrument_raw_carry_data(instrument_code)
 Each relevant pathname must contain .csv files of the following four types (where code is
 the instrument_code):
 
-1. Static configuration data- `instrument_config.csv` headings: Instrument, Pointsize,
-   AssetClass, Currency
+1. Static configuration and cost data- `instrument_config.csv` headings: Instrument, Pointsize,
+   AssetClass, Currency. Additional headings for costs: Slippage, PerBlock,
+   Percentage, PerTrade. See ['costs'](#costs) for more detail.
 2. Adjusted price data- `code.csv` (eg SP500.csv) headings: DATETIME, PRICE
 3. Carry and forward data - `code.csv` (eg AEX.csv): headings:
    DATETIME, PRICE,CARRY,FORWARD,CARRY_CONTRACT PRICE_CONTRACT, FORWARD_CONTRACT
 4. Currency data - `ccy1ccy2fx.csv` (eg AUDUSDfx.csv) headings: DATETIME,
    FXRATE
-5. Cost data - `costs_analysis.csv` headings: Instrument, Slippage, PerBlock,
-   Percentage, PerTrade. See ['costs'](#costs) for more detail.
 
 DATETIME should be something that `pandas.to_datetime` can parse. Note that the
 price in (2) is the continously stitched price (see [volatility
@@ -904,10 +903,10 @@ For more information see the [futures data document](/docs/futures.md#csvFutures
 
 #### The [arcticSimData](/sysdata/arctic/arctic_and_mongo_sim_futures_data.py) object
 
-This is a simData object which gets it's data out of [Mongo DB](mongodb.com) (static) and [Arctic](https://github.com/manahl/arctic) (time series) (*Yes the class name should include both terms. Yes I shortened it so it isn't ridiculously long, and most of the interesting stuff comes from Arctic*). It is better for live trading.
+This is a simData object which gets it's data out of [Mongo DB](https://mongodb.com) (static) and [Arctic](https://github.com/manahl/arctic) (time series) (*Yes the class name should include both terms. Yes I shortened it so it isn't ridiculously long, and most of the interesting stuff comes from Arctic*). It is better for live trading.
 
 For production code, and storing large amounts of data (eg for individual futures contracts) we probably need something more robust than .csv files. 
-[MongoDB](/mongodb.com) is a no-sql database which is rather fashionable at the moment, though the main reason I selected it for this purpose is that it is used by [Arctic](#arctic). [Arctic](https://github.com/manahl/arctic) is a superb open source time series database which sits on top of Mongo DB) and provides straightforward and fast storage of pandas DataFrames. It was created by my former colleagues at [Man AHL](ahl.com) (in fact I beta tested a very early version of Arctic), and then very generously released as open source. 
+[MongoDB](https://mongodb.com) is a no-sql database which is rather fashionable at the moment, though the main reason I selected it for this purpose is that it is used by Arctic. [Arctic](https://github.com/manahl/arctic) is a superb open source time series database which sits on top of Mongo DB) and provides straightforward and fast storage of pandas DataFrames. It was created by my former colleagues at [Man AHL](https://ahl.com) (in fact I beta tested a very early version of Arctic), and then very generously released as open source. 
 
 There is more detail on this in the [futures data documentation](/docs/futures.md): [Mongo DB](/docs/futures.md#mongoDB) and [Arctic](/docs/futures.md#arctic).
 
