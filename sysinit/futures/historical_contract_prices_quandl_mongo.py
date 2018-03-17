@@ -4,12 +4,14 @@ For a given list of futures contracts defined by Quandl start dates:
 read price data from quandl, and then write to artic
 Write list of futures contracts to mongodb database
 """
+import datetime
 
-from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
+from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.futures.contracts import listOfFuturesContracts
 from sysdata.futures.instruments import futuresInstrument
+from sysdata.futures.rolls import contractDateWithRollParameters
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
-from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
+from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
 
 
 def get_roll_parameters_from_mongo(instrument_code):
@@ -27,11 +29,24 @@ def get_first_contract_date_from_quandl(instrument_code):
     return config.get_first_contract_date(instrument_code)
 
 
-def create_list_of_contracts(instrument_code):
+def create_list_of_contracts(instrument_code, current_only=False):
     instrument_object = futuresInstrument(instrument_code)
     print(instrument_code)
     roll_parameters = get_roll_parameters_from_mongo(instrument_code)
-    first_contract_date = get_first_contract_date_from_quandl(instrument_code)
+
+    if not current_only:
+        first_contract_date = get_first_contract_date_from_quandl(instrument_code)
+    else:
+        now = datetime.datetime.now()
+        contract_date = now.strftime('%Y%m')
+        contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
+        first_contract_date = None
+        while not first_contract_date:
+            try:
+                first_contract_date = contract_date_object.previous_priced_contract().as_date().strftime('%Y%m')
+            except:
+                contract_date = str(int(contract_date) + 1)
+                contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
 
     list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
                                                                           first_contract_date)
@@ -57,9 +72,17 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
                 raise Exception("Some kind of issue with arctic - stopping so you can fix it")
 
 
+def get_prices_for_all_instruments(current_only=False):
+    for instrument in quandlFuturesConfiguration().get_list_of_instruments():
+        get_prices_for_one_instrument(instrument_code=instrument, current_only=current_only)
+
+
+def get_prices_for_one_instrument(instrument_code, current_only=False):
+    contracts = create_list_of_contracts(instrument_code, current_only=current_only)
+    print("Generated %d contracts" % len(contracts))
+    get_and_write_prices_for_contract_list_from_quandl_to_arctic(contracts)
+
+
 if __name__ == '__main__':
-    config = quandlFuturesConfiguration()
-    for instrument_code in config.get_list_of_instruments():
-        list_of_contracts = create_list_of_contracts(instrument_code)
-        print("Generated %d contracts" % len(list_of_contracts))
-        get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)
+    get_prices_for_one_instrument(instrument_code='VIX', current_only=False)
+    # get_prices_for_all_instruments()
