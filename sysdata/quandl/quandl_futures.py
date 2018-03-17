@@ -2,6 +2,7 @@
 Get data from quandl for futures
 
 """
+from numpy import NaN
 
 from sysdata.futures.contracts import futuresContract
 from sysdata.futures.futures_per_contract_prices import futuresContractPriceData, futuresContractPrices
@@ -207,6 +208,10 @@ class quandlFuturesContractPrices(futuresContractPrices):
     """
 
     def __init__(self, contract_data):
+
+        # Quandl VIX data doesn't have Last column for some reason
+        if 'Last' not in contract_data:
+            contract_data['Last'] = pd.Series(NaN, index=contract_data.index)
 
         try:
             new_data = pd.DataFrame(dict(OPEN=contract_data.Open,
