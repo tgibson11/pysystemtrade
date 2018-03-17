@@ -8,12 +8,11 @@ Write list of futures contracts to mongodb database
 from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
 from sysdata.futures.contracts import listOfFuturesContracts
 from sysdata.futures.instruments import futuresInstrument
-from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 
-def get_roll_parameters_from_mongo(instrument_code):
 
+def get_roll_parameters_from_mongo(instrument_code):
     mongo_roll_parameters = mongoRollParametersData()
 
     roll_parameters = mongo_roll_parameters.get_roll_parameters(instrument_code)
@@ -59,9 +58,8 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
 
 
 if __name__ == '__main__':
-    instrument_code = "EDOLLAR"
-    list_of_contracts = create_list_of_contracts(instrument_code)
-
-    print("Generated %d contracts" % len(list_of_contracts))
-
-    get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)
+    config = quandlFuturesConfiguration()
+    for instrument_code in config.get_list_of_instruments():
+        list_of_contracts = create_list_of_contracts(instrument_code)
+        print("Generated %d contracts" % len(list_of_contracts))
+        get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)
