@@ -40,6 +40,7 @@ def generate_multiple_prices(only_this_instrument=None):
             multiple_prices = futuresMultiplePrices.create_from_raw_data(roll_calendar, dict_of_futures_contract_settlement_prices)
 
             # print(multiple_prices)
+            # print(multiple_prices['2013-10-01':'2013-11-30'])
 
             if ADD_TO_ARCTIC:
                 arctic_multiple_prices.add_multiple_prices(instrument_code, multiple_prices, ignore_duplication=True)
@@ -48,5 +49,5 @@ def generate_multiple_prices(only_this_instrument=None):
 
 
 if __name__ == '__main__':
-    generate_multiple_prices()
-    # generate_multiple_prices(only_this_instrument=VIX)
+    # generate_multiple_prices()
+    generate_multiple_prices(only_this_instrument='SOYBEAN')
