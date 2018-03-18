@@ -12,7 +12,7 @@ class futuresContractPrices(pd.DataFrame):
 
     def __init__(self, data):
 
-        print(data)
+        # print(data)
 
         data_present = list(data.columns)
         data_present.sort()
