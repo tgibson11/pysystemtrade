@@ -3,7 +3,7 @@ from syscore.fileutils import get_filename_for_package, files_with_extension_in_
 from syscore.pdutils import pd_readcsv
 
 
-CSV_ROLL_CALENDAR_DIRECTORY = "data.futures.roll_calendars_csv"
+CSV_ROLL_CALENDAR_DIRECTORY = "private.my_system.roll_calendars"
 DATE_INDEX_NAME = "DATE_TIME"
 
 # NOTE: can't change calendars here - do we need init?
