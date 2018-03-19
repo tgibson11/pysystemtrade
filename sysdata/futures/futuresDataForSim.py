@@ -190,7 +190,7 @@ class futuresConfigDataForSim(simData):
         """
         Returns dataframe with index of instruments, column AssetClass
         """
-        instr_data = self.get_instrument_data()
+        instr_data = self.get_all_instrument_data()
         instr_assets = instr_data.AssetClass
 
         return instr_assets
@@ -226,6 +226,10 @@ class futuresConfigDataForSim(simData):
 
         return currency
 
+    def get_instrument_ib_symbol(self, instrument_code):
+        instr_object = self.get_instrument_object(instrument_code)
+        ib_symbol = instr_object.meta_data['IBSymbol']
+        return ib_symbol
 
 
 """
