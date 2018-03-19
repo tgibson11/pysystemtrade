@@ -61,10 +61,14 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
     for contract_object in list_of_contracts:
         print("Processing %s" % contract_object.ident())
         quandl_price = quandl_prices_data.get_prices_for_contract_object(contract_object)
+        # print(quandl_price)
 
         if quandl_price.empty:
             print("Problem reading price data this contract - skipping")
         else:
+            if quandl_price.tail(1).iloc[0]['SETTLE'] == 0.0:
+                # Drop last row if settle price is 0
+                quandl_price = quandl_price[:-1]
             print("Read ok, trying to write to arctic")
             try:
                 arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price)
@@ -84,5 +88,5 @@ def get_prices_for_one_instrument(instrument_code, current_only=False):
 
 
 if __name__ == '__main__':
-    get_prices_for_one_instrument(instrument_code='VIX', current_only=False)
+    get_prices_for_one_instrument(instrument_code='VIX', current_only=True)
     # get_prices_for_all_instruments()
