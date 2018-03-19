@@ -321,7 +321,7 @@ class rollParameters(object):
         # first held contract after current date
         hold_cycle = self.hold_rollcycle
 
-        adjusted_date = reference_date + pd.DateOffset(days = -self.roll_offset_day + self.approx_expiry_offset)
+        adjusted_date = reference_date + pd.DateOffset(days=(-self.roll_offset_day - self.approx_expiry_offset))
 
         relevant_year_int, relevant_month_int = hold_cycle.yearmonth_inrollcycle_after_date(adjusted_date)
 

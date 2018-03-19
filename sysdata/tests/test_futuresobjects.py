@@ -247,9 +247,9 @@ class MyTestCase(unittest.TestCase):
                                                                   roll_parameters,
                                                                   "200003", pd.datetime(2001,1,1))
 
-        self.assertEqual(len(flist), 5)
+        self.assertEqual(len(flist), 7)
         self.assertEqual(flist[0].date, "20000300")
-        self.assertEqual(flist[-1].date, "20010300")
+        self.assertEqual(flist[-1].date, "20010900")
 
 if __name__ == '__main__':
     unittest.main()
