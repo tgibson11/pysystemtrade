@@ -12,6 +12,7 @@ They can be stored, or worked out 'on the fly'
 
 
 import pandas as pd
+from numpy import NaN
 
 from sysdata.data import baseData
 
@@ -63,8 +64,14 @@ class futuresMultiplePrices(pd.DataFrame):
             carry_contract = contracts_now.carry_contract
 
             current_price_data = dict_of_futures_contract_prices[str(current_contract)][start_of_roll_period:end_of_roll_period]
-            next_price_data = dict_of_futures_contract_prices[str(next_contract)][start_of_roll_period:end_of_roll_period]
-            carry_price_data = dict_of_futures_contract_prices[str(carry_contract)][start_of_roll_period:end_of_roll_period]
+            try:
+                next_price_data = dict_of_futures_contract_prices[str(next_contract)][start_of_roll_period:end_of_roll_period]
+            except KeyError:
+                next_price_data = pd.Series(NaN, index=current_price_data.index)
+            try:
+                carry_price_data = dict_of_futures_contract_prices[str(carry_contract)][start_of_roll_period:end_of_roll_period]
+            except KeyError:
+                carry_price_data = pd.Series(NaN, index=current_price_data.index)
 
             all_price_data = pd.concat([current_price_data, next_price_data, carry_price_data], axis=1)
             all_price_data.columns = ["PRICE", "FORWARD", "CARRY"]
