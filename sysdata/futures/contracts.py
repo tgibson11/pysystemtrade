@@ -232,6 +232,8 @@ class listOfFuturesContracts(list):
 
         first_contract = futuresContract(instrument_object, contractDateWithRollParameters(roll_parameters, first_contract_date))
         held_contract_date = str(roll_parameters.approx_first_held_contractDate_at_date(end_date))
+        held_contract = futuresContract(instrument_object, contractDateWithRollParameters(roll_parameters, held_contract_date))
+        last_contract_date = str(held_contract.next_priced_contract().contract_date)
 
         assert end_date > first_contract.expiry_date
 
@@ -244,7 +246,7 @@ class listOfFuturesContracts(list):
         while date_still_valid:
             next_contract = current_contract.next_priced_contract()
 
-            if str(next_contract.contract_date) > held_contract_date:
+            if str(next_contract.contract_date) > last_contract_date:
                 date_still_valid = False
             else:
                 list_of_contracts.append(next_contract)
