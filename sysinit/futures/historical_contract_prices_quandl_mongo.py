@@ -49,7 +49,7 @@ def create_list_of_contracts(instrument_code, current_only=False):
                 contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
 
     list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
-                                                                          first_contract_date)
+                                                                      first_contract_date)
 
     return list_of_contracts
 
