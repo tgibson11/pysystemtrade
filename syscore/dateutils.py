@@ -85,6 +85,12 @@ def expiry_date(expiry_ident):
 
     """
 
+    if isinstance(expiry_ident, float):
+        expiry_ident = int(expiry_ident)
+
+    if isinstance(expiry_ident, int):
+        expiry_ident = str(expiry_ident)
+
     if isinstance(expiry_ident, str):
         # do string expiry calc
         if len(expiry_ident) == 6:
@@ -102,8 +108,7 @@ def expiry_date(expiry_ident):
         expiry_date = expiry_ident
 
     else:
-        raise Exception(
-            "expiry_date needs to be a string with 4 or 6 digits, ")
+        raise Exception("expiry_date needs to be a string with 6 or 8 digits, " + str(expiry_ident))
 
     # 'Natural' form is datetime
     return expiry_date
