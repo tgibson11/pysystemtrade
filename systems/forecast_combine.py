@@ -873,7 +873,6 @@ class ForecastCombine(_ForecastCombineCalculateWeights,
 
         forecast_cap = self.get_forecast_cap()
         if hasattr(self.parent.config, "forecast_mapping"):
-
             if instrument_code in self.parent.config.forecast_mapping:
                 configuration = self.parent.config.forecast_mapping[instrument_code]
                 post_process_func = map_forecast_value
