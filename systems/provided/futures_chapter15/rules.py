@@ -99,6 +99,13 @@ def ewmac_calc_vol(price, Lfast, Lslow, vol_days=35):
     return raw_ewmac / vol.ffill()
 
 
+def ewmac_raw(price, vol, Lfast, Lslow):
+    fast_ewma = price.ewm(span=Lfast).mean()
+    slow_ewma = price.ewm(span=Lslow).mean()
+    raw_ewmac = fast_ewma - slow_ewma
+
+    return raw_ewmac
+
 
 def carry(daily_ann_roll, vol, smooth_days=90):
     """
