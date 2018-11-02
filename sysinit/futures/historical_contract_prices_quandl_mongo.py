@@ -46,10 +46,12 @@ def create_list_of_contracts(instrument_code, current_only=False):
                 first_contract_date = contract_date_object.previous_priced_contract().as_date().strftime('%Y%m')
             except:
                 contract_date = str(int(contract_date) + 1)
+                if contract_date[4:6] == "13":
+                    contract_date = str(int(contract_date[:4]) + 1) + "01"
                 contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
 
     list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
-                                                                      first_contract_date)
+                                                                          first_contract_date)
 
     return list_of_contracts
 
