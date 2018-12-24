@@ -490,12 +490,17 @@ class contractDateWithRollParameters(contractDate):
         return self._iterate_contract("previous_year_month", "hold_rollcycle")
 
     def carry_contract(self):
-        if self.roll_parameters.carry_offset == -1:
-            return self.previous_priced_contract()
-        elif self.roll_parameters.carry_offset == 1:
-            return self.next_priced_contract()
+        carry_contract = self
+        if self.roll_parameters.carry_offset < 0:
+            for i in range(abs(int(self.roll_parameters.carry_offset))):
+                carry_contract = carry_contract.previous_priced_contract()
+        elif self.roll_parameters.carry_offset > 0:
+            for i in range(int(self.roll_parameters.carry_offset)):
+                carry_contract = carry_contract.next_priced_contract()
         else:
-            raise Exception("carry_offset needs to be +1 or -1")
+            raise Exception("carry_offset cannot be 0")
+
+        return carry_contract
 
     def want_to_roll(self):
         return self.expiry_date+ datetime.timedelta(days = self.roll_parameters.roll_offset_day)
