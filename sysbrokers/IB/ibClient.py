@@ -205,3 +205,27 @@ class ibClient(brokerClient, EClient):
         self.ib_clear_req_id(tickerid)
 
         return historic_data
+
+    def ib_get_positions(self):
+        """
+        Current positions held
+        :return:
+        """
+
+        # Make a place to store the data we're going to return
+        positions_queue = finishableQueue(self.wrapper.init_positions())
+
+        # ask for the data
+        self.reqPositions()
+
+        # poll until we get a termination or die of boredom
+        positions_list = positions_queue.get(timeout=10)
+
+        while self.wrapper.broker_is_error():
+            print(self.wrapper.broker_get_error())
+
+        if positions_queue.timed_out():
+            print("Exceeded maximum wait for wrapper to confirm finished whilst getting positions")
+
+        return positions_list
+
