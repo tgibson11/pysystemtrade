@@ -30,20 +30,31 @@ This quick start guide assumes the following:
 You need to:
 
 - Install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), install or update [python3](https://docs.python-guide.org/starting/install3/linux/). You may also find a simple text editor (like emacs) is useful for fine tuning, and if you are using a headless server then [x11vnc](http://www.karlrunge.com/x11vnc/) is helpful.
-- Install the pysystemtrade package, and install or update, any dependencies
+- Add the following environment variables to your .profile: (feel free to use other directories):
+   - MONGO_DATA=/home/user_name/data/mongodb/
+   - PYSYS_CODE=/home/user_name/data/workspace3/pysystemtrade
+   - SCRIPT_PATH=/home/user_name/data/workspace3/pysystemtrade/sysproduction/linux/scripts
+   - ECHO_PATH=/home/user/echos
+- Create the following directories (again use other directories, but you must modify the .profile above and crontab below)
+   - '/data/mongodb/'
+   - '/echos/'
+   - '/workspace3/
+- Install the pysystemtrade package, and install or update, any dependencies in directory $PYSYS_CODE (it's possible to put it elsewhere, but you will need to modify the environment variables listed above)
 - [Set up interactive brokers](/docs/IB.md), download and install their python code, and get a gateway running.
 - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/) 
-- Create the following directories: (and any subdirectories)
-   - /data/mongodb/
 - create a file 'private_config.yaml' in the private directory of [pysystemtrade](#/private)
-- [Initialise the spot FX data from .csv files](/sysinit/futures/repocsv_spotfx_prices.py) (this will be out of date, but you will update it in a moment)
-- Initialise the supplied crontab
+- [check a mongodb server is running with the right data directory](/docs/futures.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
+- launch an IB gateway (this could be done automatically depending on your security setup)
+- [Initialise the spot FX data in MongoDB from .csv files](/sysinit/futures/repocsv_spotfx_prices.py) (this will be out of date, but you will update it in a moment)
+- Update the FX price data in MongoDB using interactive brokers: command line:`. /home/your_user_name/workspace3/pysystemtrade/sysproduction/linux/scripts/read_fx_prices`
+- Initialise the [supplied crontab](/sysproduction/linux/crontab). Note if you have put your code or echos somewhere else you will need to modify the directory references at the top of the crontab.
+- All scripts executable by the crontab need to be executable, so do the following: `cd $SCRIPT_PATH` ; `sudo chmod +x update*` ;`sudo chmod +x truncate*` FIX ME ADD FURTHER FILES AS REQUIRED
 
 Before trading, and each time you restart the machine you should:
 
-- [check a mongodb server is running with the right data directory](/docs/futures.md#mongo-db) mongod --dbpath ~/data/mongodb/
-- launch an IB gateway
-- 
+- [check a mongodb server is running with the right data directory](/docs/futures.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
+- launch an IB gateway (this could [be done automatically](https://github.com/ib-controller/ib-controller) depending on your security setup)
+
 
 # Overview of a production system
 
@@ -61,7 +72,7 @@ Here are the steps you need to follow to set up a production system. I assume yo
 10. Regularly monitor your system, and deal with any problems
 
 
-# Implementation details
+# Implementation options
 
 Standard implementation for pysystemtrade is a fully automated system running on a single local machine. In this section I briefly describe some alternatives you may wish to consider.
 
@@ -78,7 +89,7 @@ Pysystemtrade can be run locally in the normal way, on a single machine. But you
 If spreading your implementation across several machines bear in mind:
 
 - Interactive brokers
-   - interactive brokers Gateway will need to have the ip address of all relevant machines in the whitelist
+   - interactive brokers Gateway will need to have the ip address of all relevant machines that connect to it in the whitelist
    - you will need to modify the `private_config.yaml` system configuration file so it connects to a different IP address `ib_ipaddress: '192.168.0.10'`
 - Mongodb
    - Add an ip address the `bind_ip` line in the `/etc/mongod.conf` file to allow connections from other machines `eg bind_ip=localhost, 192.168.0.10`
@@ -87,10 +98,7 @@ If spreading your implementation across several machines bear in mind:
 
 ## Backup machine
 
-If you are running your implementation locally, or on a remote server that is not a cloud, then you should seriously consider a backup machine. The backup machine should have an up to date environment containing all the relevant applications, code and libaries, and on a regular basis you should update the local data stored on that machine (see INSERT BACKUP LINK). The backup machine doesn't need to be turned on at all times, unless you are trading in such a way that a one hour period without trading would be critical (in my experience, one hour is the maximum time to get a backup machine on line assuming the code is up to date, and the data is less than 24 hours stale). I also encourage you to perform a scheduled 'failover' on regular basis: stop the live machine running, copy across any data to the backup machine, start up the backup machine. The live machine then becomes the backup.
-
-# Code and configuration management
-
+If you are running your implementation locally, or on a remote server that is not a cloud, then you should seriously consider a backup machine. The backup machine should have an up to date environment containing all the relevant applications, code and libaries, and on a regular basis you should update the local data stored on that machine (see INSERT BACKUP LINK). The backup machine doesn't need to be turned on at all times, unless you are trading in such a way that a one hour period without trading would be critical (in my experience, one hour is the maximum time to get a backup machine on line assuming the code is up to date, and the data is less than 24 hours stale). I also encourage you to perform a scheduled 'failover' on regular basis: stop the live machine running (best to do this at a weekend), copy across any data to the backup machine, start up the backup machine. The live machine then becomes the backup.
 
 ## Multiple systems
 
@@ -101,23 +109,9 @@ You may want to run multiple trading systems. Common use cases are:
 - You want to run the same system, but in different trading accounts
 - You want a paper trading and live trading system
 
-(There may be problems with trying to connect to your broker API multiple times in some of these use cases, again I will consider solutions to this)
+To handle this I suggest having multiple copies of the pysystemtrade environment. You will have a single crontab, but you will need multiple script, echos (AND FIX ME REPORTS?) directories. You will need to change the [private config file](private.private_config.yaml) so it points to different `mongo_db` database names. If you don't want multiple copies of certain data (eg prices) then you should hardcode the `database_name` in the relevant files whenever a connection is made eg `mongo_db = mongoDb(database_name='whatever')`. See [storing futures and spot FX data](/docs/futures.md#mongo-db) for more detail. Finally you should set the field `ib_idoffset` in the [private config file](private.private_config.yaml) so that there is no chance of duplicate clientid connections; setting one system to have an id offset of 1, the next offset 1000, and so on should be sufficient.
 
-Broadly speaking there are two ways to handle this:
-
-- common code, with some kind of parameter switching and database field malarky so it's clear which system you are interacting with.
-- seperated environments, each containing a unique version of code and parameters for each system.
-
-For various reasons, and based on my own experience, the latter is preferable. A parallel decision is with regard to data. If you have a single environment, then you also have a single data storage point. But if not you can do one of these:
-
-- store general data (eg prices) in files that are accessible by all your systems, and store specific data for each system in it's own environment. 
-- keep multiple copies of general data with specific data for each system
-- keep all data in a single place, with specific tables or records for each system's private data. 
-
-For a flat file solution (eg sqllite or .csv) it's possible to have some tables stored in public and others in specific directories. But it is not okay for a database server (eg mongodb). In the latter case we need to be able to access both generic and specific tables accessible by a single database server (it's tricky to run multiple database servers, and it imposes an uneccessary load on the system). To solve this I propose using the third solution, and incorporating database field flags in the configuration for each environment, to allow specific tables in the mongodb 'cloud' to be accessed for different systems (I prefer seperate tables for each seperate system, rather than flagged records in a single table, although the concept of 'table' is a bit outdated for a nosql database like mongodb, strictly speaking they are 'collections').
-
-
-## Private directory or seperate library
+# Code and configuration management
 
 Your trading strategy will consist of pysystemtrade, plus some specific configuration files, plus possibly some bespoke code. You can eithier implement this as:
 
@@ -134,15 +128,42 @@ I strongly recommend that you use a code repo system or similar to manage your n
 
 Since the private directory is excluded from the git system (since you don't want it appearing on github!), you need to ensure it is managed seperately. I use a script which I run in lieu of a normal git add/ commit / push cycle:
 
-- copy the contents of the private directory to another, git controlled, directory
-- git add/commit/push cycle on the main pysystemtrade directory
-- git add/commit/push cycle on the copied private directory
+```
+# pass commit quote as an argument
+# For example:
+# . commit 'this is a commit description string'
+#
+# copy the contents of the private directory to another, git controlled, directory
+#
+cp -R ~/pysystemtrade/private/ ~/private/
+#
+# git add/commit/push cycle on the main pysystemtrade directory
+#
+cd ~/pysystemtrade/
+git add *
+git commit -m $1
+git push
+#
+# git add/commit/push cycle on the copied private directory
+#
+cd ~/private/
+git add *
+git commit -m $1
+git push
+```
 
 A second script is run instead of a git pull:
 
-- git pull within git controlled private directory copy
-- copy the updated contents of the private directory to pysystemtrade private directory
-- git pull from main pysystemtrade github repo
+```
+# git pull within git controlled private directory copy
+cd ~/private/
+git pull
+# copy the updated contents of the private directory to pysystemtrade private directory
+cp -R ~/private/ ~/pysystemtrade/
+# git pull from main pysystemtrade github repo
+cd ~/pysystemtrade/
+git pull
+```
 
 I use a local git repo for my private directory. Github are now offering free private repos, so that is another option.
 
@@ -188,22 +209,147 @@ Various kinds of data files are used by the pysystemtrade production system. Bro
 - prices (see [storing futures and spot FX data](/docs/futures.md))
 - positions
 - other state and control information
+- static configuration files
 
-The default option is to store these all into a mongodb database. 
+The default option is to store these all into a mongodb database, except for configuration files which are stored as .yaml files.
 
 ## Data backup
 
 Assuming that you are using the default mongob for storing, then I recommend using [mongodump](https://docs.mongodb.com/manual/reference/program/mongodump/#bin.mongodump) on a daily basis to back up your files. Other more complicated alternatives are available (see the [official mongodb man page](https://docs.mongodb.com/manual/core/backups/)). 
 
-To avoid conflicts you should schedule your backup during the 'deadtime' for your system (see scheduling).
+Linux:
+```
+# dumps everything into dump directory
+# make sure a mongo-db instance is running with correct directory, but ideally without any load; command line: `mongod --dbpath $MONGO_DATA`
+mongodump
 
-# Reporting, logging and diagnostics
+# copy dump directory to another machine or drive, here we assume there is a shared network drive mounted on all local machine
+cp -rf dump /media/shared-drive/mongo_backup/
+
+# To restore:
+# FIX ME DOES THIS OVERWRITE???
+cp -rf /media/shared-drive/mongo_backup/dump/ ~
+
+# Now make sure a mongo-db instance is running with correct directory
+mongorestore 
+```
+
+To avoid conflicts you should schedule your backup during the 'deadtime' for your system (see scheduling FIX ME LINK).
+
+# Echoes, Logging, diagnostics and reporting
 
 We need to know what our system is doing, especially if it is fully automated. Here are the methods by which this should be done:
 
-- logging of stdout output from processes that are running
-- storage of diagnostics in a database, tagged with keys to identify them 
+- Echoes of stdout output from processes that are running
+- Storage of logging output in a database, tagged with keys to identify them 
+- Storage of diagnostics in a database, tagged with keys to identify them 
 - the option to run reports both scheduled and ad-hoc, which can optionally be automatically emailed
+
+## Echos: stdout output
+
+The [supplied crontab](/sysproduction/linux/crontab) contains lines like this:
+
+```
+SCRIPT_PATH="$HOME:/workspace3/psystemtrade/sysproduction/linux/scripts"
+ECHO_PATH="$HOME:/echos"
+#
+0 6  * * 1-5 $SCRIPT_PATH/updatefxprices  >> $ECHO_PATH/updatefxprices 2>&1
+```
+
+The above line will run the script `updatefxprices`, but instead of outputting the results to stdout they will go to `updatefxprices`. These echo files are must useful when processes crash, in which case you may want to examine the stack trace. Usually however the log files will be more useful.
+
+### Cleaning old echo files
+
+Over time echo files can get... large. To avoid this a regularly scheduled crontab script [FIX ME LINK AND ADD TO CRON] chops them down to the last 20,000 lines.
+
+## Logging 
+
+Logging in pysystemtrade is done via loggers. See the [userguide for more detail](/docs/userguide.md#logging).
+
+### Adding logging to your code
+
+The default for logging is to do this via mongodb. Here is an example of logging code:
+
+```python
+from syslogdiag.log import logToMongod as logger 
+
+def top_level_function():
+    """
+    This is a function that's called as the top level of a process
+    """
+
+    # can optionally pass mongodb connection attributes here
+    log=logger("top-level-function")
+
+    # note use of log.setup when passing log to other components
+    conn = connectionIB(client=100, log=log.setup(component="IB-connection"))
+    
+    ibfxpricedata = ibFxPricesData(conn, log=log.setup(component="ibFxPricesData"))
+    arcticfxdata = arcticFxPricesData(log=log.setup(component="arcticFxPricesData"))
+
+    list_of_codes_all = ibfxpricedata.get_list_of_fxcodes()  # codes must be in .csv file /sysbrokers/IB/ibConfigSpotFx.csv
+    log.msg("FX Codes: %s" % str(list_of_codes_all))
+    for fx_code in list_of_codes_all:
+
+        # Using log.label permanently adds the labelled attribute (although in this case it will be replaced on each iteration of the loop
+        log.label(currency_code = fx_code)
+        new_fx_prices = ibfxpricedata.get_fx_prices(fx_code) 
+
+        if len(new_fx_prices)==0:
+            log.error("Error trying to get data for %s" % fx_code)
+            continue
+
+
+
+```
+
+The following should be used as logging attributes (failure to do so will break reporting code):
+
+- type: the argument passed when the logger is setup. Should be the name of the top level calling function.
+- stage: Used by stages in System objects
+- component: other parts of the top level function that have their own loggers
+- currency_code: Currency code (used for fx)
+- instrument_code: Self explanatory
+
+FIX ME TO DO: CRITICAL LOGS SHOULD EMAIL THE USER
+
+### Getting log data back
+
+Python:
+```python
+from syslogdiag.log import accessLogFromMongodb
+```
+# can optionally pass mongodb connection attributes here
+mlog = accessLogFromMongodb()
+mlog.get_log_items(dict(type="top-level-function")) # any attribute directory here is fine as a filter, defaults to last days results
+mlog.get_log_items(dict(type="top-level-function"), lookback_days=7) # get last weeks worth
+mlog.get_log_items_as_tuple(dict(type="top-level-function")) # returns as list of 4-tuple, useful for reporting
+```
+
+
+### Cleaning old logs
+
+
+Python:
+```python
+from syslogdiag.log import accessLogFromMongodb
+from sysdata.mongodb.mongo_connection import mongoDb
+
+# can optionally pass mongodb connection attributes here
+mongo_db=mongoDb()
+mlog = accessLogFromMongodb(mongo_db=mongo_db)
+
+mlog.delete_log_items_from_before_n_days(days=365) # this is also the default
+```
+
+Linux script: (defaults to last 365 days and default database
+```
+. $SCRIPT_PATH/truncate_log_files
+```
+
+FIX ME THIS SHOULD BE DONE EVERY DAY ONCE WE HAVE ENOUGH LOGS ADD TO CRONTAB
+
+## Reporting
 
 
 # Scripts
@@ -220,6 +366,39 @@ Scripts are used to run python code which:
 
 Script are then called by schedulers (FIX ME LINK), or on an ad-hoc basis from the command line.
 
+## Production system components
+
+### Get spot FX data from interactive brokers, write to MongoDB
+
+
+Python:
+```python
+from sysproduction.updateFxPrices import update_fx_prices
+
+update_fx_prices()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/update_fx_prices
+```
+
+
+## Ad-hoc diagnostics
+
+### Recent FX prices
+
+Python:
+```python
+from sysproduction.readFxPrices import read_fx_prices
+read_fx_prices("GBPUSD", tail_size=20) # print last 20 rows for cable
+```
+
+Linux command line: (arguments are asked for after script is run)
+```
+cd $SCRIPT_PATH
+. read_fx_prices
+```
 
 # Scheduling
 
@@ -248,11 +427,13 @@ Here is the schedule I use for my own trading system. Since I trade US, European
 - 6am: Get daily spot FX prices
 - 6am: Run some lightweight morning reports
 - 8pm: Stop processes for monitoring account value, executing trades, and gathering intraday prices
+- 8pm: Clear client id tracker used by IB to avoid conflicts
 - 8:30pm: Get daily 'closing' prices (some of these may not be technically closes if markets have not yet closed)
 - 9:00pm: Run daily reports, and any computationally intensive processes (like running a backtest based on new prices)
 - 11pm: Run backups
+- 11pm: Truncate echo files, discard log file entries more than one year old, 
 
-There will be flexibility in this schedule depending on how long different processes take. Notice that I don't launch a new interactive brokers gateway daily. Some people may prefer to do this, but I am using an authentication protocol which requires manual intervention. [This product](https://github.com/ib-controller/ib-controller/) is popular for automating the lauch of the IB gateway.
+There will be flexibility in this schedule depending on how long different processes take. Notice that I don't shut down and then launch a new interactive brokers gateway daily. Some people may prefer to do this, but I am using an authentication protocol which requires manual intervention. [This product](https://github.com/ib-controller/ib-controller/) is popular for automating the lauch of the IB gateway.
 
 ## Choice of scheduling systems
 
@@ -260,8 +441,7 @@ You need some sort of scheduling system to kick off the various processes.
 
 ### Linux cron
 
-Because I use cron myself, there are is a cron tab included in pysystemtrade. To use it type: FIXME
-
+Because I use cron myself, there are is a [cron tab included in pysystemtrade](https://github.com/robcarver17/pysystemtrade/blob/master/sysproduction/linux/crontab). 
 
 ### Windows task scheduler
 
@@ -273,7 +453,6 @@ You can use python itself as a scheduler, using something like [this](https://gi
 
 ### Manual system
 
-It's possible to run pysystemtrade without any scheduling, by manually starting the neccessary processes as required. This option might make sense for traders who are not running a fully automated system (see FIX ME REF). I would advise writing scripts (FIX ME REF) to automate this and reduce the typing involved.
-
+It's possible to run pysystemtrade without any scheduling, by manually starting the neccessary processes as required. This option might make sense for traders who are not running a fully automated system (see FIX ME REF). 
 
 
