@@ -354,7 +354,8 @@ class rollParameters(object):
         # first held contract after current date
         roll_cycle = getattr(self, rollcycle_name)
 
-        adjusted_date = reference_date + pd.DateOffset(days=(-self.roll_offset_day - self.approx_expiry_offset))
+        # I think Rob Carver has a bug here, but date math is hard
+        adjusted_date = reference_date - pd.DateOffset(days=self.roll_offset_day + self.approx_expiry_offset)
 
         relevant_year_int, relevant_month_int = roll_cycle.yearmonth_inrollcycle_after_date(adjusted_date)
 
@@ -490,17 +491,12 @@ class contractDateWithRollParameters(contractDate):
         return self._iterate_contract("previous_year_month", "hold_rollcycle")
 
     def carry_contract(self):
-        carry_contract = self
-        if self.roll_parameters.carry_offset < 0:
-            for i in range(abs(int(self.roll_parameters.carry_offset))):
-                carry_contract = carry_contract.previous_priced_contract()
-        elif self.roll_parameters.carry_offset > 0:
-            for i in range(int(self.roll_parameters.carry_offset)):
-                carry_contract = carry_contract.next_priced_contract()
+        if self.roll_parameters.carry_offset == -1:
+            return self.previous_priced_contract()
+        elif self.roll_parameters.carry_offset == 1:
+            return self.next_priced_contract()
         else:
-            raise Exception("carry_offset cannot be 0")
-
-        return carry_contract
+            raise Exception("carry_offset needs to be +1 or -1")
 
     def want_to_roll(self):
         return self.expiry_date+ datetime.timedelta(days = self.roll_parameters.roll_offset_day)

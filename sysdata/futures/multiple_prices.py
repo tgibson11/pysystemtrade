@@ -64,6 +64,7 @@ class futuresMultiplePrices(pd.DataFrame):
             carry_contract = contracts_now.carry_contract
 
             current_price_data = dict_of_futures_contract_prices[str(current_contract)][start_of_roll_period:end_of_roll_period]
+            # Don't fail if price data is not available for the next contract or carry contract
             try:
                 next_price_data = dict_of_futures_contract_prices[str(next_contract)][start_of_roll_period:end_of_roll_period]
             except KeyError:
