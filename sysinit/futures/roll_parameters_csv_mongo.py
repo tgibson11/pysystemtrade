@@ -6,7 +6,7 @@ from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysinit.futures.csv_data_readers.rolldata_from_csv import initCsvFuturesRollData
 
 data_out = mongoRollParametersData()
-data_in = initCsvFuturesRollData(config_file="private.my_system.config.rollconfig.csv")
+data_in = initCsvFuturesRollData()
 
 instrument_list = data_in.get_list_of_instruments()
 
