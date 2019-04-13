@@ -12,7 +12,7 @@ import quandl
 import pandas as pd
 
 
-QUANDL_FUTURES_CONFIG_FILE = get_filename_for_package("private.my_system.config.QuandlFuturesConfig.csv")
+QUANDL_FUTURES_CONFIG_FILE = get_filename_for_package("sysdata.quandl.QuandlFuturesConfig.csv")
 
 
 quandl.ApiConfig.api_key = load_private_key()

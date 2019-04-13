@@ -6,6 +6,7 @@ Write list of futures contracts to mongodb database
 """
 import datetime
 
+from syscore.fileutils import get_filename_for_package
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.futures.contracts import listOfFuturesContracts
 from sysdata.futures.instruments import futuresInstrument
