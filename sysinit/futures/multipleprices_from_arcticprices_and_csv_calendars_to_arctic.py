@@ -20,11 +20,10 @@ from sysdata.futures.multiple_prices import futuresMultiplePrices
 # could get these from stdin
 ADD_TO_ARCTIC = True
 ADD_TO_CSV = False
-ROLL_CALENDAR_DATA_PATH = "private.my_system.roll_calendars"
 
 
-def generate_multiple_prices(datapath=ROLL_CALENDAR_DATA_PATH, instrument_list=None):
-    csv_roll_calendars = csvRollCalendarData(datapath=datapath)
+def generate_multiple_prices(instrument_list=None):
+    csv_roll_calendars = csvRollCalendarData()
     artic_individual_futures_prices = arcticFuturesContractPriceData()
     arctic_multiple_prices = arcticFuturesMultiplePricesData()
     csv_multiple_prices = csvFuturesMultiplePricesData()
