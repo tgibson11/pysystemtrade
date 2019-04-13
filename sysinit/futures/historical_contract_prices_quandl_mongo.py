@@ -78,17 +78,14 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
                 raise Exception("Some kind of issue with arctic - stopping so you can fix it")
 
 
-def get_prices_for_all_instruments(current_only=False):
-    for instrument in quandlFuturesConfiguration().get_list_of_instruments():
-        get_prices_for_one_instrument(instrument_code=instrument, current_only=current_only)
-
-
-def get_prices_for_one_instrument(instrument_code, current_only=False):
-    contracts = create_list_of_contracts(instrument_code, current_only=current_only)
-    print("Generated %d contracts" % len(contracts))
-    get_and_write_prices_for_contract_list_from_quandl_to_arctic(contracts)
+def get_prices_for_instruments(instrument_list=None, current_only=False):
+    if not instrument_list:
+        instrument_list = quandlFuturesConfiguration().get_list_of_instruments()
+    for instrument_code in instrument_list:
+        contracts = create_list_of_contracts(instrument_code, current_only=current_only)
+        print("Generated %d contracts" % len(contracts))
+        get_and_write_prices_for_contract_list_from_quandl_to_arctic(contracts)
 
 
 if __name__ == '__main__':
-    get_prices_for_one_instrument(instrument_code='VIX', current_only=True)
-    # get_prices_for_all_instruments()
+    get_prices_for_instruments(instrument_list=[], current_only=True)
