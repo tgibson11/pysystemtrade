@@ -85,14 +85,6 @@ def expiry_date(expiry_ident):
 
     """
 
-    # Expiry dates are coming out of Arctic as float or int
-    # It was easier to add support for that here rather than figure out why
-    if isinstance(expiry_ident, float):
-        expiry_ident = int(expiry_ident)
-
-    if isinstance(expiry_ident, int):
-        expiry_ident = str(expiry_ident)
-
     if isinstance(expiry_ident, str):
         # do string expiry calc
         if len(expiry_ident) == 6:
