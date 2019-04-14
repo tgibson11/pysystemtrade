@@ -64,15 +64,12 @@ class futuresMultiplePrices(pd.DataFrame):
             carry_contract = contracts_now.carry_contract
 
             current_price_data = dict_of_futures_contract_prices[str(current_contract)][start_of_roll_period:end_of_roll_period]
-            # Don't fail if price data is not available for the next contract or carry contract
+            # Don't fail if price data is not available for the next contract
             try:
                 next_price_data = dict_of_futures_contract_prices[str(next_contract)][start_of_roll_period:end_of_roll_period]
             except KeyError:
                 next_price_data = pd.Series(NaN, index=current_price_data.index)
-            try:
-                carry_price_data = dict_of_futures_contract_prices[str(carry_contract)][start_of_roll_period:end_of_roll_period]
-            except KeyError:
-                carry_price_data = pd.Series(NaN, index=current_price_data.index)
+            carry_price_data = dict_of_futures_contract_prices[str(carry_contract)][start_of_roll_period:end_of_roll_period]
 
             all_price_data = pd.concat([current_price_data, next_price_data, carry_price_data], axis=1)
             all_price_data.columns = ["PRICE", "FORWARD", "CARRY"]
