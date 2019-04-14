@@ -190,7 +190,9 @@ class futuresConfigDataForSim(simData):
         """
         Returns dataframe with index of instruments, column AssetClass
         """
-        instr_data = self.get_all_instrument_data()
+        # RC version assumes we have price data for all instruments defined in instrument config
+        # .loc[...] filters for instruments that actually have price data
+        instr_data = self.get_all_instrument_data().loc[self.get_instrument_list()]
         instr_assets = instr_data.AssetClass
 
         return instr_assets
