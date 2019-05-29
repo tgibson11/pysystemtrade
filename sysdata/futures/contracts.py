@@ -259,8 +259,12 @@ class listOfFuturesContracts(list):
                                                                                               end_date)
         current_carry_contract = current_held_contract.carry_contract()
 
+        next_held_contract = current_held_contract.next_held_contract()
+        next_priced_contract = current_priced_contract.next_priced_contract()
+        next_carry_contract = next_held_contract.carry_contract()
+
         # these are all str thats okay
-        last_contract_date = max([current_held_contract.date, current_priced_contract.date, current_carry_contract.date])
+        last_contract_date = max([next_held_contract.date, next_priced_contract.date, next_carry_contract.date])
 
         list_of_contracts = [first_contract]
 
