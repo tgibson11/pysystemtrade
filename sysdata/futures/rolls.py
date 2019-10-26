@@ -342,12 +342,12 @@ class rollParameters(object):
 
     def _approx_first_contractDate_at_date(self, reference_date, rollcycle_name):
         """
-        What contract would be pricing or holding on first_date?
+        What contract would be pricing or holding on reference_date?
 
-        Returns a contractDate object with a date after first_date, taking into account RollOffsetDays
+        Returns a contractDate object with a date after reference_date, taking into account RollOffsetDays
           as well as the priced roll cycle.
 
-        :param reference_date:
+        :param reference_date: datetime
         :return: contractDate object
         """
 
