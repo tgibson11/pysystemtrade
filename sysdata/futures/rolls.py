@@ -354,14 +354,13 @@ class rollParameters(object):
         # first held contract after current date
         roll_cycle = getattr(self, rollcycle_name)
 
-        # adjusted_date: some date before the first day of the nominal contract month we want to hold on
-        # reference_date (and after the first day of the nominal contract month of the previously held contract)
-        #
-        # roll_offset_day: the number of days to roll before (-) or after (+) the contract expiry date
-        #
-        # approx_expiry_offset: the (approximate) number of days before (-) or after(+) the first day of the nominal
-        # contract month of the contract expiration date
-        adjusted_date = reference_date - pd.DateOffset(days=self.roll_offset_day + self.approx_expiry_offset)
+        # For example suppose the reference date is 20190101, and the expiry offset is 15
+        #    plus the roll offset is -90 (we want to roll ~ 3 months in advance of the expiry)
+        #    The contract expires on the 16th of each month
+        #    We want to roll 90 days ahead of that
+        #    With thanks to https://github.com/tgibson11 for helping me get this right
+
+        adjusted_date = reference_date - pd.DateOffset(days = (self.roll_offset_day + self.approx_expiry_offset))
 
         relevant_year_int, relevant_month_int = roll_cycle.yearmonth_inrollcycle_after_date(adjusted_date)
 
