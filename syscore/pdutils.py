@@ -117,7 +117,7 @@ def pd_readcsv_frompackage(filename):
     return pd_readcsv(full_filename)
 
 
-def pd_readcsv(filename, date_index_name="DATETIME", date_format=DEFAULT_DATE_FORMAT, dtype=None):
+def pd_readcsv(filename, date_index_name="DATETIME", date_format=DEFAULT_DATE_FORMAT):
     """
     Reads a pandas data frame, with time index labelled
     package_name(/path1/path2.., filename
@@ -131,14 +131,11 @@ def pd_readcsv(filename, date_index_name="DATETIME", date_format=DEFAULT_DATE_FO
     :param DEFAULT_DATE_FORMAT: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     :type DEFAULT DATE_FORMAT: str
 
-    :param dtype: Data type for data or columns
-    :type dtype: Type name or dict of column -> type, optional
-
     :returns: pd.DataFrame
 
     """
 
-    ans = pd.read_csv(filename, dtype=dtype)
+    ans = pd.read_csv(filename)
     ans.index = pd.to_datetime(ans[date_index_name], format=date_format).values
 
     del ans[date_index_name]

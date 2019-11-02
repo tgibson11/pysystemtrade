@@ -34,9 +34,7 @@ class csvRollCalendarData(rollCalendarData):
 
         try:
             filename = self._filename_given_instrument_code(instrument_code)
-            # Read contract dates as strings rather than numbers
-            dtypes = {'current_contract': str, 'next_contract': str, 'carry_contract': str}
-            roll_calendar = pd_readcsv(filename, date_index_name=DATE_INDEX_NAME, dtype=dtypes)
+            roll_calendar = pd_readcsv(filename, date_index_name=DATE_INDEX_NAME)
         except OSError:
             self.log.warning("Can't find roll calendar file %s" % filename)
             return rollCalendar.create_empty()

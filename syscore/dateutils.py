@@ -103,7 +103,7 @@ def expiry_date(expiry_ident):
 
     else:
         raise Exception("expiry_ident needs to be a string with 6 or 8 digits, a datetime, or a date; "
-                        "actual type: " + type(expiry_ident) + "value: " + expiry_ident)
+                        "actual type: " + type(expiry_ident) + "value: " + str(expiry_ident))
 
     # 'Natural' form is datetime
     return expiry_date
