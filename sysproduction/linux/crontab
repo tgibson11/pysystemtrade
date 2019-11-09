@@ -1,7 +1,7 @@
 # set environment variables
-# Note you may have to change the directory references if your code does not reside in $HOME/workspace3/psystemtrade/
+# Note you may have to change the directory references if your code does not reside in $HOME/psystemtrade/
 
-SCRIPT_PATH="$HOME:/workspace3/psystemtrade/sysproduction/linux/scripts"
+SCRIPT_PATH="$HOME:/psystemtrade/sysproduction/linux/scripts"
 ECHO_PATH="$HOME:/echos"
 # Use this for stuff to run on startup
 #
