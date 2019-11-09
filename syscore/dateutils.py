@@ -102,8 +102,8 @@ def expiry_date(expiry_ident):
         expiry_date = expiry_ident
 
     else:
-        raise Exception("expiry_ident needs to be a string with 6 or 8 digits, a datetime, or a date; "
-                        "actual type: " + type(expiry_ident) + "; value: " + str(expiry_ident))
+        raise Exception("expiry_ident needs to be a string with 6 or 8 digits, a datetime, or a date;"
+                        f" type={type(expiry_ident)}, value={expiry_ident}")
 
     # 'Natural' form is datetime
     return expiry_date
@@ -233,6 +233,19 @@ def generate_fitting_dates(data, date_method, rollyears=20):
 
     return periods
 
+
+"""
+Convert date into a float, and back again
+"""
+LONG_DATE_FORMAT = "%Y%m%d%H%M%S.%f"
+
+def datetime_to_long(date_to_convert):
+    return float(date_to_convert.strftime(LONG_DATE_FORMAT))
+
+def long_to_datetime(float_to_convert):
+    str_to_convert='{0:.6f}'.format(float_to_convert)
+    converted_datetime = datetime.datetime.strptime(str_to_convert, LONG_DATE_FORMAT)
+    return converted_datetime
 
 if __name__ == '__main__':
     import doctest

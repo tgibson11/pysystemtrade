@@ -14,7 +14,7 @@ class csvFxPricesData(fxPricesData):
     Class for fx prices write / to from csv
     """
 
-    def __init__(self, datapath=None, log=logtoscreen(), price_column="PRICE", date_column = "DATETIME", date_format = DEFAULT_DATE_FORMAT):
+    def __init__(self, datapath=None, log=logtoscreen("csvFxPricesData"), price_column="PRICE", date_column = "DATETIME", date_format = DEFAULT_DATE_FORMAT):
         """
         Get FX data from a .csv file
 
@@ -75,7 +75,7 @@ class csvFxPricesData(fxPricesData):
 
 
     def _filename_given_fx_code(self, code):
-        return get_filename_for_package("%s.%s.csv" %(self._datapath,code))
+        return get_filename_for_package(self._datapath, "%s.csv" %(code))
 
 
 
