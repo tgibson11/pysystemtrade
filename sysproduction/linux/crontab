@@ -1,8 +1,9 @@
 # set environment variables
 # Note you may have to change the directory references if your code does not reside in $HOME/psystemtrade/
 
-SCRIPT_PATH="$HOME:/psystemtrade/sysproduction/linux/scripts"
-ECHO_PATH="$HOME:/echos"
+SCRIPT_PATH="/home/todd/pysystemtrade/sysproduction/linux/scripts"
+ECHO_PATH="/home/todd/echos"
+DUMP_PATH="/home/todd/data/dump"
 # Use this for stuff to run on startup
 #
 # @reboot
@@ -10,5 +11,14 @@ ECHO_PATH="$HOME:/echos"
 #
 # Daily sample FX Prices at 6 am
 #
-0 6  * * 1-5 $SCRIPT_PATH/updatefxprices  >> $ECHO_PATH/updatefxprices.echo 2>&1
+0 6  * * 1-5 cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/updatefxprices.echo 2>&1
+#
+# Backup at 11pm
+#
+0 23 * * 1-5 mongodump --out $DUMP_PATH >> $ECHO_PATH/mongodump.echo 2>&1
+#
+# Truncate echo files & discard old log entries at 11 pm
+#
+0 23 * * 1-5 cd $SCRIPT_PATH; ./truncate_echo_files >> $ECHO_PATH/truncate_echo_files.echo 2>&1
+0 23 * * 1-5 cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
 #

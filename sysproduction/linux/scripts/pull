@@ -1,0 +1,8 @@
+# git pull within git controlled private directory copy
+cd ~/private/
+git pull
+# copy the updated contents of the private directory to pysystemtrade private directory
+cp -R ~/private/ ~/pysystemtrade/
+# git pull from main pysystemtrade github repo
+cd ~/pysystemtrade/
+git pull
