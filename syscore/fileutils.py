@@ -25,6 +25,7 @@ def get_filename_for_package(pathname, filename=None):
         # filename will be at the end of the pathname
         path_as_list = pathname.rsplit(".")
         filename = path_as_list[-2]+"."+path_as_list[-1]
+        pathname = '.'.join(path_as_list[0:-2])
 
     resolved_pathname = get_pathname_for_package(pathname)
 
