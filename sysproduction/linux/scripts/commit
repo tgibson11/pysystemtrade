@@ -10,7 +10,7 @@ cp -R ~/pysystemtrade/private/ ~/private/
 #
 cd ~/pysystemtrade/
 git add *
-git commit -m $1
+git commit -m "$1"
 git push
 #
 # git add/commit/push cycle on the copied private directory

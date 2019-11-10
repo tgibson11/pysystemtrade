@@ -4,6 +4,8 @@
 SCRIPT_PATH="/home/todd/pysystemtrade/sysproduction/linux/scripts"
 ECHO_PATH="/home/todd/echos"
 DUMP_PATH="/home/todd/data/dump"
+# So matplotlib doesn't try to connect to an X11 server
+MPLBACKEND=Agg
 # Use this for stuff to run on startup
 #
 # @reboot
@@ -11,7 +13,8 @@ DUMP_PATH="/home/todd/data/dump"
 #
 # Daily sample FX Prices at 6 am
 #
-0 6  * * 1-5 cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/updatefxprices.echo 2>&1
+# 0 6  * * 1-5 cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/update_fx_prices.echo 2>&1
+09 10  * * * cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/update_fx_prices.echo 2>&1
 #
 # Backup at 11pm
 #

@@ -3,7 +3,7 @@ from sysdata.fx.spotfx import fxPricesData, fxPrices
 from syslogdiag.log import logtoscreen
 from syscore.fileutils import get_filename_for_package
 
-IB_CCY_CONFIG_FILE = get_filename_for_package("sysbrokers.IB.ibConfigSpotFX.csv")
+IB_CCY_CONFIG_FILE = get_filename_for_package("sysbrokers.IB", "ibConfigSpotFX.csv")
 
 class ibFxPricesData(fxPricesData):
 
