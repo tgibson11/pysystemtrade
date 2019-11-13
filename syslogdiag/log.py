@@ -18,7 +18,7 @@ class logger(object):
 
     """
 
-    def __init__(self, type="", log_level="Off", **kwargs):
+    def __init__(self, type, log_level="Off", **kwargs):
         """
         Base class for logging.
 
