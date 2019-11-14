@@ -4,14 +4,16 @@ For a given list of futures contracts defined by Quandl start dates:
 read price data from quandl, and then write to artic
 Write list of futures contracts to mongodb database
 """
-import datetime
 
-from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
+from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
+from sysdata.csv.csv_roll_calendars import csvRollCalendarData
 from sysdata.futures.contracts import listOfFuturesContracts
 from sysdata.futures.instruments import futuresInstrument
+from sysdata.futures.roll_calendars import rollCalendar
 from sysdata.futures.rolls import contractDateWithRollParameters
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
-from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
+from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
+
 
 def get_roll_parameters_from_mongo(instrument_code):
 
@@ -37,18 +39,11 @@ def create_list_of_contracts(instrument_code, current_only=False):
     if not current_only:
         first_contract_date = get_first_contract_date_from_quandl(instrument_code)
     else:
-        now = datetime.datetime.now()
-        contract_date = now.strftime('%Y%m')
-        contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
-        first_contract_date = None
-        while not first_contract_date:
-            try:
-                first_contract_date = contract_date_object.previous_priced_contract().as_date().strftime('%Y%m')
-            except:
-                contract_date = str(int(contract_date) + 1)
-                if contract_date[4:6] == "13":
-                    contract_date = str(int(contract_date[:4]) + 1) + "01"
-                contract_date_object = contractDateWithRollParameters(roll_parameters, contract_date)
+        roll_calendar = rollCalendar(csvRollCalendarData().get_roll_calendar(instrument_code))
+        last_contract_date = contractDateWithRollParameters(roll_parameters,
+                                                            roll_calendar.last_current_contract().contract_date)
+        unexpired_contract_dates = last_contract_date.get_unexpired_contracts_from_now_to_contract_date()
+        first_contract_date = unexpired_contract_dates[-1].contract_date
 
     list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
                                                                       first_contract_date)
