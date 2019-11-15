@@ -4,16 +4,15 @@ For a given list of futures contracts defined by Quandl start dates:
 read price data from quandl, and then write to artic
 Write list of futures contracts to mongodb database
 """
-
-from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.csv.csv_roll_calendars import csvRollCalendarData
-from sysdata.futures.contracts import listOfFuturesContracts
-from sysdata.futures.instruments import futuresInstrument
 from sysdata.futures.roll_calendars import rollCalendar
 from sysdata.futures.rolls import contractDateWithRollParameters
-from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
-
+from sysdata.futures.contracts import listOfFuturesContracts, futuresContract
+from sysdata.futures.instruments import futuresInstrument
+from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
+from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
+from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 
 def get_roll_parameters_from_mongo(instrument_code):
 
@@ -38,15 +37,15 @@ def create_list_of_contracts(instrument_code, current_only=False):
 
     if not current_only:
         first_contract_date = get_first_contract_date_from_quandl(instrument_code)
+        list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
+                                                                              first_contract_date)
     else:
         roll_calendar = rollCalendar(csvRollCalendarData().get_roll_calendar(instrument_code))
         last_contract_date = contractDateWithRollParameters(roll_parameters,
                                                             roll_calendar.last_current_contract().contract_date)
         unexpired_contract_dates = last_contract_date.get_unexpired_contracts_from_now_to_contract_date()
-        first_contract_date = unexpired_contract_dates[-1].contract_date
-
-    list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
-                                                                      first_contract_date)
+        list_of_contracts = [
+            futuresContract(instrument_object, contract_date) for contract_date in unexpired_contract_dates]
 
     return list_of_contracts
 
@@ -58,7 +57,6 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
     for contract_object in list_of_contracts:
         print("Processing %s" % contract_object.ident())
         quandl_price = quandl_prices_data.get_prices_for_contract_object(contract_object)
-        # print(quandl_price)
 
         if quandl_price.empty:
             print("Problem reading price data this contract - skipping")
