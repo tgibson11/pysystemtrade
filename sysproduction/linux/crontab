@@ -13,7 +13,8 @@ MPLBACKEND=Agg
 #
 # Daily sample FX Prices at 6 am
 #
-0 6  * * 1-5 cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/update_fx_prices.echo 2>&1
+# 0 6  * * 1-5 cd $SCRIPT_PATH; ./update_fx_prices >> $ECHO_PATH/update_fx_prices.echo 2>&1
+0 6  * * 1-5 cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
 #
 # Backup at 11pm
 #

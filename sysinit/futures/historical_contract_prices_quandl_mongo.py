@@ -81,4 +81,4 @@ def get_prices_for_instruments(instrument_list=None, current_only=False):
 
 
 if __name__ == '__main__':
-    get_prices_for_instruments(instrument_list=[], current_only=True)
+    get_prices_for_instruments(instrument_list=['PLAT'], current_only=False)

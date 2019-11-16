@@ -48,4 +48,4 @@ def generate_multiple_prices(instrument_list=None):
 
 
 if __name__ == '__main__':
-    generate_multiple_prices(instrument_list=[])
+    generate_multiple_prices(instrument_list=['PLAT'])
