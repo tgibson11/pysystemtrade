@@ -251,7 +251,7 @@ class listOfFuturesContracts(list):
 
         first_contract = futuresContract(instrument_object, contractDateWithRollParameters(roll_parameters, first_contract_date))
 
-        assert end_date > first_contract.expiry_date
+        # assert end_date > first_contract.expiry_date
 
         current_held_contract = futuresContract.approx_first_held_futuresContract_at_date(instrument_object, roll_parameters,
                                                                                               end_date)
