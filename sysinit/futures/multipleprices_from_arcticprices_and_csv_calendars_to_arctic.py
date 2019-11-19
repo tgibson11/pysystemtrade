@@ -9,6 +9,8 @@ We then store those multiple prices in: (depending on options)
 - arctic
 - .csv
 """
+import matplotlib
+# matplotlib.use("TkAgg")
 
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.csv.csv_roll_calendars import csvRollCalendarData
@@ -24,20 +26,20 @@ ADD_TO_CSV = False
 
 def generate_multiple_prices(instrument_list=None):
     csv_roll_calendars = csvRollCalendarData()
-    artic_individual_futures_prices = arcticFuturesContractPriceData()
+    arctic_individual_futures_prices = arcticFuturesContractPriceData()
     arctic_multiple_prices = arcticFuturesMultiplePricesData()
     csv_multiple_prices = csvFuturesMultiplePricesData()
 
     if not instrument_list:
-        instrument_list = artic_individual_futures_prices.get_instruments_with_price_data()
+        instrument_list = arctic_individual_futures_prices.get_instruments_with_price_data()
 
     for instrument_code in instrument_list:
         print("Generating multiple prices for " + instrument_code)
         roll_calendar = csv_roll_calendars.get_roll_calendar(instrument_code)
-        dict_of_futures_contract_prices = artic_individual_futures_prices.get_all_prices_for_instrument(instrument_code)
-        dict_of_futures_contract_settlement_prices = dict_of_futures_contract_prices.settlement_prices()
+        dict_of_futures_contract_prices = arctic_individual_futures_prices.get_all_prices_for_instrument(instrument_code)
+        dict_of_futures_contract_closing_prices = dict_of_futures_contract_prices.closing_prices()
 
-        multiple_prices = futuresMultiplePrices.create_from_raw_data(roll_calendar, dict_of_futures_contract_settlement_prices)
+        multiple_prices = futuresMultiplePrices.create_from_raw_data(roll_calendar, dict_of_futures_contract_closing_prices)
 
         # print(multiple_prices)
 
@@ -48,4 +50,4 @@ def generate_multiple_prices(instrument_list=None):
 
 
 if __name__ == '__main__':
-    generate_multiple_prices(instrument_list=['PLAT'])
+    generate_multiple_prices(instrument_list=['AUD'])
