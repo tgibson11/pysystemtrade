@@ -208,28 +208,35 @@ class quandlFuturesContractPrices(futuresContractPrices):
 
     def __init__(self, contract_data):
 
+        if 'Last' in contract_data.columns:
+            last_count = contract_data.Last.count()
+        else:
+            last_count = 0
+
+        if 'Close' in contract_data.columns:
+            close_count = contract_data.Close.count()
+        else:
+            close_count = 0
+
+        if 'Settle' in contract_data.columns:
+            settle_count = contract_data.Settle.count()
+        else:
+            settle_count = 0
+
+        if last_count >= close_count >= settle_count:
+            final_series = contract_data.Last
+        elif close_count >= settle_count:
+            final_series = contract_data.Close
+        else:
+            final_series = contract_data.Settle
+
         try:
             new_data = pd.DataFrame(dict(OPEN=contract_data.Open,
-                                         CLOSE=contract_data.Last,
+                                         FINAL=final_series,
                                          HIGH=contract_data.High,
-                                         LOW=contract_data.Low,
-                                         SETTLE=contract_data.Settle))
+                                         LOW=contract_data.Low))
         except AttributeError:
-            try:
-                new_data = pd.DataFrame(dict(OPEN=contract_data.Open,
-                                         CLOSE=contract_data.Close,
-                                         HIGH=contract_data.High,
-                                         LOW=contract_data.Low,
-                                         SETTLE=contract_data.Settle))
-            except AttributeError:
-                try:
-                    new_data = pd.DataFrame(dict(OPEN=contract_data.Open,
-                                                 CLOSE=contract_data.Settle,
-                                                 HIGH=contract_data.High,
-                                                 LOW=contract_data.Low,
-                                                 SETTLE=contract_data.Settle))
-                except:
-                    raise Exception(
-                        "Quandl API error: data fields %s are not as expected" % ",".join(list(contract_data.columns)))
+            raise Exception(
+                "Quandl API error: data fields %s are not as expected" % ",".join(list(contract_data.columns)))
 
         super().__init__(new_data)
