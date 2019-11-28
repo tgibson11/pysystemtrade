@@ -24,7 +24,7 @@ class futuresContractPrices(pd.DataFrame):
         try:
             assert data_present == PRICE_DATA_COLUMNS
         except AssertionError:
-            raise Exception(f"futuresContractPrices has to conform to pattern; data_present={data_present}")
+            raise Exception("futuresContractPrices has to conform to pattern")
 
         super().__init__(data)
 
