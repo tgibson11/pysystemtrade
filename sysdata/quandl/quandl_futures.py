@@ -223,7 +223,7 @@ class quandlFuturesContractPrices(futuresContractPrices):
         else:
             settle_count = 0
 
-        if last_count >= close_count >= settle_count:
+        if last_count >= max(close_count, settle_count):
             final_series = contract_data.Last
         elif close_count >= settle_count:
             final_series = contract_data.Close
