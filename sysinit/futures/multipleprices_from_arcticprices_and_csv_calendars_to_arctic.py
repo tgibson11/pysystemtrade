@@ -37,7 +37,7 @@ def generate_multiple_prices(instrument_list=None):
         print("Generating multiple prices for " + instrument_code)
         roll_calendar = csv_roll_calendars.get_roll_calendar(instrument_code)
         dict_of_futures_contract_prices = arctic_individual_futures_prices.get_all_prices_for_instrument(instrument_code)
-        dict_of_futures_contract_closing_prices = dict_of_futures_contract_prices.closing_prices()
+        dict_of_futures_contract_closing_prices = dict_of_futures_contract_prices.final_prices()
 
         multiple_prices = futuresMultiplePrices.create_from_raw_data(roll_calendar, dict_of_futures_contract_closing_prices)
 

@@ -33,31 +33,6 @@ UNIXTIME_CONVERTER = 1e9
 UNIXTIME_IN_YEAR = UNIXTIME_CONVERTER * SECONDS_IN_YEAR
 
 
-CLOSING_OFFSET = pd.DateOffset(hours=23, minutes=0, seconds=0)
-
-def index_to_closing(data_object):
-    """
-    If index is daily, add an offset. By convention this is 23:00 exactly
-    Allows us to mix daily and intraday prices and seperate if required
-
-    :param data_object:
-    :return:
-    """
-    new_index = []
-    for index_entry in data_object.index:
-        # Check for genuine daily data to add notional timestamp to, or weird legacy data issue (FIX ME REMOVE WHEN DONE)
-        if (index_entry.hour==0 and index_entry.minute==0 and index_entry.second==0) or \
-                (index_entry.hour==23 and index_entry.minute==23 and index_entry.second==32):
-
-            new_index_entry = index_entry.date() + CLOSING_OFFSET
-        else:
-            new_index_entry = index_entry
-
-        new_index.append(new_index_entry)
-
-    new_data_object=pd.DataFrame(data_object.values, index=new_index, columns=data_object.columns)
-
-    return new_data_object
 
 MONTH_LIST = ["F", "G", "H", "J", "K", "M", "N", "Q", "U", "V", "X", "Z"]
 
@@ -259,6 +234,14 @@ def generate_fitting_dates(data, date_method, rollyears=20):
 
     return periods
 
+def time_matches(index_entry, closing_time=pd.DateOffset(hours=12, minutes=0, seconds=0)):
+    if index_entry.hour == closing_time.hours and \
+        index_entry.minute == closing_time.minutes and \
+        index_entry.second == closing_time.seconds:
+
+        return True
+    else:
+        return False
 
 """
 Convert date into a float, and back again
