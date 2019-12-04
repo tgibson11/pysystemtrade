@@ -22,4 +22,5 @@ MPLBACKEND=Agg
 20 23 * * 1-5 cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
 40 23 * * 1-5 cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
 #
+# Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
 @reboot mongod --dbpath $MONGO_DATA
