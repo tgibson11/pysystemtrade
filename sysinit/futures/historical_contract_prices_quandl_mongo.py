@@ -66,7 +66,7 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
                 quandl_price = quandl_price[:-1]
             print("Read ok, trying to write to arctic")
             try:
-                arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price)
+                arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price, ignore_duplication=True)
             except:
                 raise Exception("Some kind of issue with arctic - stopping so you can fix it")
 
