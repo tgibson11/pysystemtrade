@@ -460,8 +460,7 @@ Script are then called by [schedulers](#scheduling), or on an ad-hoc basis from 
 
 ## Production system components
 
-### Get spot FX data from interactive brokers, write to MongoDB
-
+### Get spot FX data from interactive brokers, write to MongoDB (Daily)
 
 Python:
 ```python
@@ -474,6 +473,74 @@ Linux script:
 ```
 . $SCRIPT_PATH/update_fx_prices
 ```
+
+### Update futures contract data (Daily)
+
+This makes sure that the contracts stored in MongoDB reflect what we need to sample right now. It also updates any active contract expiry dates, using IB data.
+
+Python:
+```python
+from sysproduction.updateSampledContracts import update_sampled_contracts
+update_sampled_contracts()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/update_sampled_contracts
+```
+
+### Update futures contract historical price data (Daily)
+
+This gets historical daily data from IB for all the futures contracts marked to sample in the mongoDB contracts database, and updates the Arctic futures price database.
+
+Python:
+```python
+from sysproduction.update_historical_prices import update_historical_prices
+update_historical_prices()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/update_historical_prices
+```
+
+FIXME: An intraday sampling would be good
+
+### Update sampled contracts (Daily)
+
+This ensures that we are currently sampling active contracts, and updates contract expiry dates.
+
+Python:
+```python
+from sysproduction.update_sampled_contracts import updated_sampled_contracts
+update_sampled_prices()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/update_sampled_contracts
+```
+
+
+### Update multiple and adjusted prices (Daily)
+
+This 
+
+It should be scheduled to run once the daily prices for individual contracts have been updated.
+
+Python:
+```python
+from sysproduction.update_multiple_adjusted_prices import update_multiple_adjusted_prices_daily
+update_multiple_adjusted_prices_daily()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/update_multiple_adjusted_prices
+```
+
+
+FIXME: An intraday sampling would be good
 
 
 ## Ad-hoc diagnostics

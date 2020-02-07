@@ -1,4 +1,8 @@
 import pandas as pd
+import numpy as np
+
+from syscore.pdutils import merge_data_series_with_label_column
+
 from sysdata.data import baseData
 from sysdata.futures.contracts import futuresContract
 from syscore.pdutils import full_merge_of_existing_data, merge_newer_data
@@ -100,7 +104,7 @@ class futuresContractPrices(pd.DataFrame):
         :return: merged futures_per_contract object
         """
 
-        merged_futures_prices = merge_newer_data(self, new_futures_per_contract_prices)
+        merged_futures_prices = merge_newer_data(pd.DataFrame(self), new_futures_per_contract_prices)
         merged_futures_prices = futuresContractPrices(merged_futures_prices)
 
         return merged_futures_prices
@@ -112,6 +116,8 @@ class futuresContractFinalPrices(pd.Series):
     """
     def __init__(self, data):
         super().__init__(data)
+
+
 
 
 class dictFuturesContractPrices(dict):
@@ -198,6 +204,175 @@ class dictFuturesContractFinalPrices(dict):
         sorted_contract_ids = self.sorted_contract_ids()
 
         return sorted_contract_ids[-1]
+
+class futuresContractFinalPricesWithContractID(pd.DataFrame):
+    """
+    Just the final prices from a futures contract, plus
+    Columns are named 'NAME' and 'NAME_CONTRACT'
+    """
+    def __init__(self, price_and_contract_data, price_column = 'PRICE', contract_suffix="_CONTRACT"):
+        """
+
+        :param price_and_contract_data: pd.DataFrame with two columns
+        :param column_name: column name for price
+        :param contract_suffix: column name for contract
+        """
+
+        super().__init__(price_and_contract_data)
+
+        contract_name = price_column+contract_suffix
+
+        self._price_column = price_column
+        self._contract_column = contract_name
+
+    @classmethod
+    def create_with_single_contractid(futuresContractFinalPricesWithContractID,
+                                      price_data, contractid,
+                                      price_column = 'PRICE', contract_suffix="_CONTRACT"):
+        """
+
+        :param price_data: futuresContractFinalPrices
+        :param contractid: str YYYYMMDD
+        :param column_name: column name for price
+        :param contract_suffix: column name for contract
+        """
+
+        contract_data = [contractid]*len(price_data)
+        data = pd.DataFrame(np.array([list(price_data.values), contract_data]).transpose(),
+                            index = price_data.index)
+
+        contract_name = price_column+contract_suffix
+        data.columns=[price_column, contract_name]
+
+        object = futuresContractFinalPricesWithContractID(data,
+                                                          price_column=price_column,
+                                                          contract_suffix=contract_suffix)
+
+        return object
+
+    def contract_ids(self):
+        contract_column = self._contract_column
+        contract_ids = self[contract_column]
+
+        return contract_ids
+
+    def final_contract(self):
+        """
+
+        :return: last value in contract id column
+        """
+        contract_ids = self.contract_ids()
+
+        return contract_ids[-1]
+
+
+    def check_all_contracts_equal_to(self, test_contractid):
+        """
+        Check to see if all contracts are the same as contractid
+
+        :param contractid: str yyyymmdd
+        :return: bool
+        """
+
+        contract_ids = self.contract_ids()
+
+        check_equality = [cid == test_contractid for cid in contract_ids.values]
+
+        return all(check_equality)
+
+    def merge_data(self, new_data):
+        """
+        Assuming that contracts all match,
+
+        merge the data series together
+
+        :param new_data: object of same type
+        :return: object of same type
+        """
+        if len(new_data)==0:
+            return self
+
+        original_data = self
+
+        last_contract_in_original_data = original_data.final_contract()
+
+        try:
+            assert new_data.check_all_contracts_equal_to(last_contract_in_original_data)
+        except:
+            raise Exception("When merging data, final contractid in original data must match all new data")
+        try:
+            assert new_data._price_column == original_data._price_column
+            assert new_data._contract_column == original_data._contract_column
+        except:
+            raise Exception("When merging data, column names must match")
+
+        col_names = dict(data=original_data._price_column, label = original_data._contract_column)
+
+        merged_data = merge_data_series_with_label_column(original_data, new_data, col_names=col_names)
+
+        return merged_data
+
+
+class dictFuturesContractFinalPricesWithContractID(dict):
+    ## options for construction:
+    ##    - pulled out of multiple prices
+    ##    - from two dicts of prices, and contract ids
+    def __init__(self, dict_with_cids):
+        """
+
+        :param dict_with_cids: dict, containing futuresContractFinalPricesWithContractID
+        :return: object
+        """
+        super().__init__(dict_with_cids)
+
+    @classmethod
+    def create_from_two_dicts(dictFuturesContractFinalPricesWithContractID,
+                              dict_of_final_prices, dict_of_contract_ids):
+        """
+
+        :param dict_of_final_prices: dict of futuresContractFinalPrices
+        :param dict_of_contract_ids: dict of str, yyyymmdd contract_ids. Keys must match
+        """
+
+        new_dict = {}
+        for key, price_series in dict_of_final_prices.items():
+            try:
+                contract_id = dict_of_contract_ids[key]
+            except KeyError:
+                raise Exception("key value %s missing from dict_of_contract_ids" % key)
+
+            prices_with_contractid = futuresContractFinalPricesWithContractID.\
+                create_with_single_contractid(price_series, contract_id, price_column = key)
+            new_dict[key] = prices_with_contractid
+
+        return dictFuturesContractFinalPricesWithContractID(new_dict)
+
+    def merge_data(self, new_price_dict):
+        """
+        Update this data with some new data, element by element
+
+        :param new_price_dict: another of the same class. Keys and column names must match. Contract IDs must match
+        :return:  merged price dict
+        """
+
+        ## for each element, run a merge
+        list_of_keys = self.keys()
+        merged_dict = {}
+        for key_name in list_of_keys:
+            current_data = self[key_name]
+            try:
+                new_data = new_price_dict[key_name]
+            except KeyError:
+                raise Exception("Key name mismatch when merging price data, %s missing from new data" % key_name)
+            try:
+                merged_data = current_data.merge_data(new_data)
+            except Exception as e:
+                raise e
+
+            merged_dict[key_name] = merged_data
+
+        return merged_dict
+
 
 BASE_CLASS_ERROR = "You have used a base class for futures price data; you need to use a class that inherits with a specific data source"
 
@@ -472,7 +647,7 @@ class futuresContractPriceData(baseData):
         # We have guaranteed no duplication
         self.write_prices_for_contract_object(futures_contract_object, merged_prices, ignore_duplication=True)
 
-        new_log.msg("Added %d additional rows of data")
+        new_log.msg("Added %d additional rows of data" % rows_added)
 
         return rows_added
 
