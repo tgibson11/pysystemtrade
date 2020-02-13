@@ -230,11 +230,19 @@ class quandlFuturesContractPrices(futuresContractPrices):
         else:
             final_series = contract_data.Settle
 
+        if 'Volume' in contract_data.columns:
+            volume_series = contract_data.Volume
+        elif 'Total Volume' in contract_data.columns:
+            volume_series = contract_data['Total Volume']
+        else:
+            volume_series = None
+
         try:
             new_data = pd.DataFrame(dict(OPEN=contract_data.Open,
                                          FINAL=final_series,
                                          HIGH=contract_data.High,
-                                         LOW=contract_data.Low))
+                                         LOW=contract_data.Low,
+                                         VOLUME=volume_series))
         except AttributeError:
             raise Exception(
                 "Quandl API error: data fields %s are not as expected" % ",".join(list(contract_data.columns)))
