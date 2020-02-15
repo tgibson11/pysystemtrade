@@ -53,6 +53,12 @@ class diagContracts(object):
         preceeding_forward_contract_date = forward_contract.previous_priced_contract()
         subsequent_forward_contract_date = forward_contract.next_held_contract()
 
+        # Next forward contract might not even be trading yet!
+        if not self.data.arctic_futures_contract_price\
+                .has_data_for_instrument_code_and_contract_date(instrument_code,
+                                                                subsequent_forward_contract_date.contract_date):
+            subsequent_forward_contract_date = forward_contract
+
         # Could be up to 6 contracts
         # HOW TO PAD THESE ?
         all_contracts = [price_contract, forward_contract, preceeding_forward_contract_date,

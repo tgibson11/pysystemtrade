@@ -241,7 +241,7 @@ class dictFuturesContractFinalPrices(dict):
         joint_data = [pd.Series(prices, name=contractid) for contractid, prices in self.items()]
         joint_data = pd.concat(joint_data, axis=1)
 
-        matched_data = joint_data.dropna()
+        matched_data = joint_data.dropna(how='all')
 
         return matched_data
 
