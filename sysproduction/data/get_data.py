@@ -3,6 +3,7 @@
 
 from sysbrokers.IB.ibFuturesContractPriceData import ibFuturesContractPriceData
 from sysbrokers.IB.ibSpotFXData import ibFxPricesData
+from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesData
@@ -101,7 +102,8 @@ def process_class_id(class_name, mongo_db = arg_not_supplied, ib_conn = arg_not_
 
     eval_dict = dict(ib = "%s(ib_conn, log=log.setup(component='%s'))",
                      mongo = "%s(mongo_db=mongo_db, log=log.setup(component='%s'))",
-                     arctic = "%s(mongo_db=mongo_db, log=log.setup(component='%s'))")
+                     arctic = "%s(mongo_db=mongo_db, log=log.setup(component='%s'))",
+                     quandl="%s()  # %s")
 
     to_eval = eval_dict[prefix] % (class_name, class_name)
     resolved_instance = eval(to_eval)
