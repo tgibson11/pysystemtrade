@@ -22,7 +22,7 @@ def process_adjusted_prices_all_instruments(csv_adj_data_path=None, ADD_TO_ARCTI
     arctic_multiple_prices, _notused, _alsonotused = _get_data_inputs(csv_adj_data_path)
     instrument_list = arctic_multiple_prices.get_list_of_instruments()
     for instrument_code in instrument_list:
-        print("Processing adjusted prices for " + instrument_code)
+        print(instrument_code)
         process_adjusted_prices_single_instrument(instrument_code, csv_adj_data_path=csv_adj_data_path,  ADD_TO_ARCTIC = ADD_TO_ARCTIC, ADD_TO_CSV = ADD_TO_CSV)
 
 def process_adjusted_prices_single_instrument(instrument_code, csv_adj_data_path=None, ADD_TO_ARCTIC=True, ADD_TO_CSV=False):
@@ -30,7 +30,7 @@ def process_adjusted_prices_single_instrument(instrument_code, csv_adj_data_path
     multiple_prices = arctic_multiple_prices.get_multiple_prices(instrument_code)
     adjusted_prices = futuresAdjustedPrices.stich_multiple_prices(multiple_prices, forward_fill=True)
 
-    # print(adjusted_prices)
+    print(adjusted_prices)
 
     if ADD_TO_ARCTIC:
         arctic_adjusted_prices.add_adjusted_prices(instrument_code, adjusted_prices, ignore_duplication=True)

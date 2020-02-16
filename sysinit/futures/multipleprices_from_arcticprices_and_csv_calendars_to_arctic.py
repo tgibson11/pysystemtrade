@@ -32,7 +32,7 @@ def process_multiple_prices_all_instruments(csv_multiple_data_path=None,
     instrument_list = arctic_individual_futures_prices.get_instruments_with_price_data()
 
     for instrument_code in instrument_list:
-        print("Processing multiple prices for " + instrument_code)
+        print(instrument_code)
         process_multiple_prices_single_instrument(instrument_code,
                                                   csv_multiple_data_path=csv_multiple_data_path,
                                                   csv_roll_data_path=csv_roll_data_path,
@@ -51,7 +51,7 @@ def process_multiple_prices_single_instrument(instrument_code,
 
     multiple_prices = futuresMultiplePrices.create_from_raw_data(roll_calendar, dict_of_futures_contract_closing_prices)
 
-    # print(multiple_prices)
+    print(multiple_prices)
 
     if ADD_TO_ARCTIC:
         arctic_multiple_prices.add_multiple_prices(instrument_code, multiple_prices, ignore_duplication=True)

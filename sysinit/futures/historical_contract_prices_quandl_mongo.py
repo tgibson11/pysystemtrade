@@ -30,22 +30,14 @@ def get_first_contract_date_from_quandl(instrument_code):
     return config.get_first_contract_date(instrument_code)
 
 
-def create_list_of_contracts(instrument_code, current_only=False):
+def create_list_of_contracts(instrument_code):
     instrument_object = futuresInstrument(instrument_code)
     print(instrument_code)
     roll_parameters = get_roll_parameters_from_mongo(instrument_code)
+    first_contract_date = get_first_contract_date_from_quandl(instrument_code)
 
-    if not current_only:
-        first_contract_date = get_first_contract_date_from_quandl(instrument_code)
-        list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
-                                                                              first_contract_date)
-    else:
-        roll_calendar = rollCalendar(csvRollCalendarData().get_roll_calendar(instrument_code))
-        last_contract_date = contractDateWithRollParameters(roll_parameters,
-                                                            roll_calendar.last_current_contract().contract_date)
-        unexpired_contract_dates = last_contract_date.get_unexpired_contracts_from_now_to_contract_date()
-        list_of_contracts = [
-            futuresContract(instrument_object, contract_date) for contract_date in unexpired_contract_dates]
+    list_of_contracts = listOfFuturesContracts.historical_price_contracts(instrument_object, roll_parameters,
+                                                                      first_contract_date)
 
     return list_of_contracts
 
@@ -66,19 +58,16 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
                 quandl_price = quandl_price[:-1]
             print("Read ok, trying to write to arctic")
             try:
-                arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price, ignore_duplication=True)
+                arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price)
             except:
                 raise Exception("Some kind of issue with arctic - stopping so you can fix it")
 
 
-def get_prices_for_instruments(instrument_list=None, current_only=False):
-    if not instrument_list:
-        instrument_list = quandlFuturesConfiguration().get_list_of_instruments()
-    for instrument_code in instrument_list:
-        contracts = create_list_of_contracts(instrument_code, current_only=current_only)
-        print("Generated %d contracts" % len(contracts))
-        get_and_write_prices_for_contract_list_from_quandl_to_arctic(contracts)
-
-
 if __name__ == '__main__':
-    get_prices_for_instruments(current_only=False)
+    instrument_code = "US10"
+    list_of_contracts = create_list_of_contracts(instrument_code)
+    print(list_of_contracts)
+
+    print("Generated %d contracts" % len(list_of_contracts))
+
+    get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)

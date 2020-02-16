@@ -226,10 +226,6 @@ class futuresConfigDataForSim(simData):
 
         return currency
 
-    def get_instrument_ib_symbol(self, instrument_code):
-        instr_object = self.get_instrument_object(instrument_code)
-        ib_symbol = instr_object.meta_data['IBSymbol']
-        return ib_symbol
 
 
 """

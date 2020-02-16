@@ -3,11 +3,7 @@ Update historical data per contract from Quandl data, dump into mongodb
 """
 
 from syscore.objects import success, failure
-from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
-from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesData
 from sysdata.mongodb.mongo_connection import mongoDb
-from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
-from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from syslogdiag.log import logToMongod as logger
 from sysproduction.data.get_data import dataBlob
 
