@@ -471,23 +471,8 @@ def merge_data_series_with_label_column(original_data, new_data, col_names=dict(
     else:
         first_date_after_series_mismatch, last_date_when_series_mismatch = match_data
 
-    # BEGIN temporary roll-handling logic (until Rob implements something)
-    # Convert the datetimes to dates (truncating the time)
-    first_date_after_series_mismatch = datetime.date(first_date_after_series_mismatch.year,
-                                                     first_date_after_series_mismatch.month,
-                                                     first_date_after_series_mismatch.day)
-
-    last_date_when_series_mismatch = datetime.date(last_date_when_series_mismatch.year,
-                                                   last_date_when_series_mismatch.month,
-                                                   last_date_when_series_mismatch.day)
-
-    # If the 2 dates are now the same (i.e., there was a roll)
-    # Move both dates forward one day (so the "old" data that has the roll will be retained, and the "new" data will be used going forward)
-    if first_date_after_series_mismatch == last_date_when_series_mismatch:
-        first_date_after_series_mismatch = first_date_after_series_mismatch + datetime.timedelta(days=1)
-        last_date_when_series_mismatch = last_date_when_series_mismatch + datetime.timedelta(days=1)
-
-    # END temporary roll-handling logic
+    if new_data[first_date_after_series_mismatch:].empty:
+        return original_data
 
     # Concat the two price series together, fill to the left
     # This will replace any NA values in existing prices with new ones
