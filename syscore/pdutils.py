@@ -483,7 +483,7 @@ def merge_data_series_with_label_column(original_data, new_data, col_names=dict(
                                                 new_data[data_column][first_date_after_series_mismatch:])
 
     labels_in_merged_data = new_data[first_date_after_series_mismatch:][label_column]
-    labels_in_merged_data_reindexed = labels_in_merged_data.reindex(merged_data.index)
+    labels_in_merged_data_reindexed = labels_in_merged_data.reindex(merged_data.index, method='bfill')
 
     labelled_merged_data = pd.concat([labels_in_merged_data_reindexed, merged_data], axis=1)
     labelled_merged_data.columns = [label_column, data_column]
