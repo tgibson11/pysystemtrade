@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 from syscore.pdutils import merge_data_series_with_label_column
+from syscore.objects import arg_not_supplied, missing_data
 
 from sysdata.data import baseData
 from sysdata.futures.contracts import futuresContract
@@ -34,6 +35,7 @@ class futuresContractPrices(pd.DataFrame):
         super().__init__(data)
 
         self._is_empty=False
+        data.index.name="index" # for arctic compatibility
 
 
     @classmethod
@@ -235,13 +237,27 @@ class dictFuturesContractFinalPrices(dict):
 
         return sorted_contract_ids[-1]
 
-    def matched_prices(self):
-        # Return pd.DataFrame where we only have prices in all contracts
+    def joint_data(self):
 
         joint_data = [pd.Series(prices, name=contractid) for contractid, prices in self.items()]
         joint_data = pd.concat(joint_data, axis=1)
 
-        matched_data = joint_data.dropna(how='all')
+        return joint_data
+
+    def matched_prices(self, contracts_to_match = arg_not_supplied):
+        # Return pd.DataFrame where we only have prices in all contracts
+
+        if contracts_to_match is arg_not_supplied:
+            contracts_to_match = self.keys()
+
+        joint_data = self.joint_data()
+        joint_data_to_match = joint_data[contracts_to_match]
+
+        matched_data = joint_data_to_match.dropna()
+
+        if len(matched_data)==0:
+            ## This will happen if there are no matches
+            return missing_data
 
         return matched_data
 
@@ -603,6 +619,7 @@ class futuresContractPriceData(baseData):
         """
 
         ans = self._perform_contract_method_for_instrument_code_and_contract_date( instrument_code, contract_date, "write_prices_for_contract_object",
+                                                                                   futures_price_data,
                                                                                    ignore_duplication=ignore_duplication)
 
         return ans
@@ -750,11 +767,11 @@ class futuresContractPriceData(baseData):
 
         return contract_dates
 
-    def _perform_contract_method_for_instrument_code_and_contract_date(self, instrument_code, contract_date, method_name, **kwargs):
+    def _perform_contract_method_for_instrument_code_and_contract_date(self, instrument_code, contract_date, method_name, *args, **kwargs):
         contract_object = self._object_given_instrumentCode_and_contractDate(instrument_code, contract_date)
         method = getattr(self, method_name)
 
-        return method(contract_object, **kwargs)
+        return method(contract_object, *args, **kwargs)
 
     def _object_given_instrumentCode_and_contractDate(self, instrument_code, contract_date):
         """

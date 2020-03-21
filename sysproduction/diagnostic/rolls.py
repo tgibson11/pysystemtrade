@@ -6,7 +6,7 @@ from sysproduction.data.contracts import diagContracts
 from sysproduction.data.prices import diagPrices
 from sysproduction.data.state import diagState
 
-from syscore.objects import header, table, body_text, report_config
+from syscore.objects import header, table, body_text
 
 ## We want a roll report (We could merge this into another kind of report)
 ## We want to be able to have it emailed, or run it offline
@@ -63,13 +63,16 @@ def get_roll_data_for_instrument(instrument_code, data):
     relevant_contract_dict = c_data.get_labelled_list_of_relevant_contracts(instrument_code)
     relevant_contracts = relevant_contract_dict['contracts']
     contract_labels = relevant_contract_dict['labels']
+    current_contracts = relevant_contract_dict['current_contracts']
 
     v_data = diagVolumes(data)
     volumes = v_data.get_normalised_smoothed_volumes_of_contract_list(instrument_code,  relevant_contracts)
 
     # price curve
     p_data = diagPrices(data)
-    last_matched_prices = p_data.get_last_matched_prices_for_contract_list(instrument_code, relevant_contracts)
+    contracts_to_match = [current_contracts[k] for k in ('PRICE', 'FORWARD')]
+    last_matched_prices = p_data.get_last_matched_prices_for_contract_list(instrument_code, relevant_contracts,
+                                                                           contracts_to_match=contracts_to_match)
 
     # length to expiries / length to suggested roll
     price_expiry = c_data.get_priced_expiry(instrument_code)
