@@ -1,3 +1,6 @@
+import yaml
+
+from syscore.fileutils import PRIVATE_CONFIG_FILE
 from sysproduction.data.get_data import dataBlob
 from syscore.pdutils import check_df_equals, check_ts_equals
 from syscore.objects import success, failure
@@ -13,7 +16,11 @@ def backup_arctic_to_csv():
 
 def get_data_and_create_csv_directories():
 
-    backup_dir="/home/rob/data/backup"
+    # backup_dir="/home/rob/data/backup"
+    with open(PRIVATE_CONFIG_FILE) as file_to_parse:
+        yaml_dict = yaml.load(file_to_parse)
+    backup_dir = yaml_dict.get('csv_backup_dir')
+
     class_paths = dict(csvFuturesContractPriceData="contract_prices",
                        csvFuturesAdjustedPricesData="adjusted_prices",
                        csvFuturesMultiplePricesData="multiple_prices",

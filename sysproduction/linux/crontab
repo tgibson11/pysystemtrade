@@ -17,8 +17,9 @@ MPLBACKEND=Agg
 # Backup & log maintenance at 4pm
 #
 0 16 * * 1-5 . $HOME/.profile; mongodump -o ~/dump  >> $ECHO_PATH/mongodump.echo 2>&1
-20 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
-40 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
+15 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_backup_to_csv >> $ECHO_PATH/update_backup_to_csv.echo 2>&1
+30 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
+45 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
 #
 # Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
 @reboot . $HOME/.profile; mongod --dbpath $MONGO_DATA
