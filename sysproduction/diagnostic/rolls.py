@@ -37,8 +37,7 @@ def roll_info(data, instrument_code="ALL"):
 
     if instrument_code=="ALL":
         list_of_instruments = data.arctic_futures_multiple_prices.get_list_of_instruments()
-        # data.log.warn("ONLY USING TEST DATA")
-        # list_of_instruments = ["CRUDE_W", "EDOLLAR"]
+
     else:
         list_of_instruments=[instrument_code]
 
