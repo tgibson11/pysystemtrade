@@ -86,10 +86,10 @@ def pickle_state(data, system, backtest_filename):
 
     try:
         system.cache.pickle(backtest_filename)
-        data.log.msg("Pickled backtest state to %s")
+        data.log.msg(f"Pickled backtest state to {backtest_filename}")
         return success
     except Exception as e:
-        data.log.warn("Couldn't save backtest state to %s error %e" % (e, backtest_filename))
+        data.log.warn(f"Couldn't save backtest state to {backtest_filename} error {e}")
         return failure
 
 def copy_config_file(data, resolved_backtest_config_filename, config_save_filename):
