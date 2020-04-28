@@ -1,136 +1,88 @@
-from sysbrokers.baseServer import brokerServer, finishableQueue
-from ibapi import wrapper
-import queue
-from sysbrokers.baseServer import FINISHED
+"""
+Handlers used by https://ib-insync.readthedocs.io/api.html flavour
+
+"""
+
 from syslogdiag.log import logtoscreen
+from syscore.objects import success
+from sysbrokers.baseServer import brokerServer
 
+## List of IB error codes that are blacklisted eg serious and require action
+IB_IS_ERROR = [200]
 
-ACCOUNT_UPDATE_FLAG = "update"
-ACCOUNT_VALUE_FLAG = "value"
+## For each IB error code, map to one of my error types
+## Useful for deciding which process should handle it
+IB_ERROR_TYPES = {200:'invalid_contract'}
 
-class ibServer(wrapper.EWrapper, brokerServer):
-    """
-    Server specific to interactive brokers
+def from_ibcontract_to_tuple(ibcontract):
+    return (ibcontract.symbol, ibcontract.lastTradeDateOrContractMonth)
 
-    Overrides the methods in the base class specifically for IB
+class ibServer(brokerServer):
 
-    """
+    def __init__(self, log=logtoscreen("ibServer")):
+        self._contract_register = dict()
+        super().__init__(log=log)
 
-    def __init__(self, log=logtoscreen("IBserver")):
-        self._my_contract_details = {}
-        self._my_historic_data_dict = {}
-        # use a dict as could have different accountids
-        self._my_accounts = {}
-        # We set these up as we could get things coming along before we run an init
-        self._my_positions = queue.Queue()
+    def add_contract_to_register(self, ibcontract, log_tags={}):
+        """
+        The contract register is used to map IB contracts back to instrument and contractid
+        This makes logging cleaner
 
-        self.log = log
+        :param ibcontract: an IB contract tuple (
+        :param log_tags: dict of keywords that will pass to log
+        :return:
+        """
+        contract_register = self._contract_register
+        contract_tuple = from_ibcontract_to_tuple(ibcontract)
+        contract_register[contract_tuple] = log_tags
 
+        return success
 
-    def error(self, id, errorCode, errorString):
-        ## Overriden method
-        ## Uses method in brokerServer to actually handle the error
-        ## WHITELIST?
+    def get_contract_log_tags_from_register(self, ibcontract):
+        """
+         The contract register is used to map IB contracts back to instrument and contractid
+        This makes logging cleaner
 
-        errormsg = "IB error id %d errorcode %d string %s" % (id, errorCode, errorString)
-        self.broker_error(errormsg)
+        :param contract: IB contract
+        :return: log_tags, dict
+        """
+        if ibcontract is None:
+            return {}
+        contract_register = self._contract_register
+        contract_tuple = from_ibcontract_to_tuple(ibcontract)
+        log_tags = contract_register.get(contract_tuple, {})
 
-    ## get contract details code
-    def init_contractdetails(self, reqId):
-        contract_details_queue = self._my_contract_details[reqId] = queue.Queue()
+        return log_tags
 
-        return contract_details_queue
+    def error_handler(self, reqid, error_code, error_string, contract):
+        """
+        Error handler called from server
+        Needs to be attached to ib connection
 
-    def contractDetails(self, reqId, contractDetails):
-        ## overridden method
+        :param reqid: IB reqid
+        :param error_code: IB error code
+        :param error_string: IB error string
+        :param contract: IB contract or None
+        :return: success
+        """
+        if contract is None:
+            contract_str = ""
+        else:
+            contract_str = " (%s/%s)" % (contract.symbol, contract.lastTradeDateOrContractMonth)
 
-        if reqId not in self._my_contract_details.keys():
-            self.init_contractdetails(reqId)
+        msg = "Reqid %d: %d %s %s" % (reqid, error_code, error_string, contract_str)
 
-        self._my_contract_details[reqId].put(contractDetails)
+        # Associate a contract with tags eg my instrument and contract id
+        log_tags = self.get_contract_log_tags_from_register(contract)
 
-    def contractDetailsEnd(self, reqId):
-        ## overriden method
-        if reqId not in self._my_contract_details.keys():
-            self.init_contractdetails(reqId)
+        iserror = error_code in IB_IS_ERROR
+        if iserror:
+            ## Serious requires some action
+            myerror_type = IB_ERROR_TYPES.get(error_code, "generic")
+            self.broker_error(msg, myerror_type, log_tags)
 
-        self._my_contract_details[reqId].put(FINISHED)
+        else:
+            ## just a warning / general message
+            self.broker_message(msg, log_tags)
 
-    ## Historic data code
-    def init_historicprices(self, tickerid):
-        historic_data_queue = self._my_historic_data_dict[tickerid] = queue.Queue()
-
-        return historic_data_queue
-
-
-    def historicalData(self, tickerid , bar):
-
-        ## Overriden method
-        ## Note I'm choosing to ignore barCount, WAP and hasGaps but you could use them if you like
-        bardata=(bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume)
-
-        historic_data_dict=self._my_historic_data_dict
-
-        ## Add on to the current data
-        if tickerid not in historic_data_dict.keys():
-            self.init_historicprices(tickerid)
-
-        historic_data_dict[tickerid].put(bardata)
-
-    def historicalDataEnd(self, tickerid, start:str, end:str):
-        ## overriden method
-
-        if tickerid not in self._my_historic_data_dict.keys():
-            self.init_historicprices(tickerid)
-
-        self._my_historic_data_dict[tickerid].put(FINISHED)
-
-    # get positions code
-    def init_positions(self):
-        positions_queue = self._my_positions = queue.Queue()
-        return positions_queue
-
-    def position(self, account, contract, position, avgCost):
-        # uses a simple tuple, but you could do other, fancier, things here
-        position_object = (account, contract, position, avgCost)
-        self._my_positions.put(position_object)
-
-    def positionEnd(self):
-        # overridden method
-        self._my_positions.put(FINISHED)
-
-    # get accounting data
-    def init_accounts(self, accountName):
-        accounting_queue = self._my_accounts[accountName] = queue.Queue()
-        return accounting_queue
-
-    def updateAccountValue(self, key: str, val: str, currency: str, accountName: str):
-        # use this to separate out different account data
-        data = IdentifiedAs(ACCOUNT_VALUE_FLAG, (key, val, currency))
-        self._my_accounts[accountName].put(data)
-
-    def updatePortfolio(self, contract, position: float,
-                        marketPrice: float, marketValue: float,
-                        averageCost: float, unrealizedPNL: float,
-                        realizedPNL: float, accountName: str):
-        # use this to separate out different account data
-        data = IdentifiedAs(ACCOUNT_UPDATE_FLAG, (contract, position, marketPrice, marketValue, averageCost,
-                                                   unrealizedPNL, realizedPNL))
-        self._my_accounts[accountName].put(data)
-
-    def accountDownloadEnd(self, accountName: str):
-        self._my_accounts[accountName].put(FINISHED)
-
-
-class IdentifiedAs(object):
-    """
-    Used to identify
-    """
-
-    def __init__(self, label, data):
-        self.label = label
-        self.data = data
-
-    def __repr__(self):
-        return "Identified as %s" % self.label
-
+        return success
