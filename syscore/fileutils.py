@@ -1,7 +1,6 @@
 import os
 import sys
 import matplotlib.pylab as plt
-from PIL import Image
 from functools import partial
 
 # all these are unused: but are required to get the filename padding to work
