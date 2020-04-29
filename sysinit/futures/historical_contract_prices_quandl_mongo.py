@@ -4,6 +4,7 @@ For a given list of futures contracts defined by Quandl start dates:
 read price data from quandl, and then write to artic
 Write list of futures contracts to mongodb database
 """
+from sysdata.csv.csv_instrument_config import csvFuturesInstrumentData
 from sysdata.csv.csv_roll_calendars import csvRollCalendarData
 from sysdata.futures.roll_calendars import rollCalendar
 from sysdata.futures.rolls import contractDateWithRollParameters
@@ -64,10 +65,15 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
 
 
 if __name__ == '__main__':
-    instrument_code = "US10"
-    list_of_contracts = create_list_of_contracts(instrument_code)
-    print(list_of_contracts)
+    instrument_data = csvFuturesInstrumentData(config_path="data.futures.csvconfig")
+    print(instrument_data)
+    instrument_list = instrument_data.get_list_of_instruments()
 
-    print("Generated %d contracts" % len(list_of_contracts))
+    for instrument_code in instrument_list:
 
-    get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)
+        list_of_contracts = create_list_of_contracts(instrument_code)
+        print(list_of_contracts)
+
+        print("Generated %d contracts" % len(list_of_contracts))
+
+        get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contracts)
