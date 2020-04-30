@@ -2,8 +2,9 @@
 Update historical data per contract from Quandl data, dump into mongodb
 """
 
-from syscore.objects import success, failure
+from syscore.objects import success, failure, data_error
 from sysdata.mongodb.mongo_connection import mongoDb
+from syslogdiag.emailing import send_mail_msg
 from syslogdiag.log import logToMongod as logger
 from sysproduction.data.get_data import dataBlob
 
@@ -16,7 +17,6 @@ def update_historical_prices():
     """
     with mongoDb() as mongo_db, \
             logger("Update-Historical-prices-Quandl", mongo_db=mongo_db) as log:
-
         data = dataBlob("quandlFuturesContractPriceData arcticFuturesContractPriceData \
          arcticFuturesMultiplePricesData mongoFuturesContractData",
                         mongo_db=mongo_db, log=log)
@@ -67,6 +67,17 @@ def update_historical_prices_for_instrument_and_contract(contract_object, data, 
         log.warn("No Quandl prices found for %s" % str(contract_object))
         return failure
 
-    data.arctic_futures_contract_price.update_prices_for_contract(contract_object, quandl_prices)
+    rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, quandl_prices,
+                                                                               check_for_spike=True)
+    if rows_added is data_error:
+        # SPIKE
+        # Need to email user about this as will need manually checking
+        msg = "Spike found in prices for %s: need to manually check by running update_manual_check_historical_prices" \
+              % str(contract_object)
+        log.warn(msg)
+        try:
+            send_mail_msg(msg, "Price Spike")
+        except:
+            log.warn("Couldn't send email about price spike")
 
     return success
