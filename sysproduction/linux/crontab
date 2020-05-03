@@ -12,14 +12,15 @@ MPLBACKEND=Agg
 #
 # Run daily process at 6 am
 #
-0 6  * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
+30 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_sampled_contracts >> $ECHO_PATH/update_sampled_contracts.echo 2>&1
+35 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
 #
-# Backup & log maintenance at 4pm
+# Backup & log maintenance at 11pm
 #
-0 16 * * 1-5 . $HOME/.profile; mongodump -o ~/dump  >> $ECHO_PATH/mongodump.echo 2>&1
-15 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_backup_to_csv >> $ECHO_PATH/update_backup_to_csv.echo 2>&1
-30 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
-45 16 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
+0 11 * * 1-5 . $HOME/.profile; mongodump -o ~/dump  >> $ECHO_PATH/mongodump.echo 2>&1
+15 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_backup_to_csv >> $ECHO_PATH/update_backup_to_csv.echo 2>&1
+30 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
+45 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
 #
 # Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
 @reboot . $HOME/.profile; mongod --dbpath $MONGO_DATA
