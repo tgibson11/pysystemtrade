@@ -411,30 +411,6 @@ def _unique_list_from_total(account_summary_data, tag_name):
     return list_of_items
 
 
-def ib_get_positions(self):
-        """
-        Current positions held
-        :return:
-        """
-
-        # Make a place to store the data we're going to return
-        positions_queue = finishableQueue(self.wrapper.init_positions())
-
-        # ask for the data
-        self.reqPositions()
-
-        # poll until we get a termination or die of boredom
-        positions_list = positions_queue.get(timeout=10)
-
-        while self.wrapper.broker_is_error():
-            print(self.wrapper.broker_get_error())
-
-        if positions_queue.timed_out():
-            print("Exceeded maximum wait for wrapper to confirm finished whilst getting positions")
-
-        return positions_list
-
-
 def get_barsize_and_duration_from_frequency(bar_freq):
 
     barsize_lookup = dict([('D', "1 day"), ('H', "1 hour"), ('5M', '5 mins'), ('M', '1 min'),
