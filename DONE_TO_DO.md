@@ -1,5 +1,8 @@
 # Release notes
 
+Moved fx cross logic out of sim data into fxPricesData
+Strategies now run backtests from configuration file
+
 ## Version 0.29.0
 
 Added price 'spike' checker, and manual price checking service
