@@ -10,10 +10,11 @@ MPLBACKEND=Agg
 #
 # 0 6  * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_fx_prices  >> $ECHO_PATH/update_fx_prices.echo 2>&1
 #
-# Run daily process at 6 am
+# Run daily process
 #
 30 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_sampled_contracts >> $ECHO_PATH/update_sampled_contracts.echo 2>&1
-35 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
+35 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_account_values >> $ECHO_PATH/update_account_values.echo 2>&1
+40 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
 #
 # Backup & log maintenance at 11pm
 #
