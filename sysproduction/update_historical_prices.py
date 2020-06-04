@@ -11,7 +11,7 @@ from sysdata.mongodb.mongo_connection import mongoDb
 from sysproduction.data.get_data import dataBlob
 from syslogdiag.log import logToMongod as logger
 from syslogdiag.emailing import send_mail_msg
-
+from sysdata.private_config import get_private_then_default_key_value
 
 def update_historical_prices():
     """
@@ -67,23 +67,37 @@ def update_historical_prices_for_instrument_and_contract(contract_object, data, 
     :param log: logger
     :return: None
     """
-    ib_prices = data.ib_futures_contract_price.get_prices_for_contract_object(contract_object)
-    if len(ib_prices)==0:
-        log.warn("No IB prices found for %s" % str(contract_object))
+    intraday_frequency = get_private_then_default_key_value("intraday_frequency")
+    result = get_and_add_prices_for_frequency(data, log, contract_object, frequency=intraday_frequency)
+    if result is failure:
+        # Skip daily data if intraday not working
         return failure
 
-    rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, ib_prices,
-                                                                               check_for_spike=True)
+    result = get_and_add_prices_for_frequency(data, log, contract_object, frequency="D")
 
-    if rows_added is data_error:
-        ## SPIKE
-        ## Need to email user about this as will need manually checking
-        msg = "Spike found in prices for %s: need to manually check by running update_manual_check_historical_prices" % str(contract_object)
-        log.warn(msg)
-        try:
-            send_mail_msg(msg, "Price Spike")
-        except:
-            log.warn("Couldn't send email about price spike")
+    return result
 
-    return success
+def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
+    try:
+        ib_prices = data.ib_futures_contract_price.get_prices_at_frequency_for_contract_object(contract_object, frequency)
+        rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, ib_prices,
+                                                                                   check_for_spike=True)
+        if rows_added is data_error:
+            ## SPIKE
+            ## Need to email user about this as will need manually checking
+            msg = "Spike found in prices for %s: need to manually check by running update_manual_check_historical_prices" % str(
+                contract_object)
+            log.warn(msg)
+            try:
+                send_mail_msg(msg, "Price Spike")
+            except:
+                log.warn("Couldn't send email about price spike for %s" % str(contract_object))
 
+            return failure
+
+        log.msg("Added %d rows at frequency %s for %s" % (rows_added, frequency, str(contract_object)))
+        return success
+
+    except Exception as e:
+        log.warn("Exception %s when getting data at frequency %s for %s" % (e, frequency, str(contract_object)))
+        return failure

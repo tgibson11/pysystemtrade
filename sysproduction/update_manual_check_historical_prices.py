@@ -14,7 +14,7 @@ from sysproduction.data.get_data import dataBlob
 from sysdata.futures.manual_price_checker import manual_price_checker
 from sysdata.futures.futures_per_contract_prices import futuresContractPrices
 from syslogdiag.log import logToMongod as logger
-
+from sysdata.private_config import get_private_then_default_key_value
 
 def update_manual_check_historical_prices(instrument_code:str):
     """
@@ -68,28 +68,37 @@ def update_historical_prices_with_checks_for_instrument(instrument_code, data, l
 
 def update_historical_prices_with_checks_for_instrument_and_contract(contract_object, data, log=logger("")):
     """
-    Do a daily update for futures contract prices, using IB historical data
+    Do a daily update for futures contract prices, using IB historical data, with checking
 
     :param contract_object: futuresContract
     :param data: data blob
     :param log: logger
     :return: None
     """
-    ib_prices = data.ib_futures_contract_price.get_prices_for_contract_object(contract_object)
-    if len(ib_prices)==0:
-        log.warn("No IB prices found for %s" % str(contract_object))
-        return failure
-    old_prices = data.arctic_futures_contract_price.get_prices_for_contract_object(contract_object)
-
-    print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
-    new_prices_checked = manual_price_checker(old_prices, ib_prices,
-                         column_to_check = 'FINAL',
-                         delta_columns = ['OPEN','HIGH','LOW'],
-                         type_new_data = futuresContractPrices
-                         )
-    rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, new_prices_checked,
-                                                                               check_for_spike=False)
+    intraday_frequency = get_private_then_default_key_value("intraday_frequency")
+    get_and_check_prices_for_frequency(data, log, contract_object, frequency=intraday_frequency)
+    get_and_check_prices_for_frequency(data, log, contract_object, frequency="D")
 
     return success
 
+def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"):
+    try:
+        old_prices = data.arctic_futures_contract_price.get_prices_for_contract_object(contract_object)
+        ib_prices = data.ib_futures_contract_price.get_prices_at_frequency_for_contract_object(contract_object, frequency)
+        if len(ib_prices) == 0:
+            raise Exception("No IB prices found for %s nothing to check" % str(contract_object))
+
+        print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
+        new_prices_checked = manual_price_checker(old_prices, ib_prices,
+                                                  column_to_check='FINAL',
+                                                  delta_columns=['OPEN', 'HIGH', 'LOW'],
+                                                  type_new_data=futuresContractPrices
+                                                  )
+        result = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, new_prices_checked,
+                                                                                   check_for_spike=False)
+        return result
+
+    except Exception as e:
+        log.warn("Exception %s when getting or checking data at frequency %s for %s" % (e, frequency, str(contract_object)))
+        return failure
 

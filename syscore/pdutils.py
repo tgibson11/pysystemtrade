@@ -414,7 +414,7 @@ def _first_spike_in_data(merged_data, first_date_in_new_data=None, column_to_che
     ## absolute is what matters
     abs_change_pd = change_pd.abs()
     ## hard to know what span to use here as could be daily, intraday or a mixture
-    avg_abs_change = abs_change_pd.ewm(span=250).mean()
+    avg_abs_change = abs_change_pd.ewm(span=500).mean()
 
     change_in_avg_units = abs_change_pd / avg_abs_change
 
@@ -434,7 +434,7 @@ def average_change_per_day(data_to_check):
     index_diff = data_to_check.index[1:] - data_to_check.index[:-1]
     index_diff_days = [diff.total_seconds()/SECONDS_PER_DAY for diff in index_diff]
 
-    change_per_day = [diff / diff_days for diff, diff_days in zip(data_diff.values, index_diff_days)]
+    change_per_day = [diff / (diff_days**.5) for diff, diff_days in zip(data_diff.values, index_diff_days)]
 
     change_pd = pd.Series(change_per_day, index=data_to_check.index[1:])
 
