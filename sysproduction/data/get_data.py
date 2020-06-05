@@ -3,7 +3,6 @@
 
 from sysbrokers.IB.ibFuturesContractPriceData import ibFuturesContractPriceData
 from sysbrokers.IB.ibSpotFXData import ibFxPricesData
-from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from sysbrokers.IB.ibConnection import connectionIB
 
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
@@ -195,8 +194,7 @@ class dataBlob(object):
         eval_dict = dict(ib = "%s(self.ib_conn, log=self.log.setup(component='%s'))",
                          mongo = "%s(mongo_db=self.mongo_db, log=self.log.setup(component='%s'))",
                          arctic = "%s(mongo_db=self.mongo_db, log=self.log.setup(component='%s'))",
-                         csv = "%s(datapath=datapath, log=self.log.setup(component='%s'))",
-                         quandl="%s()  # %s")
+                         csv = "%s(datapath=datapath, log=self.log.setup(component='%s'))")
 
         to_eval = eval_dict[prefix] % (class_name, class_name) # class_name appears twice as always passed as a log
         ## The eval may use ib_conn, mongo_db, datapath and will always use log

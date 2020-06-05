@@ -3,10 +3,13 @@ Update historical data per contract from Quandl data, dump into mongodb
 """
 
 from syscore.objects import success, failure, data_error
-from sysdata.mongodb.mongo_connection import mongoDb
+from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from syslogdiag.emailing import send_mail_msg
 from syslogdiag.log import logToMongod as logger
+from sysproduction.data.broker import dataBroker
+from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
+from sysproduction.data.prices import diagPrices, updatePrices
 
 
 def update_historical_prices():
@@ -15,13 +18,10 @@ def update_historical_prices():
 
     :return: Nothing
     """
-    with mongoDb() as mongo_db, \
-            logger("Update-Historical-prices-Quandl", mongo_db=mongo_db) as log:
-        data = dataBlob("quandlFuturesContractPriceData arcticFuturesContractPriceData \
-         arcticFuturesMultiplePricesData mongoFuturesContractData",
-                        mongo_db=mongo_db, log=log)
-
-        list_of_codes_all = data.arctic_futures_multiple_prices.get_list_of_instruments()
+    with dataBlob(log_name="Update-Historical-prices-Quandl") as data:
+        price_data = diagPrices(data)
+        log = data.log
+        list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()
         for instrument_code in list_of_codes_all:
             update_historical_prices_for_instrument(instrument_code, data,
                                                     log=log.setup(instrument_code=instrument_code))
@@ -38,8 +38,8 @@ def update_historical_prices_for_instrument(instrument_code, data, log=logger(""
     :param log: logger
     :return: None
     """
-
-    all_contracts_list = data.mongo_futures_contract.get_all_contract_objects_for_instrument_code(instrument_code)
+    diag_contracts = diagContracts(data)
+    all_contracts_list = diag_contracts.get_all_contract_objects_for_instrument_code(instrument_code)
     contract_list = all_contracts_list.currently_sampling()
 
     if len(contract_list) == 0:
@@ -68,10 +68,13 @@ def update_historical_prices_for_instrument_and_contract(contract_object, data, 
 
 
 def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
+    quandl_data_source = quandlFuturesContractPriceData()
+    db_futures_prices = updatePrices(data)
+
     try:
-        quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
-        rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, quandl_prices,
-                                                                                   check_for_spike=True)
+        quandl_prices = quandl_data_source.get_prices_for_contract_object(contract_object)
+        rows_added = db_futures_prices.update_prices_for_contract(contract_object, quandl_prices,
+                                                                  check_for_spike=True)
         if rows_added is data_error:
             # SPIKE
             # Need to email user about this as will need manually checking
