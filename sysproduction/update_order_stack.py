@@ -229,3 +229,7 @@ dict_of_functions = {1: view_instrument_stack,
                      7: handle_completed_orders,
                      8: order_locking,
                      9: view_positions}
+
+
+if __name__ == '__main__':
+    update_order_stack()

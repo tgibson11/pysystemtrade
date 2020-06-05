@@ -38,3 +38,7 @@ def process_adjusted_prices_single_instrument(instrument_code, csv_adj_data_path
         csv_adjusted_prices.add_adjusted_prices(instrument_code, adjusted_prices, ignore_duplication=True)
 
     return adjusted_prices
+
+
+if __name__ == '__main__':
+    process_adjusted_prices_all_instruments()

@@ -51,3 +51,7 @@ def update_account_values():
 
 
     return success
+
+
+if __name__ == '__main__':
+    update_account_values()

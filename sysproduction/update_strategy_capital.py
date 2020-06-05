@@ -73,3 +73,6 @@ def write_allocated_weights(data, strategy_capital_dict):
 
     return success
 
+
+if __name__ == '__main__':
+    update_strategy_capital()

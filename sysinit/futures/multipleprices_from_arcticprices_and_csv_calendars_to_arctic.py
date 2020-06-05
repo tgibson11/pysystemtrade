@@ -59,3 +59,7 @@ def process_multiple_prices_single_instrument(instrument_code,
         csv_multiple_prices.add_multiple_prices(instrument_code, multiple_prices, ignore_duplication=True)
 
     return multiple_prices
+
+
+if __name__ == '__main__':
+    process_multiple_prices_all_instruments()
