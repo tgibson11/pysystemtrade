@@ -62,22 +62,33 @@ def update_historical_prices_for_instrument_and_contract(contract_object, data, 
     :param log: logger
     :return: None
     """
-    quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
-    if len(quandl_prices) == 0:
-        log.warn("No Quandl prices found for %s" % str(contract_object))
+    result = get_and_add_prices_for_frequency(data, log, contract_object, frequency="D")
+
+    return result
+
+
+def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
+    try:
+        quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
+        rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, quandl_prices,
+                                                                                   check_for_spike=True)
+        if rows_added is data_error:
+            # SPIKE
+            # Need to email user about this as will need manually checking
+            msg = "Spike found in prices for %s: need to manually check by running " \
+                  "update_manual_check_historical_prices" \
+                  % str(contract_object)
+            log.warn(msg)
+            try:
+                send_mail_msg(msg, "Price Spike")
+            except:
+                log.warn("Couldn't send email about price spike for %s" % str(contract_object))
+
+            return failure
+
+        log.msg("Added %d rows at frequency %s for %s" % (rows_added, frequency, str(contract_object)))
+        return success
+
+    except Exception as e:
+        log.warn("Exception %s when getting data at frequency %s for %s" % (e, frequency, str(contract_object)))
         return failure
-
-    rows_added = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, quandl_prices,
-                                                                               check_for_spike=True)
-    if rows_added is data_error:
-        # SPIKE
-        # Need to email user about this as will need manually checking
-        msg = "Spike found in prices for %s: need to manually check by running update_manual_check_historical_prices" \
-              % str(contract_object)
-        log.warn(msg)
-        try:
-            send_mail_msg(msg, "Price Spike")
-        except:
-            log.warn("Couldn't send email about price spike")
-
-    return success

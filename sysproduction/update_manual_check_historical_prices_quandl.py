@@ -5,12 +5,11 @@ Apply a check to each price series
 """
 
 from syscore.objects import success, failure
-
-from sysdata.mongodb.mongo_connection import mongoDb
-from sysproduction.data.get_data import dataBlob
-from sysdata.futures.manual_price_checker import manual_price_checker
 from sysdata.futures.futures_per_contract_prices import futuresContractPrices
+from sysdata.futures.manual_price_checker import manual_price_checker
+from sysdata.mongodb.mongo_connection import mongoDb
 from syslogdiag.log import logToMongod as logger
+from sysproduction.data.get_data import dataBlob
 
 
 def update_manual_check_historical_prices(instrument_code: str):
@@ -72,19 +71,34 @@ def update_historical_prices_with_checks_for_instrument_and_contract(contract_ob
     :param log: logger
     :return: None
     """
-    quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
-    if len(quandl_prices) == 0:
-        log.warn("No Quandl prices found for %s" % str(contract_object))
-        return failure
-    old_prices = data.arctic_futures_contract_price.get_prices_for_contract_object(contract_object)
-
-    print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
-    new_prices_checked = manual_price_checker(old_prices, quandl_prices,
-                                              column_to_check='FINAL',
-                                              delta_columns=['OPEN', 'HIGH', 'LOW'],
-                                              type_new_data=futuresContractPrices
-                                              )
-    data.arctic_futures_contract_price.update_prices_for_contract(contract_object, new_prices_checked,
-                                                                  check_for_spike=False)
+    get_and_check_prices_for_frequency(data, log, contract_object, frequency="D")
 
     return success
+
+
+def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"):
+    try:
+        old_prices = data.arctic_futures_contract_price.get_prices_for_contract_object(contract_object)
+        quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
+        if len(quandl_prices) == 0:
+            raise Exception("No Quandl prices found for %s" % str(contract_object))
+
+        print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
+        new_prices_checked = manual_price_checker(old_prices, quandl_prices,
+                                                  column_to_check='FINAL',
+                                                  delta_columns=['OPEN', 'HIGH', 'LOW'],
+                                                  type_new_data=futuresContractPrices
+                                                  )
+        result = data.arctic_futures_contract_price.update_prices_for_contract(contract_object, new_prices_checked,
+                                                                               check_for_spike=False)
+        return result
+
+    except Exception as e:
+        log.warn(
+            "Exception %s when getting or checking data at frequency %s for %s" % (e, frequency, str(contract_object)))
+        return failure
+
+
+if __name__ == '__main__':
+    instrument_code = input("Instrument code: ")
+    update_manual_check_historical_prices(instrument_code)
