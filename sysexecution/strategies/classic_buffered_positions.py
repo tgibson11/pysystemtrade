@@ -77,6 +77,10 @@ def trade_given_optimal_and_actual_positions(data, strategy_name, instrument_cod
     lower_for_instrument = lower_positions[instrument_code]
     actual_for_instrument = actual_positions.get(instrument_code, 0.0)
 
+
+    print(actual_for_instrument)
+    print(lower_for_instrument)
+
     if actual_for_instrument<lower_for_instrument:
         required_position = round(lower_for_instrument)
     elif actual_for_instrument>upper_for_instrument:
@@ -84,9 +88,12 @@ def trade_given_optimal_and_actual_positions(data, strategy_name, instrument_cod
     else:
         required_position = actual_for_instrument
 
+    print(required_position)
+
     # Might seem weird to have a zero order, but since orders can be updated it makes sense
 
     trade_required = required_position - actual_for_instrument
+    print(trade_required)
 
     reference_contract = reference_contracts[instrument_code]
     reference_price = reference_prices[instrument_code]
