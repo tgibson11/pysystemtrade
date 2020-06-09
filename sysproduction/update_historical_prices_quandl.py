@@ -95,3 +95,7 @@ def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
     except Exception as e:
         log.warn("Exception %s when getting data at frequency %s for %s" % (e, frequency, str(contract_object)))
         return failure
+
+
+if __name__ == '__main__':
+    update_historical_prices()

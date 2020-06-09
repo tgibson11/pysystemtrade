@@ -23,3 +23,7 @@ def run_strategy_order_generator():
         order_handler.check_for_orders_across_strategies()
 
     return None
+
+
+if __name__ == '__main__':
+    run_strategy_order_generator()

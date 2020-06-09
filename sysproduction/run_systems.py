@@ -45,3 +45,7 @@ def _get_launch_config(config_for_strategy):
     launch_args = launcher_config
 
     return launch_function, launch_args
+
+
+if __name__ == '__main__':
+    run_systems()

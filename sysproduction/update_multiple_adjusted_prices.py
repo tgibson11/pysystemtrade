@@ -97,3 +97,6 @@ def get_dict_of_new_prices_and_contractid(instrument_code, contract_date_dict, d
 
     return new_prices_dict
 
+
+if __name__ == '__main__':
+    update_multiple_adjusted_prices_daily()

@@ -426,3 +426,6 @@ def infer_price_from_matched_price_data(matched_price_data):
 
     return inferred_price
 
+
+if __name__ == '__main__':
+    update_roll_state(input("Instrument code:"))
