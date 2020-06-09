@@ -210,7 +210,7 @@ def order_view(data):
 def order_locking(data):
     stack_handler = instrument_to_contract_stack_handler(data)
 
-    stack = resolve_stack(stack_handler)
+    stack = resolve_stack(data)
     if stack is None:
         return None
     try:
