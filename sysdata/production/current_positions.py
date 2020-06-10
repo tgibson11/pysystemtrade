@@ -176,12 +176,10 @@ class listOfPositions(list):
 
         not_found = True
         idx=start
-        while not_found:
+        while not_found and idx <= stop:
             position_to_check = self[idx]
             if position_to_check.tradeable_object == tradeable_object:
                 return idx
-            if idx>= stop:
-                break
 
             idx = idx+1
 
