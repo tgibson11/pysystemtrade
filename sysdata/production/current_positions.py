@@ -174,9 +174,8 @@ class listOfPositions(list):
         if stop is None:
             stop = len(self)-1
 
-        not_found = True
         idx=start
-        while not_found and idx <= stop:
+        while idx <= stop:
             position_to_check = self[idx]
             if position_to_check.tradeable_object == tradeable_object:
                 return idx
