@@ -51,4 +51,4 @@ def update_total_capital():
 
 
 if __name__ == '__main__':
-    update_account_values()
+    update_total_capital()

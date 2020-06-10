@@ -13,7 +13,7 @@ from sysproduction.data.get_data import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
 
 
-def update_manual_check_historical_prices(instrument_code: str):
+def interactive_manual_check_historical_prices(instrument_code: str):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 
@@ -101,4 +101,4 @@ def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"
 
 
 if __name__ == '__main__':
-    update_manual_check_historical_prices(input("Instrument code: "))
+    interactive_manual_check_historical_prices(input("Instrument code:"))

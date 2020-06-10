@@ -112,3 +112,7 @@ def backup_adj_to_csv(data):
                 data.log.msg("Written .csv backup for adjusted prices %s" % instrument_code)
             except:
                 data.log.warn("Problem writing .csv backup for adjusted prices %s" % instrument_code)
+
+
+if __name__ == '__main__':
+    backup_arctic_to_csv()

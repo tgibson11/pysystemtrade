@@ -368,4 +368,4 @@ dict_of_functions = {0: order_view,
 
 
 if __name__ == '__main__':
-    update_order_stack()
+    interactive_order_stack()

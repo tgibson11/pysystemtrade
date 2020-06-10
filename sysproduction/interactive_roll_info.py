@@ -21,3 +21,6 @@ def interactive_roll_info(instrument_code: str = "ALL"):
 
     run_report(roll_report_config, instrument_code = instrument_code)
 
+
+if __name__ == '__main__':
+    interactive_roll_info()

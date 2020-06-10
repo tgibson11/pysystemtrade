@@ -48,3 +48,6 @@ def update_fx_prices_for_code(fx_code, data):
 
     return success
 
+
+if __name__ == '__main__':
+    update_fx_prices()

@@ -188,3 +188,6 @@ def delete_all_capital(data_capital):
             return failure
     return failure
 
+
+if __name__ == '__main__':
+    interactive_update_capital_manual()

@@ -18,7 +18,7 @@ def update_historical_prices():
 
     :return: Nothing
     """
-    with dataBlob(log_name="Update-Historical-prices-Quandl") as data:
+    with dataBlob(log_name="Update-Historical-Prices-Quandl") as data:
         price_data = diagPrices(data)
         log = data.log
         list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()

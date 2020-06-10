@@ -100,3 +100,6 @@ def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"
         log.warn("Exception %s when getting or checking data at frequency %s for %s" % (e, frequency, str(contract_object)))
         return failure
 
+
+if __name__ == '__main__':
+    interactive_manual_check_historical_prices()
