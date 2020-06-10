@@ -13,16 +13,16 @@ MPLBACKEND=Agg
 # Run daily process
 #
 30 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_sampled_contracts >> $ECHO_PATH/update_sampled_contracts.echo 2>&1
-35 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_account_values >> $ECHO_PATH/update_account_values.echo 2>&1
+35 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_total_capital >> $ECHO_PATH/update_total_capital.echo 2>&1
 40 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_strategy_capital >> $ECHO_PATH/update_strategy_capital.echo 2>&1
 45 5 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./daily_process >> $ECHO_PATH/daily_process.echo 2>&1
 #
 # Backup & log maintenance at 11pm
 #
 0 11 * * 1-5 . $HOME/.profile; mongodump -o ~/dump  >> $ECHO_PATH/mongodump.echo 2>&1
-15 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./update_backup_to_csv >> $ECHO_PATH/update_backup_to_csv.echo 2>&1
-30 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_echo_files >> /dev/null 2>&1
-45 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./truncate_log_files >> $ECHO_PATH/truncate_log_files.echo 2>&1
+15 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./backup_arctic_to_csv >> $ECHO_PATH/backup_arctic_to_csv.echo 2>&1
+30 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./clean_truncate_echo_files >> /dev/null 2>&1
+45 11 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./clean_truncate_log_files >> $ECHO_PATH/clean_truncate_log_files.echo 2>&1
 #
 # Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
 @reboot . $HOME/.profile; mongod --dbpath $MONGO_DATA
