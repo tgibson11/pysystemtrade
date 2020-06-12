@@ -7,6 +7,7 @@ Apply a check to each price series
 from syscore.objects import success, failure
 from sysdata.futures.futures_per_contract_prices import futuresContractPrices
 from sysdata.futures.manual_price_checker import manual_price_checker
+from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from syslogdiag.log import logToMongod as logger
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
@@ -75,12 +76,13 @@ def update_historical_prices_with_checks_for_instrument_and_contract(contract_ob
 
 
 def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"):
+    quandl_data = quandlFuturesContractPriceData()
     price_data = diagPrices(data)
     price_updater = updatePrices(data)
 
     try:
         old_prices = price_data.get_prices_for_contract_object(contract_object)
-        quandl_prices = data.quandl_futures_contract_price.get_prices_for_contract_object(contract_object)
+        quandl_prices = quandl_data.get_prices_for_contract_object(contract_object)
         if len(quandl_prices) == 0:
             raise Exception("No Quandl prices found for %s" % str(contract_object))
 
