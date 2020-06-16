@@ -30,11 +30,13 @@ class stackHandlerForFills(stackHandlerCore):
 
         if db_broker_order.fill_equals_desired_trade():
             ## No point
+            self.log.warn(f"Broker order id {broker_order_id} is already filled")
             return success
 
         matched_broker_order = data_broker.match_db_broker_order_to_order_from_brokers(db_broker_order)
 
         if matched_broker_order is missing_order:
+            self.log.warn(f"Unable to match broker order id {broker_order_id} to an order from the broker")
             return failure
 
         result = self.apply_updated_broker_order_info_to_broker_order(broker_order_id, matched_broker_order)
