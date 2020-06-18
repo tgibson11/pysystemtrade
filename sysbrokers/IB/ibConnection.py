@@ -95,7 +95,6 @@ class connectionIB(ibClient, ibServer):
 
         # this is all very IB specific
         ib = IB()
-        print(f"Connecting to IB: clientId={client}")
         ib.connect(ipaddress, port, clientId=client)
 
         ## Add handlers, from ibServer methods
