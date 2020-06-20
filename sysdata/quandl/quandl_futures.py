@@ -230,6 +230,10 @@ class quandlFuturesContractPrices(futuresContractPrices):
         else:
             final_series = contract_data.Settle
 
+        # For VIX: the latest date often has 0.00 close, but settle is populated
+        if final_series[-1] == 0 and contract_data.Settle[-1] != 0:
+            final_series[-1] = contract_data.Settle[-1]
+
         if 'Volume' in contract_data.columns:
             volume_series = contract_data.Volume
         elif 'Total Volume' in contract_data.columns:
