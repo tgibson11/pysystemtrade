@@ -117,8 +117,7 @@ class Order(object):
 
     def fill_order(self, fill_qty, filled_price = None, fill_datetime = None):
         # Fill qty is cumulative, eg this is the new amount filled
-        assert self.fill_less_than_or_equal_to_desired_trade(fill_qty), \
-            "Can't fill order for more than trade quantity"
+        assert self.fill_less_than_or_equal_to_desired_trade(fill_qty), "Can't fill order for more than trade quantity"
 
         self._fill = fill_qty
         if filled_price is not None:

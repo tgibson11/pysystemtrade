@@ -4,7 +4,7 @@ from sysexecution.base_orders import  no_order_id, no_children, no_parent
 from sysexecution.contract_orders import contractOrder
 
 from syscore.genutils import  none_to_object, object_to_none
-from syscore.objects import failure
+from syscore.objects import failure, missing_order
 
 
 
@@ -29,11 +29,11 @@ class brokerOrder(contractOrder):
                  ):
         """
 
-        :param args: Eithier a single argument 'strategy/instrument/contract_id' str, or strategy, instrument, contract_id; followed by trade
+        :param args: Either a single argument 'strategy/instrument/contract_id' str, or strategy, instrument, contract_id; followed by trade
         i.e. brokerOrder(strategy, instrument, contractid, trade,  **kwargs) or 'strategy/instrument/contract_id', trade, type, **kwargs)
 
-        Contract_id can eithier be a single str or a list of str for spread orders, all YYYYMM
-        If expressed inside a longer string, seperate contract str by '_'
+        Contract_id can either be a single str or a list of str for spread orders, all YYYYMM
+        If expressed inside a longer string, separate contract str by '_'
 
         i.e. brokerOrder('a strategy', 'an instrument', '201003', 6,  **kwargs)
          same as brokerOrder('a strategy/an instrument/201003', 6,  **kwargs)
@@ -327,3 +327,11 @@ class brokerOrderStackData(orderStackData):
         self._change_order_on_stack(broker_order_id, db_broker_order)
 
 
+    def find_order_with_broker_tempid(self, broker_tempid):
+        list_of_order_ids = self.get_list_of_order_ids(exclude_inactive_orders=False)
+        for order_id in list_of_order_ids:
+            order = self.get_order_with_id_from_stack(order_id)
+            if order.broker_tempid == broker_tempid:
+                return order
+
+        return missing_order

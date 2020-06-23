@@ -160,7 +160,7 @@ def value_or_npnan(x, return_value = None):
         ## Not something that can be compared to a nan
         pass
 
-    # Eithier wrong type, or not a nan
+    # Either wrong type, or not a nan
     return x
 
 def get_safe_from_dict(some_dict, some_arg_name, some_default):
@@ -272,6 +272,24 @@ class timerClass(object):
         time_since_run = self.minutes_since_last_run()
         minutes_between_runs = self.frequency_minutes
         if time_since_run > minutes_between_runs:
+            return True
+        else:
+            return False
+
+class quickTimer(object):
+    def __init__(self, seconds = 60):
+        self._started = datetime.datetime.now()
+        self._time_limit = seconds
+
+    @property
+    def unfinished(self):
+     return not self.finished
+
+    @property
+    def finished(self):
+        time_now = datetime.datetime.now()
+        elapsed = time_now - self._started
+        if elapsed.seconds>self._time_limit:
             return True
         else:
             return False
