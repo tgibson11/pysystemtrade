@@ -163,3 +163,5 @@ dict_of_functions = {0: view_trade_limits,
                      22: not_defined,
                     30: not_defined}
 
+if __name__ == '__main__':
+    interactive_controls()
