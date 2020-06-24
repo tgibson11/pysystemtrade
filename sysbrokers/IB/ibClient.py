@@ -226,6 +226,12 @@ class ibClient(brokerClient):
 
         tick_data = self.ib.reqHistoricalTicks(ibcontract, recent_ib_time, '', tick_count, 'BID_ASK', useRth=False)
 
+        # self.ib.reqMarketDataType(3)
+        # tick_data = self.ib.reqMktData(ibcontract, regulatorySnapshot=True)
+        # self.ib.sleep(2)
+        # self.ib.cancelMktData(ibcontract)
+
+        print(tick_data)
         return tick_data
 
     def ib_get_trading_hours(self, contract_object_with_ib_broker_config):
