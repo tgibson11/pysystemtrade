@@ -154,6 +154,10 @@ class dataBlob(object):
 
         return log
 
+    @log.setter
+    def log(self, log):
+        self._log = log
+
     @property
     def csv_data_paths(self):
         csv_data_paths = getattr(self, "_csv_data_paths", arg_not_supplied)

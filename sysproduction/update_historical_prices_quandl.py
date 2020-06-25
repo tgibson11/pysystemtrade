@@ -6,7 +6,6 @@ from syscore.objects import success, failure, data_error
 from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from syslogdiag.emailing import send_mail_msg
 from syslogdiag.log import logToMongod as logger
-from sysproduction.data.broker import dataBroker
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
@@ -19,14 +18,25 @@ def update_historical_prices():
     :return: Nothing
     """
     with dataBlob(log_name="Update-Historical-Prices-Quandl") as data:
+        update_historical_price_object = updateHistoricalPricesQuandl(data)
+        update_historical_price_object.update_historical_prices()
+    return success
+
+
+class updateHistoricalPricesQuandl(object):
+    def __init__(self, data):
+        self.data = data
+
+    def update_historical_prices(self, method_name):
+        data = self.data
+        data.log = data.log.setup(method_name=method_name)
+
         price_data = diagPrices(data)
         log = data.log
         list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()
         for instrument_code in list_of_codes_all:
             update_historical_prices_for_instrument(instrument_code, data,
                                                     log=log.setup(instrument_code=instrument_code))
-
-    return success
 
 
 def update_historical_prices_for_instrument(instrument_code, data, log=logger("")):
