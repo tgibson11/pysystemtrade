@@ -37,10 +37,9 @@ class totalCapitalUpdate(object):
     def __init__(self, data):
         self.data = data
 
-    def update_total_capital(self, method_name):
+    def update_total_capital(self):
         data = self.data
-        data.log = data.log.setup(method_name = method_name)
-        capital_data = dataCapital(self.data)
+        capital_data = dataCapital(data)
 
         log = data.log
 

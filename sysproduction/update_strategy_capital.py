@@ -23,12 +23,10 @@ def update_strategy_capital():
     return success
 
 class updateStrategyCapital(object):
+
     def __init__(self, data):
         self.data = data
-
-
-
-    def strategy_allocation(self, method_name):
+    def strategy_allocation(self):
         """
         Used to allocate capital to strategies. Doesn't actually do the allocation but get's from another function,
           defined in config.strategy_capital_allocation.function (defaults.yaml, or overide in private_config.yaml)
@@ -38,9 +36,8 @@ class updateStrategyCapital(object):
         :param data: A data blob
         :return: None
         """
-        data = self.data
-        data.log = data.log.setup(method_name = method_name)
         try:
+            data = self.data
             strategy_capital_dict = call_allocation_function(data)
             write_allocated_weights(data, strategy_capital_dict)
         except Exception as e:
@@ -68,7 +65,7 @@ def write_allocated_weights(data, strategy_capital_dict):
     date = datetime.datetime.now()
     for strategy_name, strategy_capital in strategy_capital_dict.items():
         capital_data.update_capital_value_for_strategy(strategy_name, strategy_capital, date=date)
-        data.log.msg("Updated capital for %s to %f" % (strategy_name, strategy_capital))
+        data.log.msg("Updated capital for %s to %f" % (strategy_name, strategy_capital), strategy_name = strategy_name)
 
     return success
 

@@ -27,10 +27,8 @@ class updateHistoricalPricesQuandl(object):
     def __init__(self, data):
         self.data = data
 
-    def update_historical_prices(self, method_name):
+    def update_historical_prices(self):
         data = self.data
-        data.log = data.log.setup(method_name=method_name)
-
         price_data = diagPrices(data)
         log = data.log
         list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()
