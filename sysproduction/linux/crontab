@@ -12,6 +12,7 @@ MPLBACKEND=Agg
 0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_daily_price_updates >> $ECHO_PATH/run_daily_price_updates.echo 2>&1
 0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_systems >> $ECHO_PATH/run_systems.echo 2>&1
 0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_strategy_order_generator >> $ECHO_PATH/run_strategy_order_generator.echo 2>&1
+0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_stack_handler >> $ECHO_PATH/run_stack_handler.echo 2>&1
 #
 # Email roll report
 #
