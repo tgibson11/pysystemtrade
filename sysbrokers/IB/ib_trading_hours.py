@@ -1,16 +1,13 @@
 import datetime
 
 def get_trading_hours(ib_contract_details):
-    try:
-        time_zone_id = ib_contract_details.timeZoneId
-        time_zone_adjustment = get_time_difference(time_zone_id)
-        one_off_adjustment = one_off_adjustments(ib_contract_details.contract.symbol)
-        trading_hours_string = ib_contract_details.tradingHours
-        list_of_open_times = parse_trading_hours_string(trading_hours_string,
-                                                        adjustment_hours = time_zone_adjustment,
-                                                        one_off_adjustment=one_off_adjustment)
-    except Exception as e:
-        raise e
+    time_zone_id = ib_contract_details.timeZoneId
+    time_zone_adjustment = get_time_difference(time_zone_id)
+    one_off_adjustment = one_off_adjustments(ib_contract_details.contract.symbol)
+    trading_hours_string = ib_contract_details.tradingHours
+    list_of_open_times = parse_trading_hours_string(trading_hours_string,
+                                                    adjustment_hours = time_zone_adjustment,
+                                                    one_off_adjustment=one_off_adjustment)
 
     return list_of_open_times
 
