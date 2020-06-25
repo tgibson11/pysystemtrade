@@ -129,6 +129,8 @@ class Order(object):
 
 
     def fill_less_than_or_equal_to_desired_trade(self, proposed_fill):
+        print(f"Trade quantity: {self.trade}")
+        print(f"Proposed fill: {proposed_fill}")
         return abs(proposed_fill) <= abs(self.trade) and (proposed_fill * self.trade) >= 0
 
     def fill_equals_zero(self):
