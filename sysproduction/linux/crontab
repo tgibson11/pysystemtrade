@@ -16,7 +16,7 @@ MPLBACKEND=Agg
 #
 # Email roll report
 #
-0 6 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./email_roll_report >> $ECHO_PATH/email_roll_report.echo 2>&1
+15 6 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./email_roll_report >> $ECHO_PATH/email_roll_report.echo 2>&1
 #
 # Backup & log maintenance
 #
