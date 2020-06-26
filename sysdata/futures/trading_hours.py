@@ -32,6 +32,7 @@ class manyTradingStartAndEnd(object):
         for check_period in self._my_start_and_end:
             if check_period.okay_to_trade_now():
                 return True
+        print(self._my_start_and_end)
         return False
 
 
