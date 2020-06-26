@@ -49,7 +49,8 @@ def parse_phrase(phrase, adjustment_hours = 0, additional_adjust = 0):
 def get_time_difference(time_zone_id):
     ## Doesn't deal with DST. We will be conservative and only trade 1 hour after and 1 hour before
     time_diff_dict = {'CST (Central Standard Time)':6, 'MET (Middle Europe Time)':-1,
-                      'EST (Eastern Standard Time)':5, 'JST (Japan Standard Time)':-8}
+                      'EST (Eastern Standard Time)':5, 'JST (Japan Standard Time)':-8,
+                      'America/Belize': 6}
     diff_hours = time_diff_dict.get(time_zone_id, None)
     if diff_hours is None:
         raise Exception("Time zone '%s' not found!" % time_zone_id)
