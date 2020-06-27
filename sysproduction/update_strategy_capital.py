@@ -5,6 +5,7 @@ from syscore.objects import success
 
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.capital import dataCapital
+from sysproduction.data.strategies import diagStrategiesConfig
 
 from sysdata.private_config import get_private_then_default_key_value
 from syscore.objects import resolve_function
@@ -42,7 +43,7 @@ class updateStrategyCapital(object):
             write_allocated_weights(data, strategy_capital_dict)
         except Exception as e:
             ## Problem, will send email
-            self.log.critical("Error %s whilst allocating strategy capital" % e)
+            self.data.log.critical("Error %s whilst allocating strategy capital" % e)
 
         return None
 
@@ -57,8 +58,9 @@ def call_allocation_function(data):
 
     return results
 
-def get_strategy_allocation_config_dict():
-    return get_private_then_default_key_value('strategy_capital_allocation')
+def get_strategy_allocation_config_dict(data):
+    config = diagStrategiesConfig(data)
+    return config.get_strategy_allocation_config_dict()
 
 def write_allocated_weights(data, strategy_capital_dict):
     capital_data = dataCapital(data)

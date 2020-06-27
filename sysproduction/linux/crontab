@@ -14,13 +14,11 @@ MPLBACKEND=Agg
 0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_strategy_order_generator >> $ECHO_PATH/run_strategy_order_generator.echo 2>&1
 0 0 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./run_stack_handler >> $ECHO_PATH/run_stack_handler.echo 2>&1
 #
-# Email roll report daily at 6:15am
+# Email reports
 #
 15 6 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./email_roll_report >> $ECHO_PATH/email_roll_report.echo 2>&1
-#
-# Email P&L report Monday at 7am
-#
-0 7 * * 1 . $HOME/.profile; cd $SCRIPT_PATH; ./email_weekly_pandl_report >> $ECHO_PATH/email_weekly_pandl_report.echo 2>&1
+15 6 * * 1 . $HOME/.profile; cd $SCRIPT_PATH; ./email_weekly_pandl_report >> $ECHO_PATH/email_weekly_pandl_report.echo 2>&1
+30 6 * * 1-5 . $HOME/.profile; cd $SCRIPT_PATH; ./email_status_report >> $ECHO_PATH/email_status_report.echo 2>&1
 #
 # Backup & log maintenance daily at 11pm
 #
