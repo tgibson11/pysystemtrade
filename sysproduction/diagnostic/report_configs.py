@@ -41,4 +41,7 @@ roll_report_config = reportConfig(title="Roll report",
 daily_pandl_report_config = reportConfig(title="One day P&L report",
                                     function="sysproduction.diagnostic.profits.pandl_info", calendar_days_back = 1)
 
+weekly_pandl_report_config = reportConfig(title="Weekly P&L report",
+                                    function="sysproduction.diagnostic.profits.pandl_info", calendar_days_back=7)
+
 
