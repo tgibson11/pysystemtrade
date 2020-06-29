@@ -33,7 +33,8 @@ def send_mail_msg(body, subject):
     msg = MIMEMultipart()
 
     msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
+    # msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(f"<html><body><pre>{body}</pre></body></html>", "html"))
 
     _send_msg(msg)
 
