@@ -45,6 +45,7 @@ class ibClient(brokerClient):
         :return: list
         """
         trades_in_broker_format = self.ib.trades()
+        print(self.ib.trades())
         print(self.ib.fills())
 
         return trades_in_broker_format
