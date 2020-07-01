@@ -15,3 +15,6 @@ def email_status_report():
     config = status_report_config.new_config_with_modified_output("email")
     run_report(config)
 
+
+if __name__ == '__main__':
+    email_status_report()
