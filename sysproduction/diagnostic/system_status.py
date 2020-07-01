@@ -253,10 +253,15 @@ def get_control_data_for_process_name(data, process_name):
     time_to_stop = diag_process_config.is_it_time_to_stop(process_name)
     right_machine = diag_process_config.is_this_correct_machine(process_name)
 
+    if control_data_for_process.last_end_time is not None:
+        last_end_time = control_data_for_process.last_end_time.strftime(short_date_string)
+    else:
+        last_end_time = None
+
 
     data_for_process = dataForProcess(name = process_name, running = control_data_for_process.currently_running,
                                       start = control_data_for_process.last_start_time.strftime(short_date_string),
-                                      end = control_data_for_process.last_end_time.strftime(short_date_string),
+                                      end = last_end_time,
                                       status = control_data_for_process.status,
                                       finished_in_last_day=control_data_for_process.has_process_finished_in_last_day(),
                                       start_time = all_config['start_time'],
