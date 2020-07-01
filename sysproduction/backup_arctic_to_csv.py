@@ -34,10 +34,8 @@ class backupArcticToCsv():
         backup_optimal_positions(data)
         backup_roll_state_data(data)
 
-
 def get_backup_dir():
     return get_private_then_default_key_value('csv_backup_directory')
-
 
 def get_data_and_create_csv_directories(logname):
 
