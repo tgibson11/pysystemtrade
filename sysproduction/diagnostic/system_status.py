@@ -141,7 +141,7 @@ def get_trade_limit_tuple(element):
 def get_control_data_list_for_all_processes_as_df(data):
     cd_list = get_control_data_list_for_all_processes(data)
     pdf = make_df_from_list_of_named_tuple(dataForProcess, cd_list)
-    pdf = pdf.transpose()
+    # pdf = pdf.transpose()
 
     return pdf
 
