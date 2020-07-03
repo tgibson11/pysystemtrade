@@ -245,15 +245,19 @@ def time_matches(index_entry, closing_time=pd.DateOffset(hours=12, minutes=0, se
         return False
 
 """
-Convert date into a float, and back again
+Convert date into a decimal, and back again
 """
 LONG_DATE_FORMAT = "%Y%m%d%H%M%S.%f"
+CONVERSION_FACTOR = 10000
 
 def datetime_to_long(date_to_convert):
-    return float(date_to_convert.strftime(LONG_DATE_FORMAT))
+    as_str = date_to_convert.strftime(LONG_DATE_FORMAT)
+    as_float = float(as_str)
+    return int(as_float*CONVERSION_FACTOR)
 
-def long_to_datetime(float_to_convert):
-    str_to_convert='{0:.6f}'.format(float_to_convert)
+def long_to_datetime(int_to_convert):
+    as_float = float(int_to_convert)/CONVERSION_FACTOR
+    str_to_convert='%.6f' % as_float
     converted_datetime = datetime.datetime.strptime(str_to_convert, LONG_DATE_FORMAT)
     return converted_datetime
 
