@@ -44,9 +44,16 @@ class ibClient(brokerClient):
 
         :return: list
         """
+
+        # One or more of these requests seems to solve the problem of not getting a status update
+        # for the last submitted order.
+        # TODO 1) confirm problem is solved; 2) figure out which requests are necessary
+        self.ib.reqCompletedOrders(False)
+        self.ib.reqOpenOrders()
+        self.ib.reqExecutions()
+        self.ib.sleep(1)
+
         trades_in_broker_format = self.ib.trades()
-        print(self.ib.trades())
-        print(self.ib.fills())
 
         return trades_in_broker_format
 
