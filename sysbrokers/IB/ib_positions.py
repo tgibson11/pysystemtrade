@@ -1,5 +1,20 @@
 import re
-def from_ib_positions_to_dict(raw_positions):
+from syscore.genutils import highest_common_factor_for_list, sign
+from syscore.objects import arg_not_supplied, missing_data
+
+def extract_fx_balances_from_account_summary(account_summary):
+    relevant_tag = 'TotalCashBalance'
+
+    result = extract_currency_dict_for_tag_from_account_summary(account_summary, relevant_tag)
+
+    return result
+
+def extract_currency_dict_for_tag_from_account_summary(account_summary, relevant_tag):
+    result = dict([(summary_item.currency, summary_item.value) for summary_item in account_summary if summary_item.tag == relevant_tag])
+
+    return result
+
+def from_ib_positions_to_dict(raw_positions, account_id = arg_not_supplied):
     """
 
     :param raw_positions: list of positions in form Position(...)
@@ -10,6 +25,10 @@ def from_ib_positions_to_dict(raw_positions):
                             CASH = resolve_ib_cash_position, BOND=resolve_ib_bond_position,
                             BILL=resolve_ib_bill_position)
     for position in raw_positions:
+        if account_id is not arg_not_supplied:
+            if position.account != account_id:
+                continue
+
         asset_class = position.contract.secType
         method = position_methods.get(asset_class, None)
         if method is None:
@@ -23,17 +42,20 @@ def from_ib_positions_to_dict(raw_positions):
     return resolved_positions_dict
 
 def resolve_ib_stock_position(position):
+
     return dict(account = position.account, symbol = position.contract.symbol,
                 multiplier = 1.0, expiry = "",
                 exchange = position.contract.exchange, currency = position.contract.currency,
                 position = position.position)
 
 def resolve_ib_future_position(position):
+
     return dict(account = position.account, symbol = position.contract.symbol, expiry = position.contract.lastTradeDateOrContractMonth,
                 multiplier = float(position.contract.multiplier), currency = position.contract.currency,
                 position = position.position)
 
 def resolve_ib_cash_position(position):
+
     return dict(account = position.account, symbol = position.contract.localSymbol,
                 expiry = "", multiplier = 1.0,
                 currency = position.contract.currency, position = position.position)
@@ -53,5 +75,13 @@ def resolve_ib_bill_position(position):
 
 def resolveBS(trade):
     if trade<0:
-        return 'SELL', abs(trade)
-    return 'BUY', abs(trade)
+        return "SELL", int(abs(trade))
+    return "BUY", int(abs(trade))
+
+def resolveBS_for_list(trade_list):
+    ## result is always positive
+    trade = highest_common_factor_for_list(trade_list)
+
+    trade = sign(trade_list[0])* trade
+
+    return resolveBS(trade)
