@@ -184,14 +184,17 @@ class ibOrdersData(brokerOrderStackData):
         :return: brokerOrder coming from broker
         """
 
+        # get_list_of_broker_orders also refreshes the orders in storage,
+        # which seems to be necessary to ensure the last submitted order is up-to-date
+        account_id = broker_order_to_match.broker_account
+        list_of_broker_orders = self.get_list_of_broker_orders(account_id = account_id)
+
         dict_of_broker_orders = self.get_dict_of_orders_from_storage()
         matched_order = match_order_from_dict(dict_of_broker_orders, broker_order_to_match)
         if matched_order is not missing_order:
             return matched_order
 
         ## match on temp id and clientid
-        account_id = broker_order_to_match.broker_account
-        list_of_broker_orders = self.get_list_of_broker_orders(account_id = account_id)
         matched_order = match_order_on_tempid(list_of_broker_orders,  broker_order_to_match)
         if matched_order is not missing_order:
             return matched_order
