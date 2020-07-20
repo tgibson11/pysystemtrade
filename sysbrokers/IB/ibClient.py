@@ -58,7 +58,7 @@ class ibClient(brokerClient):
         self.ib.reqCompletedOrders(False)
         # self.ib.reqOpenOrders()
         # self.ib.reqExecutions()
-        self.ib.sleep(1)
+        # self.ib.sleep(1)
 
         trades_in_broker_format = self.ib.trades()
         if account_id is not arg_not_supplied:
