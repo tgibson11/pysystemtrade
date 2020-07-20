@@ -55,7 +55,7 @@ class ibClient(brokerClient):
         # One or more of these requests seems to solve the problem of not getting a status update
         # for the last submitted order.
         # TODO figure out which requests are necessary (if any)
-        self.ib.reqCompletedOrders(False)
+        # self.ib.reqCompletedOrders(False)
         # self.ib.reqOpenOrders()
         # self.ib.reqExecutions()
         # self.ib.sleep(1)
