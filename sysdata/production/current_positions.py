@@ -153,6 +153,8 @@ class listOfPositions(list):
         if my_position == other_position:
             return False
         else:
+            print(f"my_position: {my_position}")
+            print(f"other_position: {other_position}")
             return True
 
     def position_for_object(self, tradeable_object):
