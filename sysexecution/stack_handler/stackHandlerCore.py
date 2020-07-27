@@ -152,7 +152,7 @@ class stackHandlerCore(object):
 
         if revised_order.trade!=proposed_order.trade:
             log.msg("%s/%s trade change from %s to %s because of trade limits"
-                    % strategy_name, instrument_code, str(proposed_order.trade), str(revised_order.trade))
+                    % (strategy_name, instrument_code, str(proposed_order.trade), str(revised_order.trade)))
 
         return revised_order
 

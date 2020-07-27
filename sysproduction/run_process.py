@@ -18,6 +18,8 @@ We kick them all off in the crontab at a specific time (midnight is easiest), bu
 
 """
 import datetime
+import traceback
+
 from sysproduction.data.controls import dataControlProcess, diagProcessConfig
 from syscore.objects import process_no_run, process_stop, process_running, success, failure, arg_not_supplied
 from syslogdiag.echos import redirectOutput
@@ -61,7 +63,7 @@ class processToRun(object):
                 self._do()
 
         except Exception as e:
-            self.log.critical(str(e))
+            self.log.critical(traceback.format_exc())
 
         finally:
             self._finish()
