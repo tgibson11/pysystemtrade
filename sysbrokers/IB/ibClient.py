@@ -394,7 +394,7 @@ class ibClient(brokerClient):
         if account!='':
             ib_order.account = account
 
-        order_object = None  # self.ib.placeOrder(ibcontract, ib_order)
+        order_object = self.ib.placeOrder(ibcontract, ib_order)
 
         # for consistency with spread orders
         trade_with_contract = tradeWithContract(ibcontract_with_legs, order_object)
