@@ -43,8 +43,6 @@ class manyTradingStartAndEnd(object):
         for check_period in self._my_start_and_end:
             if check_period.okay_to_trade_now():
                 return True
-        for check_period in self._my_start_and_end:
-            print(f"Start: {check_period._start_time}, End: {check_period._end_time}")
         return False
 
     def less_than_one_hour_left(self):

@@ -321,12 +321,6 @@ class ibClient(brokerClient):
 
         tick_data = self.ib.reqHistoricalTicks(ibcontract, recent_ib_time, '', tick_count, 'BID_ASK', useRth=False)
 
-        # self.ib.reqMarketDataType(3)
-        # tick_data = self.ib.reqMktData(ibcontract, snapshot=True, regulatorySnapshot=True)
-        # self.ib.sleep(2)
-        # self.ib.cancelMktData(ibcontract)
-        # print(tick_data)
-
         return tick_data
 
     def ib_get_trading_hours(self, contract_object_with_ib_data):
@@ -400,7 +394,7 @@ class ibClient(brokerClient):
         if account!='':
             ib_order.account = account
 
-        order_object = self.ib.placeOrder(ibcontract, ib_order)
+        order_object = None  # self.ib.placeOrder(ibcontract, ib_order)
 
         # for consistency with spread orders
         trade_with_contract = tradeWithContract(ibcontract_with_legs, order_object)
