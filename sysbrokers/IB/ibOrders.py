@@ -4,7 +4,7 @@ from copy import copy
 from collections import  namedtuple
 import datetime
 
-from sysbrokers.IB.ibFuturesContracts import ibFuturesContractData
+from sysbrokers.IB.ibFuturesContracts import ibFuturesContractData, BrokerSymbolNotFoundException
 from syscore.objects import missing_order, failure, success, missing_data, arg_not_supplied
 from sysdata.futures.contracts import futuresContract
 from sysdata.fx.spotfx import currencyValue
@@ -55,8 +55,13 @@ class ibOrdersData(brokerOrderStackData):
         """
 
         list_of_raw_orders = self.ibconnection.broker_get_orders(account_id=account_id)
-        order_list = [self.create_broker_order_object(broker_trade_object_results) for broker_trade_object_results
-                      in list_of_raw_orders]
+        order_list = []
+        for broker_trade_object_results in list_of_raw_orders:
+            try:
+                order_list.append(self.create_broker_order_object(broker_trade_object_results))
+            except BrokerSymbolNotFoundException as e:
+                self.log.warn(e)
+
         order_list = [order for order in order_list if order is not missing_order]
 
         return order_list

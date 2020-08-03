@@ -13,6 +13,8 @@ from syscore.objects import missing_contract, missing_instrument, missing_file
 IB_FUTURES_CONFIG_FILE = get_filename_for_package("sysbrokers.IB.ibConfigFutures.csv")
 
 
+class BrokerSymbolNotFoundException(Exception):
+    pass
 
 
 class ibFuturesContractData(futuresContractData):
@@ -39,8 +41,9 @@ class ibFuturesContractData(futuresContractData):
         config_row = config[config.IBSymbol == ib_code]
         if len(config_row)==0:
             msg = "Broker symbol %s not found in configuration file!" % ib_code
-            self.log.critical(msg)
-            raise Exception(msg)
+            # Let the caller determine if this is important
+            # self.log.critical(msg)
+            raise BrokerSymbolNotFoundException(msg)
 
         if len(config_row)>1:
             msg = "Broker symbol %s appears more than once in configuration file!" % ib_code
