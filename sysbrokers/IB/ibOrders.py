@@ -60,7 +60,7 @@ class ibOrdersData(brokerOrderStackData):
             try:
                 order_list.append(self.create_broker_order_object(broker_trade_object_results))
             except BrokerSymbolNotFoundException as e:
-                self.log.warn(e)
+                self.log.warn(str(e))
 
         order_list = [order for order in order_list if order is not missing_order]
 
