@@ -178,11 +178,11 @@ class tradeLimitData(object):
 
     def add_trade(self,  strategy_name, instrument_code, trade):
         combined_list = self._get_list_of_all_relevant_trade_limits(strategy_name, instrument_code)
-        self.log.msg("Relevant trade limits before adding trade: " + combined_list)
+        self.log.msg(f"Relevant trade limits before adding trade: {combined_list}")
         combined_list.add_trade(trade)
-        self.log.msg("Relevant trade limits after adding trade: " + combined_list)
+        self.log.msg(f"Relevant trade limits after adding trade: {combined_list}")
         result = self._update_list_of_trade_limits(combined_list)
-        self.log.msg("Result of update: " + result)
+        self.log.msg(f"Result of update: {result}")
 
 
     def remove_trade(self,  strategy_name, instrument_code, trade):
