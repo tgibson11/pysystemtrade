@@ -55,7 +55,6 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
             market_open = data_broker.is_instrument_code_and_contract_date_okay_to_trade(original_contract_order.instrument_code,
                                                                               original_contract_order.contract_id)
             if not market_open:
-                log.msg("Market is closed, not spawning order")
                 return None
 
         # We can deal with partially filled contract orders: that's how hard we are!

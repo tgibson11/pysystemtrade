@@ -1,3 +1,0 @@
-#!/bin/bash
-. ~/.profile
-. p private.my_system.daily_process.py

@@ -4,12 +4,9 @@ For a given list of futures contracts defined by Quandl start dates:
 read price data from quandl, and then write to artic
 Write list of futures contracts to mongodb database
 """
-from sysdata.csv.csv_instrument_config import csvFuturesInstrumentData
-from sysdata.csv.csv_roll_calendars import csvRollCalendarData
-from sysdata.futures.roll_calendars import rollCalendar
-from sysdata.futures.rolls import contractDateWithRollParameters
+
 from sysdata.quandl.quandl_futures import quandlFuturesConfiguration, quandlFuturesContractPriceData
-from sysdata.futures.contracts import listOfFuturesContracts, futuresContract
+from sysdata.futures.contracts import listOfFuturesContracts
 from sysdata.futures.instruments import futuresInstrument
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
@@ -54,9 +51,6 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
         if quandl_price.empty:
             print("Problem reading price data this contract - skipping")
         else:
-            if quandl_price.tail(1).iloc[0]['FINAL'] == 0.0:
-                # Drop last row if final price is 0
-                quandl_price = quandl_price[:-1]
             print("Read ok, trying to write to arctic")
             try:
                 arctic_prices_data.write_prices_for_contract_object(contract_object, quandl_price)
@@ -65,7 +59,7 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(list_of_contrac
 
 
 if __name__ == '__main__':
-    instrument_data = csvFuturesInstrumentData(config_path="data.futures.csvconfig")
+    instrument_data = mongoFuturesInstrumentData()
     print(instrument_data)
     instrument_list = instrument_data.get_list_of_instruments()
 
