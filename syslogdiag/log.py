@@ -2,7 +2,7 @@ from copy import copy
 import datetime
 
 from sysdata.mongodb.mongo_connection import mongoConnection, MONGO_ID_KEY
-from syscore.dateutils import long_to_datetime, datetime_to_long
+from syscore.dateutils import str_to_datetime, datetime_to_str
 from syscore.objects import missing_data
 from syslogdiag.emailing import send_mail_msg
 
@@ -286,10 +286,10 @@ class logEntry(object):
 
         if log_timestamp is None:
             log_timestamp = datetime.datetime.now()
-        log_timestamp_aslong = datetime_to_long(log_timestamp)
+        log_timestamp_as_str = datetime_to_str(log_timestamp)
 
         log_dict[LEVEL_ID] = msglevel
-        log_dict[TIMESTAMP_ID] = log_timestamp_aslong
+        log_dict[TIMESTAMP_ID] = log_timestamp_as_str
         log_dict[TEXT_ID] = text
         log_dict[LOG_RECORD_ID] = log_id
 
@@ -299,7 +299,7 @@ class logEntry(object):
         self._text = text
         self._msglevel = msglevel
         self._msglevel_text = msg_level_text
-        self._timestamp_as_long = log_timestamp_aslong
+        self._timestamp_as_long = log_timestamp_as_str
         self._timestamp = log_timestamp
         self._log_id = log_id
 
@@ -313,13 +313,13 @@ class logEntry(object):
         """
         log_dict = copy(log_dict_input)
         log_dict.pop(MONGO_ID_KEY)
-        log_timestamp_aslong = log_dict.pop(TIMESTAMP_ID)
+        log_timestamp_as_str = log_dict.pop(TIMESTAMP_ID)
         msg_level = log_dict.pop(LEVEL_ID)
         text = log_dict.pop(TEXT_ID)
         log_id = log_dict.pop(LOG_RECORD_ID)
         input_attributes = log_dict
 
-        log_timestamp = long_to_datetime(log_timestamp_aslong)
+        log_timestamp = str_to_datetime(log_timestamp_as_str)
 
         log_entry = logEntry(text, log_timestamp=log_timestamp,
                              msglevel=msg_level, input_attributes=input_attributes, log_id=log_id)
@@ -448,7 +448,7 @@ class accessLogFromMongodb(object):
 
         cutoff_date = datetime.datetime.now() - datetime.timedelta(days=lookback_days)
         timestamp_dict = {}
-        timestamp_dict["$gt"] = datetime_to_long(cutoff_date)
+        timestamp_dict["$gt"] = datetime_to_str(cutoff_date)
         attribute_dict[TIMESTAMP_ID] = timestamp_dict
 
         result_dict = self._mongo.collection.find(attribute_dict)
@@ -471,7 +471,7 @@ class accessLogFromMongodb(object):
         cutoff_date = datetime.datetime.now() - datetime.timedelta(days=days)
         attribute_dict={}
         timestamp_dict = {}
-        timestamp_dict["$lt"] = datetime_to_long(cutoff_date)
+        timestamp_dict["$lt"] = datetime_to_str(cutoff_date)
         attribute_dict[TIMESTAMP_ID] = timestamp_dict
 
         self._mongo.collection.remove(attribute_dict)
