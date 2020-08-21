@@ -48,9 +48,9 @@ def run_report_with_data_blob(report_config, data):
         report_results = [header("Report %s failed to process with error %s" % (report_config.title, e))]
         report_result = failure
     try:
-        data.log.critical(traceback.format_exc())
         parsed_report = parse_report_results(report_results)
     except Exception as e:
+        data.log.critical(traceback.format_exc())
         parsed_report = "Report failed to parse %s with error %s\n" % (report_config.title, str(e))
         report_result = failure
 
