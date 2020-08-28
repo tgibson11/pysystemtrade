@@ -134,20 +134,26 @@ class dataBroker(object):
             ticker_object = self.get_ticker_object_for_order(contract_order)
 
         ticker_object, collected_prices = self.get_market_data_for_order(ticker_object, contract_order)
-        if collected_prices is missing_order:
-            # no data available, no can do
-            return missing_order
 
         if order_type=="limit":
+
+            if collected_prices is missing_order:
+                # no data available, no can do
+                return missing_order
+
             limit_price = self.set_limit_price(collected_prices.side_price, collected_prices.offside_price,
                                                limit_price_from = limit_price_from,
                                                input_limit_price = input_limit_price)
+
+            side_price = collected_prices.benchmark_side_prices
+            mid_price = collected_prices.benchmark_mid_prices
         else:
             limit_price = None
+            side_price = None
+            mid_price = None
 
         broker_order = create_new_broker_order_from_contract_order(contract_order, order_type=order_type,
-                                                   side_price=collected_prices.benchmark_side_prices,
-                                                    mid_price=collected_prices.benchmark_mid_prices,
+                                                                   side_price=side_price, mid_price=mid_price,
                                                                    broker=broker, broker_account=broker_account,
                                                                    broker_clientid=broker_clientid,
                                                                    limit_price=limit_price)
