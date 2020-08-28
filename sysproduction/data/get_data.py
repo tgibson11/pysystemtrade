@@ -224,7 +224,7 @@ class dataBlob(object):
             if csv_data_paths is arg_not_supplied:
                 raise Exception("Need csv_data_paths dict for class name %s" % class_name)
             datapath = csv_data_paths.get(class_name, "")
-            if datapath is "":
+            if datapath=="":
                 raise Exception("Need to have key %s in csv_data_paths" % class_name)
 
         eval_dict = dict(ib = "%s(self.ib_conn, log=self.log.setup(component='%s'))",
@@ -237,7 +237,7 @@ class dataBlob(object):
         try:
             resolved_instance = eval(to_eval)
         except:
-            msg = "Couldn't evaluate %s  This might be because it is missing from sysproduction.data.get_data imports or arguments don't follow pattern" % to_eval
+            msg = "Couldn't evaluate %s This might be because (a) IB gateway not running, or (b) it is missing from sysproduction.data.get_data imports or arguments don't follow pattern" % to_eval
             self.log.critical(msg)
             raise Exception(msg)
 

@@ -98,7 +98,7 @@ def trade_given_optimal_and_actual_positions(data, strategy_name, instrument_cod
     ref_date = ref_dates[instrument_code]
 
     # No limit orders, just best execution
-    order_required = instrumentOrder(strategy_name,instrument_code, trade_required,  order_type="best",
+    order_required = instrumentOrder(strategy_name,instrument_code, trade_required,  order_type="market",
                                      reference_price = reference_price, reference_contract = reference_contract,
                                      reference_datetime = ref_date)
 
