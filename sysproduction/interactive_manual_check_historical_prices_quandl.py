@@ -8,7 +8,6 @@ from syscore.objects import success, failure
 from sysdata.futures.futures_per_contract_prices import futuresContractPrices
 from sysdata.futures.manual_price_checker import manual_price_checker
 from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
-from syslogdiag.log import logToMongod as logger
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
@@ -34,7 +33,7 @@ def interactive_manual_check_historical_prices(instrument_code: str):
     return success
 
 
-def update_historical_prices_with_checks_for_instrument(instrument_code, data, log=logger("")):
+def update_historical_prices_with_checks_for_instrument(instrument_code, data, log):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 
@@ -61,7 +60,7 @@ def update_historical_prices_with_checks_for_instrument(instrument_code, data, l
     return success
 
 
-def update_historical_prices_with_checks_for_instrument_and_contract(contract_object, data, log=logger("")):
+def update_historical_prices_with_checks_for_instrument_and_contract(contract_object, data, log):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 
@@ -76,6 +75,7 @@ def update_historical_prices_with_checks_for_instrument_and_contract(contract_ob
 
 
 def get_and_check_prices_for_frequency(data, log, contract_object, frequency="D"):
+
     quandl_data = quandlFuturesContractPriceData()
     price_data = diagPrices(data)
     price_updater = updatePrices(data)

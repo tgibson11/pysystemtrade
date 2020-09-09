@@ -2,6 +2,8 @@
 Various routines to do with dates
 """
 import datetime
+import time
+import calendar
 import numpy as np
 import pandas as pd
 
@@ -245,18 +247,29 @@ def time_matches(index_entry, closing_time=pd.DateOffset(hours=12, minutes=0, se
         return False
 
 """
-Convert date into a string, and back again
+Convert date into a decimal, and back again
 """
 LONG_DATE_FORMAT = "%Y%m%d%H%M%S.%f"
+LONG_TIME_FORMAT = "%H%M%S.%f"
+LONG_JUST_DATE_FORMAT = "%Y%m%d"
+CONVERSION_FACTOR = 10000
 
+def datetime_to_long(date_to_convert):
+    as_str = date_to_convert.strftime(LONG_DATE_FORMAT)
+    as_float = float(as_str)
+    return int(as_float*CONVERSION_FACTOR)
 
-def datetime_to_str(date_to_convert):
-    return date_to_convert.strftime(LONG_DATE_FORMAT)
+def long_to_datetime(int_to_convert):
+    as_float = float(int_to_convert)/CONVERSION_FACTOR
+    str_to_convert='%.6f' % as_float
 
+    ## have to do this because of leap seconds
+    time_string, dot, microseconds = str_to_convert.partition('.')
+    utc_time_tuple = time.strptime(str_to_convert, LONG_DATE_FORMAT)
+    as_datetime = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=calendar.timegm(utc_time_tuple))
+    as_datetime= as_datetime.replace(microsecond=datetime.datetime.strptime(microseconds, '%f').microsecond)
 
-def str_to_datetime(str_to_convert):
-    return datetime.datetime.strptime(str_to_convert, LONG_DATE_FORMAT)
-
+    return as_datetime
 
 if __name__ == '__main__':
     import doctest

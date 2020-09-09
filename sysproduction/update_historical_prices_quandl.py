@@ -5,7 +5,6 @@ Update historical data per contract from Quandl data, dump into mongodb
 from syscore.objects import success, failure, data_error
 from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
 from syslogdiag.emailing import send_mail_msg
-from syslogdiag.log import logToMongod as logger
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
@@ -30,22 +29,20 @@ class updateHistoricalPricesQuandl(object):
     def update_historical_prices(self):
         data = self.data
         price_data = diagPrices(data)
-        log = data.log
         list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()
         for instrument_code in list_of_codes_all:
-            update_historical_prices_for_instrument(instrument_code, data,
-                                                    log=log.setup(instrument_code=instrument_code))
+            update_historical_prices_for_instrument(instrument_code, data)
 
 
-def update_historical_prices_for_instrument(instrument_code, data, log=logger("")):
+def update_historical_prices_for_instrument(instrument_code, data):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 
     :param instrument_code: str
     :param data: dataBlob
-    :param log: logger
     :return: None
     """
+    log = data.log
     diag_contracts = diagContracts(data)
     all_contracts_list = diag_contracts.get_all_contract_objects_for_instrument_code(instrument_code)
     contract_list = all_contracts_list.currently_sampling()
@@ -61,7 +58,7 @@ def update_historical_prices_for_instrument(instrument_code, data, log=logger(""
     return success
 
 
-def update_historical_prices_for_instrument_and_contract(contract_object, data, log=logger("")):
+def update_historical_prices_for_instrument_and_contract(contract_object, data, log):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 

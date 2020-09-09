@@ -91,7 +91,3 @@ def get_email_details():
 
     return email_server, email_port, email_from_address, email_pwd, email_to_address
 
-
-
-if __name__ == "__main__":
-    send_mail_msg("testing", "test subject")

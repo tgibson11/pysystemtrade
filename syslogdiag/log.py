@@ -2,7 +2,7 @@ from copy import copy
 import datetime
 
 from sysdata.mongodb.mongo_connection import mongoConnection, MONGO_ID_KEY
-from syscore.dateutils import str_to_datetime, datetime_to_str
+from syscore.dateutils import long_to_datetime, datetime_to_long
 from syscore.objects import missing_data
 from syslogdiag.emailing import send_mail_msg
 
@@ -286,10 +286,10 @@ class logEntry(object):
 
         if log_timestamp is None:
             log_timestamp = datetime.datetime.now()
-        log_timestamp_as_str = datetime_to_str(log_timestamp)
+        log_timestamp_aslong = datetime_to_long(log_timestamp)
 
         log_dict[LEVEL_ID] = msglevel
-        log_dict[TIMESTAMP_ID] = log_timestamp_as_str
+        log_dict[TIMESTAMP_ID] = log_timestamp_aslong
         log_dict[TEXT_ID] = text
         log_dict[LOG_RECORD_ID] = log_id
 
@@ -299,7 +299,7 @@ class logEntry(object):
         self._text = text
         self._msglevel = msglevel
         self._msglevel_text = msg_level_text
-        self._timestamp_as_long = log_timestamp_as_str
+        self._timestamp_as_long = log_timestamp_aslong
         self._timestamp = log_timestamp
         self._log_id = log_id
 
@@ -319,7 +319,7 @@ class logEntry(object):
         log_id = log_dict.pop(LOG_RECORD_ID)
         input_attributes = log_dict
 
-        log_timestamp = str_to_datetime(log_timestamp_as_str)
+        log_timestamp = long_to_datetime(log_timestamp_aslong)
 
         log_entry = logEntry(text, log_timestamp=log_timestamp,
                              msglevel=msg_level, input_attributes=input_attributes, log_id=log_id)
@@ -342,139 +342,6 @@ class logEntry(object):
         return self._text
 
 
-LOG_COLLECTION_NAME = "Logs"
-EMAIL_ON_LOG_LEVEL = [4]
-
-class logToMongod(logger):
-    """
-    Logs to a mongodb
-
-    """
-    def __init__(self, type, mongo_db = None, log_level="Off", **kwargs):
-        self._mongo = mongoConnection(LOG_COLLECTION_NAME, mongo_db=mongo_db)
-
-        super().__init__(type= type, log_level = log_level, ** kwargs)
-
-    def get_last_used_log_id(self):
-        """
-        Get last used log id. Returns None if not present
-
-        :return: int or None
-        """
-        attribute_dict = dict(_meta_data="log_id")
-        last_id_dict=self._mongo.collection.find_one(attribute_dict)
-        if last_id_dict is None:
-            return None
-        return last_id_dict['next_id']
-
-    def update_log_id(self, next_id):
-        attribute_dict = dict(_meta_data="log_id")
-        next_id_dict = dict(_meta_data="log_id", next_id=next_id)
-        self._mongo.collection.replace_one(attribute_dict, next_id_dict, True)
-
-        return None
-
-    def log_handle_caller(self, msglevel, text, input_attributes, log_id):
-        """
-        Ignores log_level - logs everything, just in case
-
-        Doesn't raise exceptions
-
-        """
-        log_entry = logEntry(text, msglevel=msglevel, input_attributes=input_attributes, log_id=log_id)
-        print(log_entry)
-
-        self._mongo.collection.insert_one(log_entry.log_dict())
-
-        if msglevel in EMAIL_ON_LOG_LEVEL:
-            ## Critical, send an email
-            self.email_user(log_entry)
-
-        return log_entry
-
-    def email_user(self, log_entry):
-        try:
-            send_mail_msg(str(log_entry), "*CRITICAL ERROR*")
-        except:
-            self.error("Couldn't email user")
-
-
-
-class accessLogFromMongodb(object):
-
-    def __init__(self, mongo_db=None):
-        self._mongo = mongoConnection(LOG_COLLECTION_NAME, mongo_db=mongo_db)
-
-    def get_log_items(self, attribute_dict=dict(), lookback_days=1):
-        """
-        Return log items as list of text
-
-        :param attribute_dict: dictionary of attributes to return logs for
-        :return: list of str
-        """
-
-        results = self.get_log_items_as_entries(attribute_dict, lookback_days=lookback_days)
-
-        # jam together as text
-        results_as_text = [str(log_entry) for log_entry in results]
-
-        return results_as_text
-
-    def print_log_items(self, attribute_dict=dict(), lookback_days=1):
-        """
-        Print log items as list of text
-
-        :param attribute_dict: dictionary of attributes to return logs for
-        :return: list of str
-        """
-
-        results_as_text = self.get_log_items(attribute_dict=attribute_dict, lookback_days=lookback_days)
-        print("\n".join(results_as_text))
-
-    def find_last_entry_date(self, attribute_dict = dict(), lookback_days = 30):
-        results = self.get_log_items_as_entries(attribute_dict=attribute_dict, lookback_days=lookback_days)
-        time_stamps = [entry.timestamp for entry in results]
-        if len(time_stamps)==0:
-            return missing_data
-        return max(time_stamps)
-
-    def get_log_items_as_entries(self, attribute_dict=dict(), lookback_days=1):
-        """
-        Return log items not as text, good for diagnostics
-
-        :param attribute_dict: dictionary of attributes to return logs for
-        :return: list of 4-typles: timestamp, level, text, attributes
-        """
-
-        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=lookback_days)
-        timestamp_dict = {}
-        timestamp_dict["$gt"] = datetime_to_str(cutoff_date)
-        attribute_dict[TIMESTAMP_ID] = timestamp_dict
-
-        result_dict = self._mongo.collection.find(attribute_dict)
-        # from cursor to list...
-        results_list = [single_log_dict for single_log_dict in result_dict]
-
-        # ... to list of log entries
-        results = [logEntry.log_entry_from_dict(single_log_dict)
-                                           for single_log_dict in results_list]
-
-        # sort by log ID
-        results.sort(key=lambda x: x._log_id)
-
-        return results
-
-
-    def delete_log_items_from_before_n_days(self, days=365):
-        # need something to delete old log records, eg more than x months ago
-
-        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=days)
-        attribute_dict={}
-        timestamp_dict = {}
-        timestamp_dict["$lt"] = datetime_to_str(cutoff_date)
-        attribute_dict[TIMESTAMP_ID] = timestamp_dict
-
-        self._mongo.collection.remove(attribute_dict)
 
 
 if __name__ == '__main__':
