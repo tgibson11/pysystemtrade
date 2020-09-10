@@ -313,7 +313,7 @@ class logEntry(object):
         """
         log_dict = copy(log_dict_input)
         log_dict.pop(MONGO_ID_KEY)
-        log_timestamp_as_str = log_dict.pop(TIMESTAMP_ID)
+        log_timestamp_aslong = log_dict.pop(TIMESTAMP_ID)
         msg_level = log_dict.pop(LEVEL_ID)
         text = log_dict.pop(TEXT_ID)
         log_id = log_dict.pop(LOG_RECORD_ID)
