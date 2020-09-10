@@ -4,10 +4,10 @@ Update historical data per contract from Quandl data, dump into mongodb
 
 from syscore.objects import success, failure, data_error
 from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
-from syslogdiag.emailing import send_mail_msg
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
+from sysproduction.diagnostic.emailing import send_production_mail_msg
 
 
 def update_historical_prices():
@@ -88,7 +88,7 @@ def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
                   % str(contract_object)
             log.warn(msg)
             try:
-                send_mail_msg(msg, "Price Spike")
+                send_production_mail_msg(data, msg, "Price Spike %s" % contract_object.instrument_code)
             except:
                 log.warn("Couldn't send email about price spike for %s" % str(contract_object))
 
