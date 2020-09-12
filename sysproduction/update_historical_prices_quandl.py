@@ -29,20 +29,22 @@ class updateHistoricalPricesQuandl(object):
     def update_historical_prices(self):
         data = self.data
         price_data = diagPrices(data)
+        log = data.log
         list_of_codes_all = price_data.get_list_of_instruments_in_multiple_prices()
         for instrument_code in list_of_codes_all:
-            update_historical_prices_for_instrument(instrument_code, data)
+            update_historical_prices_for_instrument(instrument_code, data,
+                                                    log=log.setup(instrument_code=instrument_code))
 
 
-def update_historical_prices_for_instrument(instrument_code, data):
+def update_historical_prices_for_instrument(instrument_code, data, log):
     """
     Do a daily update for futures contract prices, using Quandl historical data
 
     :param instrument_code: str
     :param data: dataBlob
+    :param log: logger
     :return: None
     """
-    log = data.log
     diag_contracts = diagContracts(data)
     all_contracts_list = diag_contracts.get_all_contract_objects_for_instrument_code(instrument_code)
     contract_list = all_contracts_list.currently_sampling()
