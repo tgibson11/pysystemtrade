@@ -1,4 +1,3 @@
-import datetime
 
 from sysdata.mongodb.mongo_connection import mongoConnection
 from sysdata.mongodb.mongo_connection import  MONGO_ID_KEY
@@ -44,7 +43,9 @@ class logToMongod(logToDb):
         return None
 
     def add_log_record(self, log_entry):
-        self._mongo.collection.insert_one(log_entry.log_dict())
+        record_as_dict = log_entry.log_dict()
+        ## very rare race condition can lead to duplicates
+        self._mongo.collection.update_one(record_as_dict, {'$set': record_as_dict}, upsert = True)
 
 
 
