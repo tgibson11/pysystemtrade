@@ -339,3 +339,5 @@ dict_of_functions = {
                     60: view_instrument_config,
                     61: view_contract_config}
 
+if __name__ == '__main__':
+    interactive_diagnostics()
