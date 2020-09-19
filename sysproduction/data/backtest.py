@@ -1,4 +1,5 @@
 import matplotlib
+import matplotlib.pyplot as plot
 matplotlib.use("TkAgg")
 
 import pandas as pd
@@ -128,6 +129,7 @@ class dataBacktest(object):
         if data is user_exit or data is missing_data:
             return data
         data.plot()
+        plot.show()
 
         return None
 
