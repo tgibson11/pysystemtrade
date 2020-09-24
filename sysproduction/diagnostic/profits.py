@@ -1,5 +1,6 @@
 import  datetime
 import pandas as pd
+import types
 
 from collections import  namedtuple
 
@@ -18,6 +19,7 @@ from sysproduction.data.strategies import diagStrategiesConfig
 ## To have it emailed, we'll call the report function and optionally pass the output to a text file not stdout
 ## Reports consist of multiple calls to functions with data object, each of which returns a displayable object
 ## We also chuck in a title and a timestamp
+
 
 
 def pandl_info(data, calendar_days_back = 7, start_date = arg_not_supplied, end_date = arg_not_supplied):
@@ -43,7 +45,8 @@ def pandl_info(data, calendar_days_back = 7, start_date = arg_not_supplied, end_
 
 pandlResults = namedtuple("pandlResults", ['total_capital_pandl', 'start_date', 'end_date',
                                            'pandl_for_instruments_across_strategies',
-                                           'futures_total','residual', 'strategies'])
+                                           'futures_total','residual', 'strategies',
+                                           'sector_pandl'])
 
 def get_pandl_report_data(data, start_date, end_date):
     """
@@ -52,17 +55,35 @@ def get_pandl_report_data(data, start_date, end_date):
     :param calendar_days_back:
     :return: named tuple object containing p&l data
     """
+    # to save double calculation
+    data.temp_pandl_read = types.MethodType(temp_pandl_read, data)
+    data.temp_pandl_write = types.MethodType(temp_pandl_write, data)
+
     total_capital_pandl = get_total_capital_pandl(data, start_date, end_date=end_date)*100
     pandl_for_instruments_across_strategies = get_ranked_list_of_pandl_by_instrument_all_strategies_in_date_range(data, start_date, end_date)
     pandl_for_instruments_across_strategies.pandl = pandl_for_instruments_across_strategies.pandl*100
     total_for_futures = pandl_for_instruments_across_strategies.pandl.sum()
     residual = total_capital_pandl - total_for_futures
     strategies = get_strategy_pandl_and_residual(data, start_date, end_date)
+    sector_pandl = get_sector_pandl(data, start_date, end_date)
 
     results_object = pandlResults(total_capital_pandl, start_date, end_date, pandl_for_instruments_across_strategies, total_for_futures, residual,
-                                  strategies)
+                                  strategies, sector_pandl)
 
     return results_object
+
+def temp_pandl_write(self, instrument_code, pandl_data):
+    meta_data = getattr(self, 'meta_data', None)
+    if meta_data is None:
+        self.meta_data = {}
+    self.meta_data[instrument_code] = pandl_data
+
+def temp_pandl_read(self, instrument_code):
+    meta_data = getattr(self, 'meta_data', None)
+    if meta_data is None:
+        return None
+    data = meta_data.get(instrument_code, None)
+    return data
 
 
 def get_total_capital_series(data):
@@ -121,6 +142,14 @@ def get_ranked_list_of_pandl_by_instrument_all_strategies_in_date_range(data, st
 
     return pandl_as_df
 
+def get_sector_pandl(data, start_date, end_date):
+    list_pandl = get_period_perc_pandl_for_all_sectors_in_date_range(data, start_date, end_date)
+    list_pandl = [pandl for pandl in list_pandl if pandl.pandl!=0]
+    list_pandl.sort(key=lambda r:r.pandl)
+
+    pandl_as_df = list_pandl_to_df(list_pandl)
+
+    return pandl_as_df
 
 def get_ranked_list_of_pandl_by_strategy_in_date_range(data, start_date, end_date):
     list_pandl = get_period_perc_pandl_for_all_strategies_in_date_range(data, start_date, end_date)
@@ -150,6 +179,14 @@ def get_period_perc_pandl_for_all_instruments_all_strategies_in_date_range(data,
 
     return list_pandl
 
+def get_period_perc_pandl_for_all_sectors_in_date_range(data, start_date, end_date):
+    diag_instruments = diagInstruments(data)
+    asset_classes = diag_instruments.get_all_asset_classes()
+    list_pandl = [PandL(asset_class, get_period_perc_pandl_for_sector_in_date_range(asset_class, data, start_date, end_date))
+                  for asset_class in asset_classes]
+
+    return list_pandl
+
 def get_period_perc_pandl_for_all_strategies_in_date_range(data, start_date, end_date):
     strategy_list = get_list_of_strategies(data)
     list_pandl = [PandL(strategy_name, get_period_perc_pandl_for_strategy_in_date_range(
@@ -158,20 +195,36 @@ def get_period_perc_pandl_for_all_strategies_in_date_range(data, start_date, end
 
     return list_pandl
 
+def get_period_perc_pandl_for_sector_in_date_range(asset_class, data, start_date, end_date):
+    print("Getting data for %s" % asset_class)
+    diag_instruments = diagInstruments(data)
+    list_of_instruments = diag_instruments.get_all_instruments_in_asset_class(asset_class)
+    instrument_pandl = [get_period_perc_pandl_for_instrument_all_strategies_in_date_range(
+        data, instrument_code, start_date, end_date) for instrument_code in list_of_instruments]
+    asset_class_pandl = sum(instrument_pandl)
+
+    return asset_class_pandl*100
+
 
 def get_period_perc_pandl_for_instrument_all_strategies_in_date_range(
         data, instrument_code, start_date, end_date):
     print("Getting p&l for %s" % instrument_code)
-    pandl_df = get_df_of_perc_pandl_series_for_instrument_all_strategies_across_contracts_in_date_range(
-        data, instrument_code, start_date, end_date)
 
-    if pandl_df is missing_data:
-        return 0.0
+    pandl_series = data.temp_pandl_read(instrument_code)
+    if pandl_series is None:
+        pandl_df = get_df_of_perc_pandl_series_for_instrument_all_strategies_across_contracts_in_date_range(
+            data, instrument_code, start_date, end_date)
 
-    pandl_series = pandl_df.sum(axis=1)
-    pandl_series = pandl_series[start_date:end_date]
+        if pandl_df is missing_data:
+            return 0.0
+
+        pandl_series = pandl_df.sum(axis=1)
+        pandl_series = pandl_series[start_date:end_date]
+
+        data.temp_pandl_write(instrument_code, pandl_series)
 
     return pandl_series.sum()
+
 
 
 def get_period_perc_pandl_for_strategy_in_date_range(
@@ -479,7 +532,11 @@ def format_pandl_data(results_object):
 
     formatted_output.append(table2)
 
+    table3_df = results_object.sector_pandl
+    table3_df = table3_df.round(2)
+    table3 = table('P&L by asset class', table3_df)
 
+    formatted_output.append(table3)
 
     formatted_output.append(header("END OF P&L REPORT"))
 

@@ -27,3 +27,20 @@ class diagInstruments(object):
 
     def get_meta_data(self, instrument_code):
         return self.data.db_futures_instrument.get_instrument_data(instrument_code).meta_data
+
+    def get_list_of_instruments(self):
+        return self.data.db_futures_instrument.get_list_of_instruments()
+
+    def get_all_asset_classes(self):
+        instrument_codes = self.get_list_of_instruments()
+        list_of_asset_classes = [self.get_asset_class(instrument_code) for instrument_code in instrument_codes]
+        unique_list = list(set(list_of_asset_classes))
+
+        return unique_list
+
+    def get_all_instruments_in_asset_class(self, asset_class):
+        instrument_codes = self.get_list_of_instruments()
+        instrument_codes = [instrument_code for instrument_code in instrument_codes
+                            if self.get_asset_class(instrument_code)==asset_class]
+
+        return instrument_codes
