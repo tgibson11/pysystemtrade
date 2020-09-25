@@ -17,5 +17,9 @@ class cleanTruncateBacktestStates():
     def clean_backtest_states(self):
         directory_to_use = get_directory_store_backtests()
         self.data.log.msg("Deleting old .pck and .yaml backtest state files in directory %s" % directory_to_use)
-        delete_old_files_with_extension_in_pathname(directory_to_use, days_old=5, extension=".pck")
-        delete_old_files_with_extension_in_pathname(directory_to_use, days_old=5, extension=".yaml")
+        delete_old_files_with_extension_in_pathname(directory_to_use, days_old=1, extension=".pck")
+        delete_old_files_with_extension_in_pathname(directory_to_use, days_old=1, extension=".yaml")
+
+
+if __name__ == '__main__':
+    clean_truncate_backtest_states()
