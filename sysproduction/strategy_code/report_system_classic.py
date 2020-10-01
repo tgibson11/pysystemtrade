@@ -128,6 +128,7 @@ def get_forecast_matrix(data_backtest, stage_name = "combForecast", method_name 
             value_dict[rule_name].append(value)
 
     value_df = pd.DataFrame(value_dict, index = instrument_codes)
+    value_df = value_df.transpose()
 
     return value_df
 
@@ -148,7 +149,7 @@ def get_forecast_matrix_over_code(data_backtest, stage_name = "combForecast", me
         value_dict[instrument_code] = values_by_rule
 
     value_df = pd.DataFrame(value_dict, index=trading_rule_names)
-    value_df = value_df.transpose()
+    # value_df = value_df.transpose()
 
     return value_df
 
