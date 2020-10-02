@@ -44,24 +44,27 @@ def get_trades_report_data(data, start_date, end_date):
     overview = broker_orders[["instrument_code","strategy_name",  "contract_id","fill_datetime",
                                        "fill", "filled_price"]]
 
+    raw_item_list = ['delay', 'bid_ask', 'execution', 'versus_limit', 'versus_parent_limit',
+                                  'total_trading']
+
+    vol_item_list = ['last_annual_vol','delay_vol', 'bid_ask_vol', 'execution_vol', 'versus_limit_vol', 'versus_parent_limit_vol', 'total_trading_vol']
+
+    cash_item_list = ['delay_cash', 'bid_ask_cash', 'execution_cash', 'versus_limit_cash', 'versus_parent_limit_cash',
+                 'total_trading_cash']
+
     delays = create_delay_df(broker_orders)
-    raw_slippage = create_raw_slippage_df(broker_orders)
-    vol_slippage = create_vol_norm_slippage_df(raw_slippage, data)
-    cash_slippage = create_cash_slippage_df(raw_slippage, data)
+    raw_slippage = create_raw_slippage_df(broker_orders, raw_item_list)
+    vol_slippage = create_vol_norm_slippage_df(raw_slippage, data, vol_item_list)
+    cash_slippage = create_cash_slippage_df(raw_slippage, data, cash_item_list)
 
     summary_dict = {}
-    item_list = ['delay', 'bid_ask', 'execution', 'versus_limit', 'versus_parent_limit',
-                                  'total_trading']
-    detailed_raw_results = get_stats_for_slippage_groups(raw_slippage, item_list)
+    detailed_raw_results = get_stats_for_slippage_groups(raw_slippage, raw_item_list)
     summary_dict.update(detailed_raw_results)
 
-    item_list = ['last_annual_vol','delay_vol', 'bid_ask_vol', 'execution_vol', 'versus_limit_vol', 'versus_parent_limit_vol', 'total_trading_vol']
-    detailed_vol_results = get_stats_for_slippage_groups(vol_slippage, item_list)
+    detailed_vol_results = get_stats_for_slippage_groups(vol_slippage, vol_item_list)
     summary_dict.update(detailed_vol_results)
 
-    item_list = ['delay_cash', 'bid_ask_cash', 'execution_cash', 'versus_limit_cash', 'versus_parent_limit_cash',
-                 'total_trading_cash']
-    detailed_cash_results = get_stats_for_slippage_groups(cash_slippage, item_list)
+    detailed_cash_results = get_stats_for_slippage_groups(cash_slippage, cash_item_list)
     summary_dict.update(detailed_cash_results)
 
     results_object = dict(overview = overview, delays = delays, raw_slippage=raw_slippage,
@@ -151,9 +154,13 @@ def get_tuple_object_from_order_id(data, order_id):
 def create_delay_df(broker_orders):
     delay_data_as_list = [delay_row(broker_orders.iloc[irow])
                           for irow in range(len(broker_orders))]
-    delay_data_df = pd.concat(delay_data_as_list, axis=1)
-    delay_data_df = delay_data_df.transpose()
-    delay_data_df.index = broker_orders.index
+
+    if delay_data_as_list:
+        delay_data_df = pd.concat(delay_data_as_list, axis=1)
+        delay_data_df = delay_data_df.transpose()
+        delay_data_df.index = broker_orders.index
+    else:
+        delay_data_df = pd.DataFrame()
 
     return delay_data_df
 
@@ -192,12 +199,16 @@ def delay_calc(first_time, second_time):
     return time_diff_seconds
 
 
-def create_raw_slippage_df(broker_orders):
+def create_raw_slippage_df(broker_orders, item_list):
     raw_slippage_data_as_list = [raw_slippage_row(broker_orders.iloc[irow])
                           for irow in range(len(broker_orders))]
-    raw_slippage_df = pd.concat(raw_slippage_data_as_list, axis=1)
-    raw_slippage_df = raw_slippage_df.transpose()
-    raw_slippage_df.index = broker_orders.index
+
+    if raw_slippage_data_as_list:
+        raw_slippage_df = pd.concat(raw_slippage_data_as_list, axis=1)
+        raw_slippage_df = raw_slippage_df.transpose()
+        raw_slippage_df.index = broker_orders.index
+    else:
+        raw_slippage_df = pd.DataFrame(columns=["strategy_name", "instrument_code"] + item_list)
 
     return raw_slippage_df
 
@@ -258,14 +269,18 @@ def price_slippage(buying_multiplier, first_price, second_price):
     return slippage
 
 
-def create_cash_slippage_df(raw_slippage, data):
+def create_cash_slippage_df(raw_slippage, data, item_list):
     ## What does this slippage mean in money terms
 
     cash_slippage_data_as_list = [cash_slippage_row(raw_slippage.iloc[irow], data)
                           for irow in range(len(raw_slippage))]
-    cash_slippage_df = pd.concat(cash_slippage_data_as_list, axis=1)
-    cash_slippage_df = cash_slippage_df.transpose()
-    cash_slippage_df.index = raw_slippage.index
+
+    if cash_slippage_data_as_list:
+        cash_slippage_df = pd.concat(cash_slippage_data_as_list, axis=1)
+        cash_slippage_df = cash_slippage_df.transpose()
+        cash_slippage_df.index = raw_slippage.index
+    else:
+        cash_slippage_df = pd.DataFrame(columns=["strategy_name", "instrument_code"] + item_list)
 
     return cash_slippage_df
 
@@ -291,14 +306,18 @@ def cash_calculations_for_slippage_row(slippage_row, data):
 
     return tuple(output+[value_of_price_point])
 
-def create_vol_norm_slippage_df(raw_slippage, data):
+def create_vol_norm_slippage_df(raw_slippage, data, item_list):
     ## What does this slippage mean in vol normalised terms
 
     vol_slippage_data_as_list = [vol_slippage_row(raw_slippage.iloc[irow], data)
                           for irow in range(len(raw_slippage))]
-    vol_slippage_df = pd.concat(vol_slippage_data_as_list, axis=1)
-    vol_slippage_df = vol_slippage_df.transpose()
-    vol_slippage_df.index = raw_slippage.index
+
+    if vol_slippage_data_as_list:
+        vol_slippage_df = pd.concat(vol_slippage_data_as_list, axis=1)
+        vol_slippage_df = vol_slippage_df.transpose()
+        vol_slippage_df.index = raw_slippage.index
+    else:
+        vol_slippage_df = pd.DataFrame(columns=["strategy_name", "instrument_code"] + item_list)
 
     return vol_slippage_df
 
