@@ -20,7 +20,7 @@ from sysproduction.data.strategies import diagStrategiesConfig
 ## To have it emailed, we'll call the report function and optionally pass the output to a text file not stdout
 ## Reports consist of multiple calls to functions with data object, each of which returns a displayable object
 ## We also chuck in a title and a timestamp
-
+from sysproduction.diagnostic.system_status import get_last_price_updates_as_df
 
 
 def pandl_info(data, calendar_days_back = 7, start_date = arg_not_supplied, end_date = arg_not_supplied):
@@ -34,10 +34,17 @@ def pandl_info(data, calendar_days_back = 7, start_date = arg_not_supplied, end_
     :param: data blob
     :return: list of formatted output items
     """
-    if end_date is arg_not_supplied:
-        end_date = datetime.datetime.now()
-    if start_date is arg_not_supplied:
-        start_date = datetime.datetime.now() - datetime.timedelta(days=calendar_days_back)
+
+    last_price_update = get_last_price_updates_as_df(data).last_update.min()
+
+    if end_date is arg_not_supplied or end_date > last_price_update:
+        end_date = last_price_update
+
+    if start_date is arg_not_supplied or start_date > end_date:
+        if calendar_days_back is arg_not_supplied:
+            start_date = end_date - datetime.timedelta(days=1)
+        else:
+            start_date = end_date - datetime.timedelta(days=calendar_days_back)
 
     results_object = get_pandl_report_data(data, start_date = start_date, end_date  = end_date)
     formatted_output = format_pandl_data(results_object)
