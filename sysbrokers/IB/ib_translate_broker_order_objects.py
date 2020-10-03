@@ -167,7 +167,7 @@ def extract_totals_from_fill_data_for_contract_id(list_of_fills_for_contractid):
     :param list_of_fills: list of named tuples
     :return: broker_clientid, broker_tempid, filled_price, fill_datetime, commission (as list of tuples)
     """
-    qty_and_price_and_datetime_and_id = [(fill.cum_qty, fill.avg_price, fill.time,
+    qty_and_price_and_datetime_and_id = [(fill.cum_qty, fill.avg_price, fill.time.astimezone(tz.tzlocal()),
                                           fill.temp_id, fill.client_id, fill.signed_qty) for fill in
                                          list_of_fills_for_contractid]
 
