@@ -1,3 +1,4 @@
+from dateutil.tz import tz
 import datetime
 import pandas as pd
 from copy import copy
@@ -11,7 +12,7 @@ from sysbrokers.baseClient import brokerClient
 
 from syscore.objects import missing_contract, arg_not_supplied, missing_order
 from syscore.genutils import list_of_ints_with_highest_common_factor_positive_first
-from syscore.dateutils import adjust_timestamp
+from syscore.dateutils import adjust_timestamp, strip_tz_info
 from syslogdiag.log import logtoscreen
 
 
@@ -418,7 +419,7 @@ class ibClient(brokerClient):
         try:
             barSizeSetting, durationStr = get_barsize_and_duration_from_frequency(bar_freq)
         except Exception as exception:
-            log.warn(exception.args[0])
+            log.warn(str(exception.args[0]))
             return pd.Series()
 
         if ibcontract is missing_contract:
@@ -431,11 +432,61 @@ class ibClient(brokerClient):
 
         price_data_as_df = price_data_raw[['open', 'high', 'low', 'close', 'volume']]
         price_data_as_df.columns = ['OPEN', 'HIGH', 'LOW', 'FINAL', 'VOLUME']
-        date_index = [ib_timestamp_to_datetime(price_row) for price_row in price_data_raw['date']]
+        date_index = [self.ib_timestamp_to_datetime(price_row) for price_row in price_data_raw['date']]
         price_data_as_df.index = date_index
 
         return price_data_as_df
 
+    def ib_timestamp_to_datetime(self, timestamp_ib):
+        """
+        Turns IB timestamp into pd.datetime as plays better with arctic, converts IB time (UTC?) to local,
+        and adjusts yyyymm to closing vector
+
+        :param timestamp_str: datetime.datetime
+        :return: pd.datetime
+        """
+
+        local_timestamp_ib = self.adjust_ib_time_to_local(timestamp_ib)
+        timestamp = pd.to_datetime(local_timestamp_ib)
+
+        adjusted_ts = adjust_timestamp(timestamp)
+
+        return adjusted_ts
+
+    def adjust_ib_time_to_local(self, timestamp_ib):
+
+        if getattr(timestamp_ib, 'tz_localize', None) is None:
+            ## daily, nothing to do
+            return timestamp_ib
+
+        timestamp_ib_with_tz = self.add_tz_to_ib_time(timestamp_ib)
+        local_timestamp_ib_with_tz = timestamp_ib_with_tz.astimezone(tz.tzlocal())
+        local_timestamp_ib = strip_tz_info(local_timestamp_ib_with_tz)
+
+        return local_timestamp_ib
+
+    def add_tz_to_ib_time(self, timestamp_ib):
+        ib_tz = self.get_ib_timezone()
+        timestamp_ib_with_tz = timestamp_ib.tz_localize(ib_tz)
+
+        return timestamp_ib_with_tz
+
+    def get_ib_timezone(self):
+        ## cache
+        ib_tz = getattr(self, "_ib_time_zone", None)
+        if ib_tz is None:
+            ib_time = self.ib.reqCurrentTime()
+            ib_tz = ib_time.timetz().tzinfo
+            self._ib_time_zone = ib_tz
+
+        return ib_tz
+
+    def get_broker_time_local_tz(self):
+        ib_time = self.ib.reqCurrentTime()
+        local_ib_time_with_tz = ib_time.astimezone(tz.tzlocal())
+        local_ib_time = strip_tz_info(local_ib_time_with_tz)
+
+        return local_ib_time
 
     def ib_spotfx_contract(self, ccy1, ccy2="USD", log=arg_not_supplied):
         ibcontract = Forex(ccy1+ccy2)
@@ -757,18 +808,6 @@ def avoid_pacing_violation(last_call_datetime, log=logtoscreen("")):
             printed_warning_already = True
         pass
 
-def ib_timestamp_to_datetime(timestamp_ib):
-    """
-    Turns IB timestamp into pd.datetime as plays better with arctic, and adjusts yyyymm to closing vector
-
-    :param timestamp_str: datetime.datetime
-    :return: pd.datetime
-    """
-    timestamp = pd.to_datetime(timestamp_ib)
-
-    adjusted_ts = adjust_timestamp(timestamp)
-
-    return adjusted_ts
 
 class ibcontractWithLegs(object):
     def __init__(self, ibcontract, legs=[]):
