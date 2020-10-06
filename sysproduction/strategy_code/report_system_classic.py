@@ -4,6 +4,7 @@ import datetime
 
 from collections import namedtuple
 
+from syscore.dateutils import ROOT_BDAYS_INYEAR
 from syscore.objects import header, table, body_text, missing_data
 from sysproduction.diagnostic.backtest_state import from_marker_to_datetime
 from sysproduction.data.positions import diagPositions
