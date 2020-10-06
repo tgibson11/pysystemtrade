@@ -463,11 +463,19 @@ def get_price_series_for_contract(data, instrument_code, contract_id):
     all_prices = diag_prices.get_prices_for_instrument_code_and_contract_date(instrument_code, contract_id)
     price_series = all_prices.return_final_prices()
 
+    # These are closing prices, so change the time from 00:00 to 14:00
+    # for compatibility with order & capital timestamps
+    price_series.index = price_series.index + pd.DateOffset(hours=14)
+
     return price_series
 
 def get_price_series_for_instrument(data, instrument_code):
     diag_prices = diagPrices(data)
     price_series = diag_prices.get_prices_for_instrument(instrument_code)
+
+    # These are closing prices, so change the time from 00:00 to 14:00
+    # for compatibility with order & capital timestamps
+    price_series.index = price_series.index + pd.DateOffset(hours=14)
 
     return price_series
 
