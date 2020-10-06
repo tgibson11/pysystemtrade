@@ -58,6 +58,7 @@ class mongoGenericHistoricOrdersData(genericOrdersData):
     def _add_order_to_data_no_checking(self, order):
         # Duplicates will be overriden, so be careful
         mongo_record = order.as_dict()
+        print(f"Order fill time (adding) = {mongo_record['fill_datetime']}")
         self._mongo.collection.insert_one(mongo_record)
         return success
 
@@ -70,6 +71,7 @@ class mongoGenericHistoricOrdersData(genericOrdersData):
 
         order_class = self._order_class()
         order = order_class.from_dict(result_dict)
+        print(f"Order fill time (finding) = {order.fill_datetime}")
         return order
 
     def delete_order_with_orderid(self, order_id):
@@ -77,6 +79,7 @@ class mongoGenericHistoricOrdersData(genericOrdersData):
         return success
 
     def update_order_with_orderid(self, order_id, order):
+        print(f"Order fill time (updating) = {order.fill_datetime}")
         self._mongo.collection.update_one(dict(order_id=order_id), {'$set': order.as_dict()})
 
 

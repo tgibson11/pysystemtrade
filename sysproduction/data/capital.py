@@ -76,10 +76,12 @@ class dataCapital(object):
     def get_ib_total_capital_value(self):
         currency_data = currencyData(self.data)
         values_across_accounts = self.data.ib_conn.broker_get_account_value_across_currency_across_accounts()
+        self.data.log.msg(f"Capital across accounts = {values_across_accounts}")
 
         ## This assumes that each account only reports either in one currency or for each currency, i.e. no double counting
         total_account_value_in_base_currency = currency_data.total_of_list_of_currency_values_in_base(
             values_across_accounts)
+        self.data.log.msg(f"Total account value in base currency = {total_account_value_in_base_currency}")
 
         return total_account_value_in_base_currency
 
