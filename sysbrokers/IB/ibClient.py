@@ -203,6 +203,7 @@ class ibClient(brokerClient):
             currencyValue(currency, self.get_liquidation_value_for_currency_across_accounts(currency))
             for currency in list_of_currencies])
 
+        print(f"Account values by currency = {list_of_values_per_currency}")
         return list_of_values_per_currency
 
 
