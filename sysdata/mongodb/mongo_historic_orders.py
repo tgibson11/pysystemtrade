@@ -61,7 +61,6 @@ class mongoGenericHistoricOrdersData(genericOrdersData):
     def add_order_to_data(self, order, ignore_duplication=False):
         # Duplicates will be overriden, so be careful
         order_id = order.order_id
-        print(f"Order fill time = {order.fill_datetime}")
         if self.get_order_with_orderid(order_id) is missing_order:
             return self._add_order_to_data_no_checking(order)
         if ignore_duplication:

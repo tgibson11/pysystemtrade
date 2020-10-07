@@ -14,13 +14,14 @@ from sysproduction.data.orders import dataOrders
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.instruments import diagInstruments
 from sysproduction.data.strategies import diagStrategiesConfig
-
-## We want a p&l (We could merge this into another kind of report)
-## We want to be able to have it emailed, or run it offline
-## To have it emailed, we'll call the report function and optionally pass the output to a text file not stdout
-## Reports consist of multiple calls to functions with data object, each of which returns a displayable object
-## We also chuck in a title and a timestamp
 from sysproduction.diagnostic.system_status import get_last_price_updates_as_df
+
+# We want a p&l (We could merge this into another kind of report)
+# We want to be able to have it emailed, or run it offline
+# To have it emailed, we'll call the report function and optionally pass the output to a text file not stdout
+# Reports consist of multiple calls to functions with data object, each of which returns a displayable object
+# We also chuck in a title and a timestamp
+
 
 def pandl_info(
         data,
@@ -607,20 +608,12 @@ def get_price_series_for_contract(data, instrument_code, contract_id):
     )
     price_series = all_prices.return_final_prices()
 
-    # These are closing prices, so change the time from 00:00 to 14:00
-    # for compatibility with order & capital timestamps
-    price_series.index = price_series.index + pd.DateOffset(hours=14)
-
     return price_series
 
 
 def get_price_series_for_instrument(data, instrument_code):
     diag_prices = diagPrices(data)
     price_series = diag_prices.get_prices_for_instrument(instrument_code)
-
-    # These are closing prices, so change the time from 00:00 to 14:00
-    # for compatibility with order & capital timestamps
-    price_series.index = price_series.index + pd.DateOffset(hours=14)
 
     return price_series
 

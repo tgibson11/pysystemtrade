@@ -254,18 +254,17 @@ class ibClient(brokerClient):
             ]
         )
 
+        print(f"Account values per currency = {list_of_values_per_currency}")
         return list_of_values_per_currency
 
     def get_liquidation_value_for_currency_across_accounts(self, currency):
         liquidiation_values_across_accounts_dict = self.get_net_liquidation_value_across_accounts()
-        print(f"Liquidation values = {liquidiation_values_across_accounts_dict}")
         list_of_account_ids = liquidiation_values_across_accounts_dict.keys()
         values_for_currency = [
             liquidiation_values_across_accounts_dict[account_id].get(currency, 0.0)
             for account_id in list_of_account_ids
         ]
 
-        print(f"Sum of liquidation values = {sum(values_for_currency)}")
         return sum(values_for_currency)
 
     def get_list_of_currencies_for_liquidation_values(self):
