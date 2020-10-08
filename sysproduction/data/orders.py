@@ -44,17 +44,14 @@ class dataOrders(object):
             self.add_historic_broker_order_to_data(broker_order)
 
     def add_historic_instrument_order_to_data(self, instrument_order):
-        print(f"Instrument order fill time = {instrument_order.fill_datetime}")
         return self.data.db_strategy_historic_orders.add_order_to_data(
             instrument_order)
 
     def add_historic_contract_order_to_data(self, contract_order):
-        print(f"Contract order fill time = {contract_order.fill_datetime}")
         return self.data.db_contract_historic_orders.add_order_to_data(
             contract_order)
 
     def add_historic_broker_order_to_data(self, broker_order):
-        print(f"Broker order fill time = {broker_order.fill_datetime}")
         return self.data.db_broker_historic_orders.add_order_to_data(
             broker_order)
 

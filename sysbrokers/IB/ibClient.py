@@ -281,7 +281,6 @@ class ibClient(brokerClient):
     def get_net_liquidation_value_across_accounts(self):
         # returns a dict, accountid as keys, of dicts, currencies as keys
         account_summary_dict = self.ib_get_account_summary()
-        print(f"Account summary dict = {account_summary_dict}")
 
         accounts = account_summary_dict.keys()
         liquidiation_values_across_accounts_dict = dict(
@@ -291,7 +290,6 @@ class ibClient(brokerClient):
             ]
         )
 
-        print(f"Liquidation values accross accounts = {liquidiation_values_across_accounts_dict}")
         return liquidiation_values_across_accounts_dict
 
     def get_liquidation_values_for_single_account(self, account_id):
@@ -901,8 +899,10 @@ class ibClient(brokerClient):
         data_stale = self._ib_get_account_summary_check_for_stale_cache()
         if data_stale:
             account_summary_data = self._ib_get_account_summary_if_cache_stale()
+            print(f"Account summary from IB = {account_summary_data}")
         else:
             account_summary_data = self._account_summary_data
+            print(f"Account summary from cache = {account_summary_data}")
 
         return account_summary_data
 
