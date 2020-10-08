@@ -36,6 +36,7 @@ from sysproduction.diagnostic.report_configs import (
     trade_report_config,
     reconcile_report_config,
     strategy_report_config,
+    risk_report_config
 )
 
 
@@ -82,6 +83,7 @@ nested_menu_of_options = {0: {1: "Interactive python",
                               13: "Trade report",
                               14: "Reconcile report",
                               15: "Strategy report",
+                              16: "Risk report"
                               },
                           2: {20: "View stored emails",
                               21: "View errors",
@@ -193,6 +195,10 @@ def strategy_report(data):
     report_config.modify_kwargs(
         strategy_name=strategy_name,
         timestamp=timestamp)
+    run_report(report_config, data=data)
+
+def risk_report(data):
+    report_config = email_or_print(risk_report_config)
     run_report(report_config, data=data)
 
 
@@ -566,37 +572,39 @@ def view_contract_config(data):
 
 
 dict_of_functions = {
-                    1: backtest_python,
-                    2: backtest_plot,
-                    3: backtest_print,
-                    4: backtest_html,
-                    10: roll_report,
-                    11: pandl_report,
-                    12: status_report,
-                    13: trade_report,
-                    14: reconcile_report,
-                    15: strategy_report,
-                    20: retrieve_and_delete_stored_messages,
-                    21: view_errors,
-                    22: view_logs,
-                    30: individual_prices,
-                    31: multiple_prices,
-                    32: adjusted_prices,
-                    33: fx_prices,
-                    40: capital_strategy,
-                    41: total_current_capital,
-                    42: total_broker_capital,
-                    43: total_max_capital,
-                    44: total_acc_capital,
-                    50: optimal_positions,
-                    51: actual_instrument_position,
-                    52: actual_contract_position,
-                    53: list_of_instrument_orders,
-                    54: list_of_contract_orders,
-                    55: list_of_broker_orders,
-                    56: view_individual_order,
-                    60: view_instrument_config,
-                    61: view_contract_config}
+    1: backtest_python,
+    2: backtest_plot,
+    3: backtest_print,
+    4: backtest_html,
+    10: roll_report,
+    11: pandl_report,
+    12: status_report,
+    13: trade_report,
+    14: reconcile_report,
+    15: strategy_report,
+    16: risk_report,
+    20: retrieve_and_delete_stored_messages,
+    21: view_errors,
+    22: view_logs,
+    30: individual_prices,
+    31: multiple_prices,
+    32: adjusted_prices,
+    33: fx_prices,
+    40: capital_strategy,
+    41: total_current_capital,
+    42: total_broker_capital,
+    43: total_max_capital,
+    44: total_acc_capital,
+    50: optimal_positions,
+    51: actual_instrument_position,
+    52: actual_contract_position,
+    53: list_of_instrument_orders,
+    54: list_of_contract_orders,
+    55: list_of_broker_orders,
+    56: view_individual_order,
+    60: view_instrument_config,
+    61: view_contract_config,
+}
 
 if __name__ == '__main__':
     interactive_diagnostics()
