@@ -270,7 +270,6 @@ class orderStackData(object):
     def change_fill_quantity_for_order(
         self, order_id, fill_qty, filled_price=None, fill_datetime=None
     ):
-        self.log.msg(f"Changing fill datetime to {fill_datetime}")
         existing_order = self.get_order_with_id_from_stack(order_id)
         if existing_order is missing_order:
             self.log.warn(

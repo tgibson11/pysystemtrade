@@ -899,10 +899,8 @@ class ibClient(brokerClient):
         data_stale = self._ib_get_account_summary_check_for_stale_cache()
         if data_stale:
             account_summary_data = self._ib_get_account_summary_if_cache_stale()
-            print(f"Account summary from IB = {account_summary_data}")
         else:
             account_summary_data = self._account_summary_data
-            print(f"Account summary from cache = {account_summary_data}")
 
         return account_summary_data
 
@@ -910,17 +908,22 @@ class ibClient(brokerClient):
         account_summary_data_update = getattr(
             self, "_account_summary_data_update", None
         )
+        print(f"Last account data update = {account_summary_data_update}")
         account_summary_data = getattr(self, "_account_summary_data", None)
+        print(f"Cached account data = {account_summary_data}")
 
         if account_summary_data_update is None or account_summary_data is None:
             return True
         elapsed_seconds = (
             account_summary_data_update - datetime.datetime.now()
         ).total_seconds()
+        print(f"Seconds since last update = " + elapsed_seconds)
 
         if elapsed_seconds > STALE_SECONDS_ALLOWED_ACCOUNT_SUMMARY:
+            print("Account data is stale")
             return True
         else:
+            print("Account data is not stale")
             return False
 
     def _ib_get_account_summary_if_cache_stale(self):

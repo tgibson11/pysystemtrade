@@ -80,6 +80,7 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
 
         # THIS LINE ACTUALLY SENDS THE ORDER TO THE ALGO
         broker_order_with_controls = algo_instance.submit_trade()
+        print(f"Broker order fill datetime (83) = {broker_order_with_controls.order.fill_datetime}")
 
         if broker_order_with_controls is missing_order:
             self.contract_stack.release_order_from_algo_control(
@@ -89,9 +90,13 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
         broker_order_with_controls = self.add_trade_to_database(
             broker_order_with_controls
         )
+        print(f"Broker order fill datetime (92) = {broker_order_with_controls.order.fill_datetime}")
+
         broker_order_with_controls = algo_instance.manage_trade(
             broker_order_with_controls
         )
+        print(f"Broker order fill datetime (95) = {broker_order_with_controls.order.fill_datetime}")
+
 
         result = self.post_trade_processing(broker_order_with_controls)
 
@@ -224,6 +229,7 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
 
     def post_trade_processing(self, broker_order_with_controls):
         broker_order = broker_order_with_controls.order
+        print(f"Broker order fill datetime (229) = {broker_order.fill_datetime}")
 
         log = broker_order.log_with_attributes(self.log)
 
@@ -240,6 +246,7 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
         return success
 
     def apply_fills_to_database(self, broker_order):
+        print(f"Broker order fill datetime (246) = {broker_order.fill_datetime}")
         broker_order_id = broker_order.order_id
 
         self.broker_stack.change_fill_quantity_for_order(
