@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from syscore.dateutils import ROOT_BDAYS_INYEAR
-from syscore.objects import header, table, body_text
+from syscore.objects import header, table, body_text, missing_data
 from syscore.optimisation_utils import sigma_from_corr_and_std
 
 from sysproduction.data.positions import diagPositions
@@ -288,6 +288,9 @@ def get_perc_of_capital_position_size_for_instrument(
     data, strategy_name, instrument_code
 ):
     capital_base_fx = capital_for_strategy(data, strategy_name)
+    if capital_base_fx is missing_data:
+        return 0
+
     exposure_base_fx = get_notional_exposure_in_base_currency_for_instrument(data, strategy_name, instrument_code)
 
     return exposure_base_fx / capital_base_fx
