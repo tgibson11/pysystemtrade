@@ -918,7 +918,7 @@ class ibClient(brokerClient):
         elapsed_seconds = (
             account_summary_data_update - datetime.datetime.now()
         ).total_seconds()
-        print(f"Seconds since last update = " + elapsed_seconds)
+        print(f"Seconds since last update = {elapsed_seconds}")
 
         if elapsed_seconds > STALE_SECONDS_ALLOWED_ACCOUNT_SUMMARY:
             print("Account data is stale")
