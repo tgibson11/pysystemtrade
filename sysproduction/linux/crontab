@@ -18,3 +18,4 @@ MPLBACKEND=Agg
 #
 # Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
 @reboot         . $HOME/.profile; mongod --dbpath $MONGO_DATA
+@reboot         . $HOME/.profile; cd $SCRIPT_PATH; ./startup  >> $ECHO_PATH/startup.txt 2>&1
