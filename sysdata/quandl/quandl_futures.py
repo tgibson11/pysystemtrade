@@ -2,7 +2,7 @@
 Get data from quandl for futures
 
 """
-
+from syscore.dateutils import adjust_timestamp
 from sysdata.futures.contracts import futuresContract
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
@@ -278,5 +278,12 @@ class quandlFuturesContractPrices(futuresContractPrices):
         except AttributeError:
             raise Exception(
                 "Quandl API error: data fields %s are not as expected" % ",".join(list(contract_data.columns)))
+
+        # Adjust timestamps to notional closing time
+        date_index = [
+            adjust_timestamp(timestamp)
+            for timestamp in new_data.index
+        ]
+        new_data.index = date_index
 
         super().__init__(new_data)
