@@ -14,8 +14,9 @@ from syscore.objects import header, table, body_text
 # Reports consist of multiple calls to functions with data object, each of which returns a displayable object
 # We also chuck in a title and a timestamp
 
+ALL_ROLL_INSTRUMENTS = "ALL"
 
-def roll_info(data, instrument_code="ALL"):
+def roll_info(data, instrument_code=ALL_ROLL_INSTRUMENTS):
     """
     Get some roll info. For all markets which are:
 
@@ -34,7 +35,7 @@ def roll_info(data, instrument_code="ALL"):
     """
     diag_prices = diagPrices(data)
 
-    if instrument_code == "ALL":
+    if instrument_code == ALL_ROLL_INSTRUMENTS:
         list_of_instruments = diag_prices.get_list_of_instruments_in_multiple_prices()
 
     else:
@@ -71,11 +72,6 @@ def get_roll_data_for_instrument(instrument_code, data):
         instrument_code, relevant_contracts
     )
 
-    # price curve
-    p_data = diagPrices(data)
-    contracts_to_match = [current_contracts[k] for k in ("PRICE", "FORWARD")]
-    last_matched_prices = p_data.get_last_matched_prices_for_contract_list(
-        instrument_code, relevant_contracts, contracts_to_match=contracts_to_match)
 
     # length to expiries / length to suggested roll
     price_expiry = c_data.get_priced_expiry(instrument_code)
@@ -104,7 +100,6 @@ def get_roll_data_for_instrument(instrument_code, data):
         carry_expiry=carry_expiry_days,
         contract_labels=contract_labels,
         volumes=volumes,
-        curve=last_matched_prices,
         positions=positions,
     )
 
@@ -193,17 +188,6 @@ def format_roll_data_for_instrument(results_dict):
         )
     )
 
-    table4_dict = {}
-    for col_number in range(width_contract_columns):
-        table4_dict["P%d" % col_number] = [results_dict[code][
-            "curve"][col_number] for code in instrument_codes]
-
-    table4_df = pd.DataFrame(table4_dict, index=instrument_codes)
-
-    table4_df = table4_df.round(5)
-
-    table4 = table("Prices", table4_df)
-    formatted_output.append(table4)
 
     formatted_output.append(header("END OF ROLL REPORT"))
 
