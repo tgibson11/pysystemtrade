@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 
 from collections import namedtuple
-from syscore.objects import missing_data, arg_not_supplied, missing_order
+from syscore.objects import missing_data, arg_not_supplied, missing_order, missing_contract
 
 from sysdata.production.current_positions import contractPosition
 
@@ -14,6 +14,7 @@ from sysexecution.tick_data import analyse_tick_data_frame
 from sysproduction.data.get_data import dataBlob
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.currency_data import currencyData
+from sysproduction.data.controls import diagProcessConfig
 
 benchmarkPriceCollection = namedtuple(
     "benchmarkPriceCollection",
@@ -91,6 +92,14 @@ class dataBroker(object):
 
     def less_than_one_hour_of_trading_leg_for_instrument_code_and_contract_date(
             self, instrument_code, contract_date):
+
+        diag_controls = diagProcessConfig()
+        hours_left_before_process_finishes = diag_controls.how_long_in_hours_before_trading_process_finishes()
+
+        if hours_left_before_process_finishes<1:
+            ## irespective of instrument traded
+            return True
+
         result = self.data.broker_futures_contract.less_than_one_hour_of_trading_leg_for_instrument_code_and_contract_date(
             instrument_code, contract_date)
 
@@ -102,6 +111,12 @@ class dataBroker(object):
         check_open = self.data.broker_futures_contract.is_instrument_code_and_contract_date_okay_to_trade(
             instrument_code, contract_id)
         return check_open
+
+    def get_min_tick_size_for_instrument_code_and_contract_date(self, instrument_code, contract_id):
+        result = self.data.broker_futures_contract.get_min_tick_size_for_instrument_code_and_contract_date(
+            instrument_code, contract_id)
+
+        return result
 
     def get_trading_hours_for_instrument_code_and_contract_date(
         self, instrument_code, contract_id
@@ -182,6 +197,7 @@ class dataBroker(object):
                 return missing_order
 
             limit_price = self.set_limit_price(
+                contract_order,
                 collected_prices.side_price,
                 collected_prices.offside_price,
                 limit_price_from=limit_price_from,
@@ -323,6 +339,7 @@ class dataBroker(object):
 
     def set_limit_price(
         self,
+            contract_order,
         side_price,
         offside_price,
         input_limit_price=None,
@@ -338,7 +355,26 @@ class dataBroker(object):
         elif limit_price_from == "offside_price":
             limit_price = offside_price
 
-        return limit_price
+        limit_price_rounded = self.round_limit_price_to_tick_size(contract_order, limit_price)
+
+        return limit_price_rounded
+
+    def round_limit_price_to_tick_size(self, contract_order, limit_price):
+        instrument_code = contract_order.instrument_code
+        contract_id = contract_order.contract_id
+
+        min_tick = self.get_min_tick_size_for_instrument_code_and_contract_date(instrument_code, contract_id)
+        if min_tick is missing_contract:
+            log = contract_order.log_with_attributes(self.data.log)
+            log.warn("Couldn't find min tick size for %s %s, not rounding limit price %f" % (instrument_code,
+                                                                                             contract_id,
+                                                                                             limit_price))
+
+            return limit_price
+
+        rounded_limit_price = min_tick * round(limit_price / min_tick)
+
+        return rounded_limit_price
 
     def get_net_mid_price_for_contract_order_by_leg(self, contract_order):
         market_conditions = self.get_market_conditions_for_contract_order_by_leg(
