@@ -154,8 +154,11 @@ class controlProcess(object):
             return False
 
         time_now = datetime.datetime.now()
-        time_delta = time_now - end_time
-        if time_delta.seconds <= SECONDS_PER_DAY:
+        # Has the process finished TODAY is a more useful condition
+        # than if it has finished in the last 24 hours.
+        # time_delta = time_now - end_time
+        # if time_delta.seconds <= SECONDS_PER_DAY:
+        if end_time.date() == time_now.date():
             return True
         else:
             return False
