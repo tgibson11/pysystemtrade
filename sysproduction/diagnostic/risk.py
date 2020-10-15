@@ -308,6 +308,8 @@ def capital_for_strategy(data, strategy_name):
     data_capital = dataCapital(data)
     capital = data_capital.get_capital_for_strategy(
         strategy_name)
+    if capital is missing_data:
+        return 0.00001
 
     return capital
 
