@@ -30,7 +30,7 @@ class cleanTruncateBacktestStates:
         )
 
         # Also remove old backtests from backup directory to save space
-        directory_to_use = get_statefile_backup_directory
+        directory_to_use = get_statefile_backup_directory()
         self.data.log.msg(
             "Deleting old .pck and .yaml backtest state files in directory %s"
             % directory_to_use
@@ -41,6 +41,7 @@ class cleanTruncateBacktestStates:
         delete_old_files_with_extension_in_pathname(
             directory_to_use, days_old=3, extension=".yaml"
         )
+
 
 if __name__ == '__main__':
     clean_truncate_backtest_states()
