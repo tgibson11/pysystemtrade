@@ -917,10 +917,8 @@ class ibClient(object):
         data_stale = self._ib_get_account_summary_check_for_stale_cache()
         if data_stale:
             account_summary_data = self._ib_get_account_summary_if_cache_stale()
-            print(f"Account summary from IB: {account_summary_data}")
         else:
             account_summary_data = self._account_summary_data
-            print(f"Account summary from cache: {account_summary_data}")
 
         return account_summary_data
 
@@ -944,6 +942,7 @@ class ibClient(object):
     def _ib_get_account_summary_if_cache_stale(self):
 
         account_summary_rawdata = self.ib.accountSummary()
+        print(f"Account summary raw data: {account_summary_rawdata}")
 
         # Weird format let's clean it up
         account_summary_dict = clean_up_account_summary(
@@ -952,6 +951,7 @@ class ibClient(object):
         self._account_summary_data = account_summary_dict
         self._account_summary_data_update = datetime.datetime.now()
 
+        print(f"Account summary dict: {account_summary_dict}")
         return account_summary_dict
 
 
