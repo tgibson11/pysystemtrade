@@ -3,14 +3,16 @@ IB connection using ib-insync https://ib-insync.readthedocs.io/api.html
 
 """
 
+import time
+
 from ib_insync import IB
 
 from sysbrokers.IB.ibClient import ibClient
 from sysbrokers.IB.ibServer import ibServer
 from syscore.genutils import get_safe_from_dict
-from syscore.objects import arg_not_supplied
+from syscore.objects import arg_not_supplied, missing_data
 
-from sysdata.private_config import get_list_of_private_then_default_key_values
+from sysdata.private_config import get_list_of_private_then_default_key_values, get_private_then_default_key_value
 from syslogdiag.log import logtoscreen
 from sysdata.mongodb.mongo_connection import mongoConnection, mongoDb
 
@@ -55,6 +57,16 @@ def ib_defaults(**kwargs):
     idoffset = yaml_dict.get("idoffset", DEFAULT_IB_IDOFFSET)
 
     return ipaddress, port, idoffset
+
+def get_broker_account() -> str:
+
+    account_id = get_private_then_default_key_value(
+        "broker_account", raise_error=False
+    )
+    if account_id is missing_data:
+        return arg_not_supplied
+    else:
+        return account_id
 
 
 class connectionIB(ibClient, ibServer):
@@ -103,9 +115,14 @@ class connectionIB(ibClient, ibServer):
         ibServer.__init__(self, log=log)
         ibClient.__init__(self, log=log)
 
+        account = get_broker_account()
+
         # this is all very IB specific
         ib = IB()
-        ib.connect(ipaddress, port, clientId=client)
+        ib.connect(ipaddress, port, clientId=client, account=account)
+
+        # Attempt to fix connection bug
+        time.sleep(5)
 
         # Add handlers, from ibServer methods
         ib.errorEvent += self.error_handler
