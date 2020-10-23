@@ -444,6 +444,14 @@ class accountCurveSingleElementOneFreq(pd.Series):
             sharpe = np.nan
         return sharpe
 
+    def geometric_mean_return(self):
+        ts = self.as_ts()
+        pct_returns = ts / self.capital
+        log_returns = np.log(pct_returns + 1)
+        daily_geo_mean = np.exp(log_returns.mean())
+        ann_geo_mean = (daily_geo_mean**self._returns_scalar) - 1
+        return ann_geo_mean
+
     def drawdown(self):
         x = self.curve()
         return drawdown(x)
