@@ -1,3 +1,5 @@
+import logging
+
 from sysproduction.run_process import processToRun
 from sysproduction.update_fx_prices import updateFxPrices
 from sysproduction.update_sampled_contracts import updateSampledContracts
@@ -5,6 +7,8 @@ from sysproduction.update_historical_prices_quandl import updateHistoricalPrices
 from sysproduction.update_multiple_adjusted_prices import updateMultipleAdjustedPrices
 
 from sysproduction.data.get_data import dataBlob
+
+logging.getLogger("arctic").setLevel(logging.ERROR)
 
 
 def run_daily_price_updates():
