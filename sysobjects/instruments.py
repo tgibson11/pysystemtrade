@@ -15,8 +15,12 @@ class futuresInstrument(object):
 
     @classmethod
     def create_from_dict(futuresInstrument, input_dict):
-        ## WANT TO GET RID OF
+        # Might seem pointless, but (a) is used in original code, (b) gives a nice consistent feel
         return futuresInstrument(input_dict['instrument_code'])
+
+    def as_dict(self):
+        # Might seem pointless, but (a) is used in original code, (b) gives a nice consistent feel
+        return dict(instrument_code = self.instrument_code)
 
     def __eq__(self, other):
         return self.instrument_code == other.instrument_code

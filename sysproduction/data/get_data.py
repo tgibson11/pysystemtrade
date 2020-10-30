@@ -240,7 +240,7 @@ class dataBlob(object):
     def ib_conn(self):
         ib_conn = getattr(self, "_ib_conn", arg_not_supplied)
         if ib_conn is arg_not_supplied:
-            ib_conn = connectionIB(mongo_db=self.mongo_db)
+            ib_conn = connectionIB(log=self.log, mongo_db=self.mongo_db)
             self._ib_conn = ib_conn
 
         return ib_conn
@@ -249,7 +249,6 @@ class dataBlob(object):
     def mongo_db(self):
         mongo_db = getattr(self, "_mongo_db", arg_not_supplied)
         if mongo_db is arg_not_supplied:
-            print("Connecting to MongoDB in get_data")
             mongo_db = mongoDb()
             self._mongo_db = mongo_db
 
