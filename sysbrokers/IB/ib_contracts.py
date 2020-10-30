@@ -1,42 +1,73 @@
-from syscore.genutils import NOT_REQUIRED
+from dataclasses import  dataclass
+
 from ib_insync import Future
 import re
 
+
+from sysobjects.instruments import futuresInstrument
 
 def ib_futures_instrument_just_symbol(symbol):
     ibcontract = Future(symbol=symbol)
     return ibcontract
 
+NOT_REQUIRED_FOR_IB = ""
 
-def ib_futures_instrument(futures_instrument_object):
+@dataclass
+class ibInstrumentData:
+    symbol: str
+    exchange: str
+    currency: str = NOT_REQUIRED_FOR_IB
+    ibMultiplier: float = NOT_REQUIRED_FOR_IB
+    myMultiplier: float = 1.0
+    ignoreWeekly: bool = False
+
+    # NOTE: is myMultiplier actually used?
+
+@dataclass
+class futuresInstrumentWithIBData(object):
+    instrument: futuresInstrument
+    ib_data: ibInstrumentData
+
+    @property
+    def instrument_code(self):
+        return self.instrument.instrument_code
+
+    @property
+    def broker_symbol(self):
+        return self.ib_data.symbol
+
+def ib_futures_instrument(futures_instrument_with_ib_data: futuresInstrumentWithIBData):
     """
     Get an IB contract which is NOT specific to a contract date
     Used for getting expiry chains
 
-    :param futures_instrument_object: instrument with .metadata suitable for IB
+    :param futures_instrument_with_ib_data: instrument with .metadata suitable for IB
     :return: IBcontract
     """
 
-    meta_data = futures_instrument_object.meta_data
+    ib_data = futures_instrument_with_ib_data.ib_data
 
-    ibcontract = Future(meta_data["symbol"], exchange=meta_data["exchange"])
-    if meta_data["ibMultiplier"] is NOT_REQUIRED:
+    ibcontract = Future(ib_data.symbol, exchange=ib_data.exchange)
+
+    if ib_data.ibMultiplier is NOT_REQUIRED_FOR_IB:
         pass
     else:
-        ibcontract.multiplier = int(meta_data["ibMultiplier"])
-    if meta_data["currency"] is NOT_REQUIRED:
+        ibcontract.multiplier = int(ib_data.ibMultiplier)
+
+    if ib_data.currency is NOT_REQUIRED_FOR_IB:
         pass
     else:
-        ibcontract.currency = meta_data["currency"]
+        ibcontract.currency = ib_data.currency
 
     return ibcontract
 
 
 def resolve_multiple_expiries(
         ibcontract_list,
-        instrument_object_with_metadata):
-    code = instrument_object_with_metadata.instrument_code
-    ignore_weekly = instrument_object_with_metadata.meta_data["ignoreWeekly"]
+        futures_instrument_with_ib_data: futuresInstrumentWithIBData):
+    code = futures_instrument_with_ib_data.instrument_code
+    ib_data = futures_instrument_with_ib_data.ib_data
+    ignore_weekly = ib_data.ignoreWeekly
     if not ignore_weekly:
         # Can't be resolved
         raise Exception(
