@@ -48,7 +48,7 @@ class csvFuturesContractPriceData(futuresContractPriceData):
         """
 
         return (
-            str(futures_contract_object.instrument)
+            str(futures_contract_object.instrument.instrument_code)
             + "_"
             + str(futures_contract_object.contract_date)
         )
@@ -77,6 +77,8 @@ class csvFuturesContractPriceData(futuresContractPriceData):
             self.log.error(
                 "Keyname (filename) %s in wrong format should be instrument_contractid" %
                 keyname)
+            raise
+
         instrument_code, contract_date = tuple(keyname_as_list)
 
         return instrument_code, contract_date
@@ -108,7 +110,7 @@ class csvFuturesContractPriceData(futuresContractPriceData):
                 skipfooter=skipfooter,
             )
         except OSError:
-            self.log.warning("Can't find adjusted price file %s" % filename)
+            self.log.warn("Can't find adjusted price file %s" % filename)
             return futuresContractPrices.create_empty()
 
         instrpricedata = instrpricedata.groupby(level=0).last()
