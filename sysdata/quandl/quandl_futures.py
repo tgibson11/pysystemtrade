@@ -2,6 +2,8 @@
 Get data from quandl for futures
 
 """
+
+from sysobjects.contracts import futuresContract
 from syscore.dateutils import adjust_timestamp
 from sysdata.futures.contracts import futuresContract
 from sysdata.futures.futures_per_contract_prices import (
@@ -105,7 +107,7 @@ class _quandlFuturesContract(futuresContract):
         :param futures_contract: of type FuturesContract
         """
 
-        super().__init__(futures_contract.instrument, futures_contract.contract_date)
+        super().__init__(futures_contract.instrument, futures_contract.date)
 
         if quandl_instrument_data is USE_DEFAULT:
             quandl_instrument_data = quandlFuturesConfiguration()

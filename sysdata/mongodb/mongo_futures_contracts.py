@@ -1,13 +1,13 @@
 from sysdata.mongodb.mongo_connection import (
     mongoConnection,
     MONGO_ID_KEY,
-    create_update_dict,
 )
 
 CONTRACT_COLLECTION = "futures_contracts"
 DEFAULT_DB = "production"
 
-from sysdata.futures.contracts import futuresContractData, futuresContract
+from sysdata.futures.contracts import futuresContractData
+from sysobjects.contracts import futuresContract
 from syslogdiag.log import logtoscreen
 
 

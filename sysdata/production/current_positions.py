@@ -6,7 +6,7 @@ Any time we get the current position from DB or the broker, it's useful to store
 import pandas as pd
 from syscore.genutils import get_unique_list
 from sysobjects.instruments import futuresInstrument
-from sysdata.futures.contracts import futuresContract
+from sysobjects.contracts import futuresContract
 
 
 class Position(object):
@@ -102,7 +102,7 @@ class contractPosition(Position):
 
     @property
     def contract_date(self):
-        return self._tradeable_object.contract_date
+        return self._tradeable_object.date
 
     @property
     def contract_object(self):
@@ -289,7 +289,7 @@ class listOfContractPositions(listOfPositions):
     def _id_column_dict(self):
         instrument_code_list = [str(position.instrument_code)
                                 for position in self]
-        contract_id_list = [str(position.contract_date) for position in self]
+        contract_id_list = [str(position.date) for position in self]
         expiry_date_list = [str(position.expiry_date) for position in self]
         id_column_dict = dict(
             instrument_code=instrument_code_list,

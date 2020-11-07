@@ -7,7 +7,7 @@ from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesDat
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
 from sysdata.futures.rolls import contractDateWithRollParameters
-from sysdata.futures.contracts import futuresContract
+from sysobjects.contracts import futuresContract
 
 from sysproduction.data.prices import get_valid_instrument_code_from_user, diagPrices
 from sysproduction.data.get_data import dataBlob
@@ -123,7 +123,7 @@ class diagContracts(object):
         ]
 
         all_contracts_dates = [
-            contract.contract_date for contract in all_contracts]
+            contract.date for contract in all_contracts]
         unique_all_contract_dates = sorted(set(all_contracts_dates))
         unique_all_contract_dates = unique_all_contract_dates + \
             [missing_contract] * (6 - len(unique_all_contract_dates))

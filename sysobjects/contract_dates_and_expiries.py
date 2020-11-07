@@ -49,9 +49,10 @@ class expiryDate(datetime.datetime):
         return self.strftime(EXPIRY_DATE_FORMAT)
 
 
-class contractDate(object):
+class singleContractDate(object):
     """
     A single contract date; either in the form YYYYMM or YYYYMMDD
+    *or* specified as a list
 
     Use cases:
     - normal contract eg 201712 and expiry date like 20171214
@@ -71,23 +72,23 @@ class contractDate(object):
 
     def __init__(
             self,
-            contract_id: str,
+            date_str: str,
             expiry_date: expiryDate=NO_EXPIRY_DATE_PASSED,
             approx_expiry_offset: int=0):
         """
 
-        :param contract_id: string of numbers length 6 or 8 eg '201008' or '201008515'
+        :param date_str: string of numbers length 6 or 8 eg '201008' or '201008515'
         :param expiry_date:  string of numbers length 8 be passed eg '20101218'
         """
 
         try:
-            assert isinstance(contract_id, str)
-            assert int(contract_id)
+            assert isinstance(date_str, str)
+            assert int(date_str)
 
-            if len(contract_id) == 6:
-                self._init_with_yymm(contract_id)
-            elif len(contract_id) == 8:
-                self._init_with_yymmdd(contract_id)
+            if len(date_str) == 6:
+                self._init_with_yymm(date_str)
+            elif len(date_str) == 8:
+                self._init_with_yymmdd(date_str)
             else:
                 raise Exception()
 
@@ -100,32 +101,36 @@ class contractDate(object):
 
 
     def __repr__(self):
-        return self.contract_date
+        return self.date
 
-    def _init_with_yymm(self, contract_id:str):
+    @property
+    def date(self):
+        return self._date_str
+
+    def _init_with_yymm(self, date_str:str):
         """
         Initialise class with length 6 str eg '201901'
 
-        :param contract_id: str
+        :param date_str: str
         :return: None
         """
 
-        self.contract_date = contract_id + "00"
+        self._date_str = date_str + "00"
         self._only_has_month = True
 
 
-    def _init_with_yymmdd(self, contract_id: str):
+    def _init_with_yymmdd(self, date_str: str):
         """
         Initialise class with length 8 str eg '20190115'
 
-        :param contract_id: str
+        :param date_str: str
         :return: None
         """
 
-        if contract_id[DAY_SLICE] == "00":
-            self._init_with_yymm(contract_id[YYYYMM_SLICE])
+        if date_str[DAY_SLICE] == "00":
+            self._init_with_yymm(date_str[YYYYMM_SLICE])
         else:
-            self.contract_date = contract_id
+            self._date_str = date_str
             self._only_has_month = False
 
 
@@ -158,6 +163,10 @@ class contractDate(object):
     def expiry_date(self):
         return self._expiry_date
 
+    @property
+    def only_has_month(self):
+        return self._only_has_month
+
     # not using a setter as shouldn't be done casually
     def update_expiry_date(self, expiry_date: expiryDate):
         self._expiry_date = expiry_date
@@ -168,7 +177,7 @@ class contractDate(object):
 
         # we do this so that we can init the object again from this with the
         # correct length of contract_date
-        contract_date = self._contract_date_with_no_trailing_zeros()
+        contract_date = self._date_str_with_no_trailing_zeros()
 
         return dict(
             expiry_date=expiry_date,
@@ -191,19 +200,19 @@ class contractDate(object):
             expiry_date=expiry_date)
 
     def year(self):
-        return int(self.contract_date[YEAR_SLICE])
+        return int(self.date[YEAR_SLICE])
 
     def month(self):
-        return int(self.contract_date[MONTH_SLICE])
+        return int(self.date[MONTH_SLICE])
 
     def day(self):
         if not self.is_day_defined():
             return 0
 
-        return int(self.contract_date[DAY_SLICE])
+        return int(self.date[DAY_SLICE])
 
     def is_day_defined(self):
-        if self._only_has_month:
+        if self.only_has_month:
             return False
         else:
             return True
@@ -218,18 +227,107 @@ class contractDate(object):
         return datetime.datetime(*tuple_of_dates)
 
     def _as_date_tuple(self):
-        if self._only_has_month:
+        if self.only_has_month:
             day = 1
         else:
             day = self.day()
 
         return (self.year(), self.month(), day)
 
-    def _contract_date_with_no_trailing_zeros(self):
-        if self._only_has_month:
+    def _date_str_with_no_trailing_zeros(self):
+        if self.only_has_month:
             # remove trailing zeros
-            contract_date = self.contract_date[YYYYMM_SLICE]
+            date_str = self.date[YYYYMM_SLICE]
         else:
-            contract_date = self.contract_date
+            date_str = self.date
 
-        return contract_date
+        return date_str
+
+class contractDate(object):
+    """
+    A single contract date; either in the form YYYYMM or YYYYMMDD
+    *or* specified as a list
+
+    Use cases:
+    - normal contract eg 201712 and expiry date like 20171214
+    - VIX where contract needs to be defined as 20171214 because of weekly expiries
+    - Gas where contract month and expiry date are in different months
+
+    We store the expiry date separately
+
+    Representation is eithier 20171200 or 20171214 so always yyyymmdd
+
+    Either:
+
+    - we know the expiry date precisely and it's passed when we create the object
+    - OR we have to approximate by using the 1st of the month when the object is created
+    - OR we can make a better approximation by applying an offset to the approximate date
+    """
+
+    def __init__(
+            self,
+            date_str,
+            expiry_date=NO_EXPIRY_DATE_PASSED,
+            approx_expiry_offset=0):
+        """
+
+        :param date_str: string of numbers length 6 or 8 eg '201008' or '201008515'
+        :param expiry_date:  string of numbers length 8 be passed eg '20101218'
+        """
+
+        ## TEMP REFACTORING
+        inner_contract_date = singleContractDate(date_str, expiry_date=expiry_date, approx_expiry_offset=approx_expiry_offset)
+        self.inner_contract_date = inner_contract_date
+
+    def __repr__(self):
+        return self.inner_contract_date.date
+
+    @property
+    def only_has_month(self):
+        return self.inner_contract_date.only_has_month
+
+    @property
+    def expiry_date(self):
+        return self.inner_contract_date.expiry_date
+
+    @property
+    def date(self):
+        ##
+        return self.inner_contract_date.date
+
+    # not using a setter as shouldn't be done casually
+    def update_expiry_date(self, expiry_date: expiryDate):
+        self.inner_contract_date.update_expiry_date(expiry_date)
+
+    def as_dict(self):
+        return self.inner_contract_date.as_dict()
+
+    @classmethod
+    def create_from_dict(contractDate, results_dict):
+        # needs to match output from as_dict
+
+        expiry_date = results_dict.get("expiry_date", NO_EXPIRY_DATE_PASSED)
+
+        if expiry_date is not NO_EXPIRY_DATE_PASSED:
+            expiry_date = expiryDate(*expiry_date)
+
+        contract_id = results_dict["contract_date"]
+
+        return contractDate(
+            contract_id,
+            expiry_date=expiry_date)
+
+    def year(self):
+        return self.inner_contract_date.year()
+
+    def month(self):
+        return self.inner_contract_date.month()
+
+    def day(self):
+        return self.inner_contract_date.day()
+
+    def is_day_defined(self):
+        return self.inner_contract_date.is_day_defined()
+
+    def letter_month(self):
+        return self.inner_contract_date.letter_month()
