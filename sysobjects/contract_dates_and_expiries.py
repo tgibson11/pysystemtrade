@@ -106,6 +106,9 @@ class singleContractDate(object):
     def __repr__(self):
         return self.date
 
+    def __eq__(self, other):
+        return self.expiry_date == other.expiry_date
+
     @property
     def date(self):
         return self._date_str
@@ -306,13 +309,26 @@ class contractDate(object):
     def __repr__(self):
         return self.key
 
+    def __eq__(self, other):
+        my_list_of_single_contract_dates = self.list_of_single_contract_dates
+        other_list_of_single_contract_dates = other.list_of_single_contract_dates
+        if len(my_list_of_single_contract_dates)!=len(other_list_of_single_contract_dates):
+            return False
+
+        equal_for_each_item = [item == other_item for item, other_item in
+                               zip(my_list_of_single_contract_dates,
+                                   other_list_of_single_contract_dates)]
+
+        return all(equal_for_each_item)
+
+
     @property
     def list_of_single_contract_dates(self):
         return self._list_of_single_contract_dates
 
     @property
     def key(self):
-        return "_".join([str(x) for x in self.list_of_single_contract_dates])
+        return self.date
 
     @property
     def is_spread_contract(self):
@@ -328,6 +344,13 @@ class contractDate(object):
 
         return self.list_of_single_contract_dates[0]
 
+    def first_contract_as_contract_date(self):
+        first_contract_as_single_contract = self.first_contract
+        first_contract_as_dict = {CONTRACT_DATE_LIST_ENTRY_KEY: first_contract_as_single_contract.as_dict()}
+
+        return contractDate(first_contract_as_dict)
+
+
     @property
     def only_has_month(self):
         return self.first_contract.only_has_month
@@ -338,8 +361,8 @@ class contractDate(object):
 
     @property
     def date(self):
-        ##
-        return self.first_contract.date
+        return "_".join([str(x) for x in self.list_of_single_contract_dates])
+
 
     # not using a setter as shouldn't be done casually
     def update_expiry_date(self, expiry_date: expiryDate):
