@@ -138,8 +138,6 @@ class diagContracts(object):
 
     def get_contract_object(self, instrument_code, contract_id):
         contract_object = self.get_contract_data(instrument_code, contract_id)
-        if contract_object.empty():
-            contract_object = futuresContract(instrument_code, contract_id)
 
         return contract_object
 
