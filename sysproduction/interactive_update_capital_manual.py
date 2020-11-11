@@ -156,7 +156,7 @@ def adjust_capital_for_delta(data_capital: dataCapital):
         "What change have you made to brokerage account that will not change capital +ve deposit, -ve withdrawal",
         type_expected=float,
     )
-    old_capital = data_capital.capital_data.get_current_total_capital()
+    old_capital = data_capital.capital_data.get_broker_account_value()
     new_capital = old_capital + capital_delta
     ans = input(
         "New brokerage capital will be %f, are you sure? Yes/<anything else for no>" %
