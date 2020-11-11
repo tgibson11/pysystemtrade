@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 from copy import copy
 
-from ib_insync import Forex, util, ComboLeg
+from ib_insync import Forex, util, ComboLeg, TagValue
 from ib_insync.order import MarketOrder, LimitOrder
 
 from sysdata.fx.spotfx import currencyValue
@@ -514,6 +514,10 @@ class ibClient(object):
 
         if order_type == "market":
             ib_order = MarketOrder(ib_BS_str, ib_qty)
+            # Use IB adaptive algo for market orders
+            ib_order.algoStrategy = "Adaptive"
+            ib_order.algoParams = []
+            ib_order.algoParams.append(TagValue("adaptivePriority", "Patient"))
         elif order_type == "limit":
             if limit_price is None:
                 self.log.critical("Need to have limit price with limit order!")
