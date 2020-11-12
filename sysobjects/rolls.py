@@ -30,11 +30,6 @@ class rollCycle(object):
 
         self._cyclestring = "".join(sorted(cyclestring))
 
-        if cyclestring == EMPTY_ROLL_CYCLE_STRING:
-            self._isempty = True
-        else:
-            self._isempty = False
-
     def __repr__(self):
         return self.cyclestring
 
@@ -268,7 +263,7 @@ class rollParameters(object):
     def carry_offset(self):
         return self._carry_offset
 
-    @@property
+    @property
     def approx_expiry_offset(self):
         return self._approx_expiry_offset
 
@@ -463,13 +458,10 @@ class contractDateWithRollParameters(contractDate):
 
     def valid_date_in_named_rollcycle(self, rollcycle_name):
 
-        self.roll_parameters.check_for_named_rollcycle(rollcycle_name)
         relevant_rollcycle = getattr(self.roll_parameters, rollcycle_name)
-        rollcycle_str = relevant_rollcycle.cyclestring
-
         current_month = self.letter_month()
 
-        if current_month in rollcycle_str:
+        if current_month in relevant_rollcycle:
             return True
         else:
             return False
@@ -488,7 +480,8 @@ class contractDateWithRollParameters(contractDate):
         :param rollcycle_name: str, attribute method of self.roll_parameters, either 'priced_rollcycle' or 'held_rollcycle'
         :return: new contractDate object
         """
-        rollcycle_to_use = getattr(self.roll_parameters, rollcycle_name)
+        rollcycle_str = getattr(self.roll_parameters, rollcycle_name)
+        rollcycle_to_use = rollCycle(rollcycle_str)
         direction_function = getattr(rollcycle_to_use, direction_function_name)
 
         try:
