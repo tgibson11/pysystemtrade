@@ -6,7 +6,6 @@ Write list of futures contracts to mongodb database
 """
 import datetime
 
-from sysdata.futures.rolls import contractDateWithRollParameters
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.quandl.quandl_futures import (
     quandlFuturesConfiguration,
@@ -18,6 +17,7 @@ from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysdata.arctic.arctic_futures_per_contract_prices import (
     arcticFuturesContractPriceData,
 )
+from sysobjects.rolls import contractDateWithRollParameters
 
 
 def get_roll_parameters_from_mongo(instrument_code):
@@ -109,20 +109,16 @@ def historical_price_contracts(
 
     first_contract = futuresContract(
         instrument_object, contractDateWithRollParameters(
-            roll_parameters, first_contract_date), )
+            roll_parameters, first_contract_date))
 
     assert end_date > first_contract.expiry_date
 
-    current_held_contract = (
-        futuresContract.approx_first_held_futuresContract_at_date(
-            instrument_object, roll_parameters, end_date
-        )
-    )
-    current_priced_contract = (
-        futuresContract.approx_first_priced_futuresContract_at_date(
-            instrument_object, roll_parameters, end_date
-        )
-    )
+    current_held_contract_date = roll_parameters.approx_first_held_futuresContract_at_date(end_date)
+    current_held_contract = futuresContract(instrument_object, current_held_contract_date)
+
+    current_priced_contract_date = roll_parameters.approx_first_priced_futuresContract_at_date(end_date)
+    current_priced_contract = futuresContract(instrument_object, current_priced_contract_date)
+
     current_carry_contract = current_held_contract.carry_contract()
 
     # these are all str thats okay
