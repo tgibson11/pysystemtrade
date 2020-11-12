@@ -5,8 +5,7 @@ import pandas as pd
 from copy import copy
 
 from syscore.dateutils import (
-    month_from_contract_letter,
-    MONTH_LIST,
+    month_from_contract_letter
 )
 from sysobjects.contract_dates_and_expiries import (
     contractDate,
@@ -14,7 +13,6 @@ from sysobjects.contract_dates_and_expiries import (
     NO_DAY_PASSED,
     NO_EXPIRY_DATE_PASSED,
 )
-from sysdata.data import baseData
 
 
 class rollCycle(object):
@@ -38,6 +36,7 @@ class rollCycle(object):
         return self._cyclestring
 
     def yearmonth_inrollcycle_before_date(self, reference_date):
+        ## FEELS LIKE WE SHOULD BE WORKING IN CONTRACT DATES RATHER THAN TUPLES HERE...
         """
         Returns a tuple (month,year) which is in this roll cycle; and which is just before reference_date
 
@@ -231,11 +230,11 @@ class rollParameters(object):
 
     def __init__(
         self,
-        hold_rollcycle,
-        priced_rollcycle,
-        roll_offset_day=0,
-        carry_offset=0,
-        approx_expiry_offset=0,
+        hold_rollcycle: str,
+        priced_rollcycle: str,
+        roll_offset_day: int=0,
+        carry_offset: int=0,
+        approx_expiry_offset: int=0,
     ):
         """
 
@@ -247,8 +246,9 @@ class rollParameters(object):
 
         """
 
-        self._hold_rollcycle = hold_rollcycle
-        self._priced_rollcycle = priced_rollcycle
+        self._hold_rollcycle = rollCycle(hold_rollcycle)
+        self._priced_rollcycle = rollCycle(priced_rollcycle)
+
 
         self._roll_offset_day = roll_offset_day
         self._carry_offset = carry_offset
@@ -305,6 +305,9 @@ class rollParameters(object):
 
     def approx_first_held_contractDate_at_date(self, reference_date):
         """
+                ## WHERE USED
+        ## TAKE OUT CONTRACT DATE REPLACE
+
         What contract would be holding on first_date?
 
         Returns a contractDate object with a date after first_date, taking into account RollOffsetDays
@@ -381,7 +384,54 @@ class rollParameters(object):
         return current_date_as_contract_with_roll_data
 
 
-class contractDateWithRollParameters(contractDate):
+class contractDateWithRollParameters(object):
+    """
+
+    """
+
+    def __init__(self, contract_date: contractDate, roll_parameters: rollParameters):
+        """
+    Roll data plus a specific contract date means we can do things like iterate the roll cycle etc
+        """
+
+        self._roll_parameters = roll_parameters
+        self._contract_date = contract_date
+
+    @property
+    def roll_parameters(self):
+        return self._roll_parameters
+
+    @property
+    def contract_date(self):
+        return self._contract_date
+
+    def __repr__(self):
+        return "%s with roll parameters %s" % (str(self.contract_date), str(self.roll_parameters))
+
+    @classmethod
+    def contract_date_from_numbers(
+        contractDateWithRollData,
+        roll_parameters,
+        new_year_number,
+        new_month_number,
+        new_day_number=NO_DAY_PASSED,
+        **kwargs
+    ):
+        ## WHERE USED?
+        ## BETTER WITH EXPLICIT CONTRACT DATE ENTRY?
+        contract_string = from_contract_numbers_to_contract_string(
+            new_year_number, new_month_number, new_day_number
+        )
+        contract_date = contractDate(contract_string, **kwargs)
+
+        contract_date_with_roll_data_object = contractDateWithRollData(
+            contract_date, roll_parameters
+        )
+
+        return contract_date_with_roll_data_object
+
+
+class contractDateWithRollParametersTODELETE(contractDate):
     """
     Roll data plus a specific contract date means we can do things like iterate the roll cycle etc
 
@@ -406,25 +456,6 @@ class contractDateWithRollParameters(contractDate):
         super().__init__(*args, **kwargs)
         self.roll_parameters = roll_parameters
 
-    @classmethod
-    def contract_date_from_numbers(
-        contractDateWithRollData,
-        rolldata_object,
-        new_year_number,
-        new_month_number,
-        new_day_number=NO_DAY_PASSED,
-        **kwargs
-    ):
-
-        contract_string = from_contract_numbers_to_contract_string(
-            new_year_number, new_month_number, new_day_number
-        )
-
-        contract_date_with_roll_data_object = contractDateWithRollData(
-            rolldata_object, contract_string, **kwargs
-        )
-
-        return contract_date_with_roll_data_object
 
     @classmethod
     def create_from_dict(
@@ -456,12 +487,35 @@ class contractDateWithRollParameters(contractDate):
             expiry_date=expiry_date,
         )
 
+    @classmethod
+    def contract_date_from_numbers(
+        contractDateWithRollParametersTODELETE,
+        roll_parameters,
+        new_year_number,
+        new_month_number,
+        new_day_number=NO_DAY_PASSED,
+        **kwargs
+    ):
+        ## WHERE USED?
+        ## BETTER WITH EXPLICIT CONTRACT DATE ENTRY?
+        contract_string = from_contract_numbers_to_contract_string(
+            new_year_number, new_month_number, new_day_number
+        )
+
+        contract_date_with_roll_data_object = contractDateWithRollParametersTODELETE(
+            roll_parameters, contract_string, **kwargs
+        )
+
+        return contract_date_with_roll_data_object
+
     def valid_date_in_named_rollcycle(self, rollcycle_name):
 
         relevant_rollcycle = getattr(self.roll_parameters, rollcycle_name)
+        rollcycle_str = relevant_rollcycle.cyclestring
+
         current_month = self.letter_month()
 
-        if current_month in relevant_rollcycle:
+        if current_month in rollcycle_str:
             return True
         else:
             return False
@@ -480,8 +534,7 @@ class contractDateWithRollParameters(contractDate):
         :param rollcycle_name: str, attribute method of self.roll_parameters, either 'priced_rollcycle' or 'held_rollcycle'
         :return: new contractDate object
         """
-        rollcycle_str = getattr(self.roll_parameters, rollcycle_name)
-        rollcycle_to_use = rollCycle(rollcycle_str)
+        rollcycle_to_use = getattr(self.roll_parameters, rollcycle_name)
         direction_function = getattr(rollcycle_to_use, direction_function_name)
 
         try:
@@ -506,7 +559,7 @@ class contractDateWithRollParameters(contractDate):
             new_day_number = self.day()
 
         # we don't pass expiry date as that will change
-        return contractDateWithRollParameters.contract_date_from_numbers(
+        return contractDateWithRollParametersTODELETE.contract_date_from_numbers(
             self.roll_parameters,
             new_year_int,
             new_month_int,
@@ -570,9 +623,11 @@ class contractDateWithRollParameters(contractDate):
         return valid_contract_to_return
 
     def next_month_contract(self):
+        ## CANT DO THIS
         return self._iterate_contract("_next_year_month", "global_rollcycle")
 
     def previous_month_contract(self):
+        ## CANT DO THIS
         return self._iterate_contract(
             "_previous_year_month", "global_rollcycle")
 

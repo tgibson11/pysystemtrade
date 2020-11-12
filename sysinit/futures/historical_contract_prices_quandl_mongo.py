@@ -6,18 +6,18 @@ Write list of futures contracts to mongodb database
 """
 import datetime
 
+from sysdata.arctic.arctic_futures_per_contract_prices import (
+    arcticFuturesContractPriceData,
+)
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
+from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysdata.quandl.quandl_futures import (
     quandlFuturesConfiguration,
     quandlFuturesContractPriceData,
 )
+from sysobjects.contract_dates_and_expiries import contractDate
 from sysobjects.contracts import listOfFuturesContracts, futuresContract
 from sysobjects.instruments import futuresInstrument
-from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
-from sysdata.arctic.arctic_futures_per_contract_prices import (
-    arcticFuturesContractPriceData,
-)
-from sysobjects.rolls import contractDateWithRollParameters
 
 
 def get_roll_parameters_from_mongo(instrument_code):
@@ -108,7 +108,7 @@ def historical_price_contracts(
     """
 
     first_contract = futuresContract(
-        instrument_object, contractDateWithRollParameters(
+        instrument_object, contractDate(
             roll_parameters, first_contract_date))
 
     assert end_date > first_contract.expiry_date
