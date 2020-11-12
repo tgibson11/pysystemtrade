@@ -139,7 +139,7 @@ class diagContracts(object):
 
     def get_contract_object(self, instrument_code, contract_id):
 
-        contract_object = self.data.db_futures_contract.get_contract_data(
+        contract_object = self.data.db_futures_contract.get_contract_object(
             instrument_code, contract_id
         )
 
