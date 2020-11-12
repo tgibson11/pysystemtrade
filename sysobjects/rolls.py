@@ -561,21 +561,21 @@ class contractDateWithRollParameters(contractDate):
     def next_priced_contract(self):
         contract = self.closest_next_valid_priced_contract()
         return contract._iterate_contract(
-            "next_year_month", "priced_rollcycle")
+            "_next_year_month", "priced_rollcycle")
 
     def previous_priced_contract(self):
         contract = self.closest_previous_valid_priced_contract()
         return contract._iterate_contract(
-            "previous_year_month", "priced_rollcycle")
+            "_previous_year_month", "priced_rollcycle")
 
     def next_held_contract(self):
         contract = self.closest_next_valid_held_contract()
-        return contract._iterate_contract("next_year_month", "hold_rollcycle")
+        return contract._iterate_contract("_next_year_month", "hold_rollcycle")
 
     def previous_held_contract(self):
         contract = self.closest_previous_valid_held_contract()
         return contract._iterate_contract(
-            "previous_year_month", "hold_rollcycle")
+            "_previous_year_month", "hold_rollcycle")
 
     def closest_next_valid_priced_contract(self):
         # returns current contract if a valid priced contract, or next one in
@@ -614,11 +614,11 @@ class contractDateWithRollParameters(contractDate):
         return valid_contract_to_return
 
     def next_month_contract(self):
-        return self._iterate_contract("next_year_month", "global_rollcycle")
+        return self._iterate_contract("_next_year_month", "global_rollcycle")
 
     def previous_month_contract(self):
         return self._iterate_contract(
-            "previous_year_month", "global_rollcycle")
+            "_previous_year_month", "global_rollcycle")
 
     def carry_contract(self):
         if self.roll_parameters.carry_offset == -1:
