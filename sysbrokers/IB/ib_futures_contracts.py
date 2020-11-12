@@ -27,11 +27,15 @@ class ibFuturesContractData(futuresContractData):
     """
 
     def __init__(self, ibconnection, log=logtoscreen("ibFuturesContractData")):
-        setattr(self, "ibconnection", ibconnection)
-        setattr(self, "log", log)
+        super().__init__(log=log)
+        self._ibconnection = ibconnection
 
     def __repr__(self):
         return "IB Futures per contract data %s" % str(self.ibconnection)
+
+    @property
+    def ibconnection(self):
+        return self._ibconnection
 
     def get_brokers_instrument_code(self, instrument_code):
         futures_instrument_with_ib_data = self.get_futures_instrument_object_with_IB_data(instrument_code)
@@ -73,7 +77,7 @@ class ibFuturesContractData(futuresContractData):
     def get_min_tick_size_for_contract(self, contract_object):
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = self.get_contract_object_with_IB_metadata(
@@ -100,7 +104,7 @@ class ibFuturesContractData(futuresContractData):
         """
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = self.get_contract_object_with_IB_metadata(
@@ -128,7 +132,7 @@ class ibFuturesContractData(futuresContractData):
         """
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = self.get_contract_object_with_IB_metadata(

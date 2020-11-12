@@ -31,11 +31,19 @@ class ibFuturesContractPriceData(futuresContractPriceData):
 
     def __init__(self, ibconnection, log=logtoscreen(
             "ibFuturesContractPriceData")):
-        setattr(self, "ibconnection", ibconnection)
-        setattr(self, "log", log)
+        self._ibconnection = ibconnection
+        self._log = log
 
     def __repr__(self):
         return "IB Futures per contract price data %s" % str(self.ibconnection)
+
+    @property
+    def log(self):
+        return self._log
+
+    @property
+    def ibconnection(self):
+        return self._ibconnection
 
     @property
     def futures_contract_data(self):
@@ -93,7 +101,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
         """
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_broker_config = (
@@ -135,7 +143,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
 
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = (
@@ -169,7 +177,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
 
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = (
@@ -197,7 +205,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
         """
         new_log = self.log.setup(
             instrument_code=contract_object.instrument_code,
-            contract_date=contract_object.date,
+            contract_date=contract_object.date_str,
         )
 
         contract_object_with_ib_data = (

@@ -119,7 +119,7 @@ def historical_price_contracts(
     current_priced_contract_date = roll_parameters.approx_first_priced_futuresContract_at_date(end_date)
     current_priced_contract = futuresContract(instrument_object, current_priced_contract_date)
 
-    current_carry_contract = current_held_contract.carry_contract()
+    current_carry_contract = current_held_contract_date.carry_contract()
 
     # these are all str thats okay
     last_contract_date = max(

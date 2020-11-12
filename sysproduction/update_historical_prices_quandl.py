@@ -55,7 +55,7 @@ def update_historical_prices_for_instrument(instrument_code, data, log):
 
     for contract_object in contract_list:
         update_historical_prices_for_instrument_and_contract(contract_object, data,
-                                                             log=log.setup(contract_date=contract_object.date))
+                                                             log=log.setup(contract_date=contract_object.date_str))
 
     return success
 
@@ -101,7 +101,7 @@ def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
 
     except Exception as e:
         log.warn("Exception %s when getting data at frequency %s for %s" % (e, frequency, str(contract_object)))
-        return failure
+        raise
 
 
 if __name__ == '__main__':
