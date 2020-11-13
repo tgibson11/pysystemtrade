@@ -45,6 +45,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
     def ibconnection(self):
         return self._ibconnection
 
+
     @property
     def futures_contract_data(self):
         return ibFuturesContractData(self.ibconnection)
