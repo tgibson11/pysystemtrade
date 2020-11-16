@@ -7,8 +7,8 @@ from sysobjects.contracts import futuresContract
 from syscore.dateutils import adjust_timestamp
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
-    futuresContractPrices,
 )
+from sysobjects.futures_per_contract_prices import futuresContractPrices
 from syscore.fileutils import get_filename_for_package
 from sysdata.quandl.quandl_utils import load_private_key
 

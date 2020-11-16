@@ -1,6 +1,7 @@
 from collections import namedtuple
 from copy import copy
-from sysdata.futures.futures_per_contract_prices import dictFuturesContractFinalPrices
+from sysobjects.dict_of_futures_per_contract_prices import dictFuturesContractFinalPrices
+from sysdata.futures.multiple_prices import futuresMultiplePrices
 
 from sysobjects.roll_parameters_with_price_data import (
     find_earliest_held_contract_with_price_data,
@@ -63,85 +64,22 @@ class rollCalendar(pd.DataFrame):
         return roll_calendar
 
     @classmethod
-    def back_out_from_current_and_forward_data(
-        rollCalendar, current_and_forward_data, roll_parameters_object
+    def back_out_from_multiple_prices(
+        rollCalendar, multiple_prices: futuresMultiplePrices
     ):
         """
 
-        :param current_and_forward_data: output from futuresDataForSim.FuturesData.get_current_and_forward_price_data(instrument_code)
+        :param multiple_prices: output from futuresDataForSim.FuturesData.get_current_and_forward_price_data(instrument_code)
                columns: PRICE, FORWARD, FORWARD_CONTRACT, PRICE_CONTRACT
 
         :return: rollCalendar
         """
-        current_and_forward_unique = current_and_forward_data[
-            ~current_and_forward_data.index.duplicated(keep="last")
-        ]
-
-        roll_dates = current_and_forward_unique.index[1:][
-            current_and_forward_unique[1:].PRICE_CONTRACT.values
-            > current_and_forward_unique[:-1].PRICE_CONTRACT.values
-        ]
-        days_before = current_and_forward_unique.index[:-1][
-            current_and_forward_unique[:-1].PRICE_CONTRACT.values
-            < current_and_forward_unique[1:].PRICE_CONTRACT.values
-        ]
-
-        # Duplicates are possible (double rolls)
-
-        current_contracts = [
-            contractDate(
-                current_and_forward_unique.loc[date_index].PRICE_CONTRACT
-            ).date_str
-            for date_index in days_before
-        ]
-        next_contracts = [
-            contractDate(
-                current_and_forward_unique.loc[date_index].PRICE_CONTRACT
-            ).date_str
-            for date_index in roll_dates
-        ]
-        carry_contracts = [
-            contractDate(
-                current_and_forward_unique.loc[date_index].CARRY_CONTRACT
-            ).date_str
-            for date_index in days_before
-        ]
-
-        roll_calendar = pd.DataFrame(
-            dict(
-                current_contract=current_contracts,
-                next_contract=next_contracts,
-                carry_contract=carry_contracts,
-            ),
-            index=roll_dates,
-        )
-
-        extra_row = pd.DataFrame(
-            dict(
-                current_contract=[
-                    contractDate(
-                        current_and_forward_data.iloc[-1].PRICE_CONTRACT
-                    ).date_str
-                ],
-                next_contract=[
-                    contractDate(
-                        current_and_forward_data.iloc[-1].FORWARD_CONTRACT
-                    ).date_str
-                ],
-                carry_contract=[
-                    contractDate(
-                        current_and_forward_data.iloc[-1].CARRY_CONTRACT
-                    ).date_str
-                ],
-            ),
-            index=[current_and_forward_data.index[-1]],
-        )
-        roll_calendar = pd.concat([roll_calendar, extra_row], axis=0)
-        roll_calendar_object = rollCalendar(roll_calendar)
+        roll_calendar_as_pd = _back_out_roll_calendar_from_multiple_prices(multiple_prices)
+        roll_calendar_object = rollCalendar(roll_calendar_as_pd)
 
         return roll_calendar_object
 
-    def check_if_date_index_monotonic(self):
+    def check_if_date_index_monotonic(self) ->bool:
         if not self.index._is_strictly_monotonic_increasing:
             print(
                 "WARNING: Date index not monotonically increasing in following indices:"
@@ -155,7 +93,7 @@ class rollCalendar(pd.DataFrame):
             return True
 
     def check_dates_are_valid_for_prices(
-            self, dict_of_futures_contract_prices):
+            self, dict_of_futures_contract_prices: dictFuturesContractFinalPrices) -> bool:
         """
         Adjust an approximate roll calendar so that we have matching dates on each expiry
 
@@ -167,62 +105,12 @@ class rollCalendar(pd.DataFrame):
         checks_okay = True
         for row_number in range(len(self.index)):
             calendar_row = self.iloc[row_number, :]
-            current_contract = calendar_row.current_contract
-            next_contract = calendar_row.next_contract
-            carry_contract = calendar_row.carry_contract
-            roll_date = self.index[row_number]
 
-            try:
-                current_prices = dict_of_futures_contract_prices[current_contract]
-            except KeyError:
-                print(
-                    "On roll date %s contract %s is missing from futures prices" %
-                    (roll_date, current_contract))
-                checks_okay = False
-            try:
-                next_prices = dict_of_futures_contract_prices[next_contract]
-            except KeyError:
-                print(
-                    "On roll date %s contract %s is missing from futures prices" %
-                    (roll_date, next_contract))
-                checks_okay = False
+            checks_okay_this_row = _check_row_of_row_calendar(calendar_row,
+                             dict_of_futures_contract_prices)
 
-            try:
-                carry_prices = dict_of_futures_contract_prices[carry_contract]
-            except KeyError:
-                print(
-                    "On roll date %s contract %s is missing from futures prices" %
-                    (roll_date, carry_contract))
-                checks_okay = False
-
-            try:
-                current_price = current_prices.loc[roll_date]
-            except KeyError:
-                print(
-                    "Roll date %s missing from prices for %s"
-                    % (roll_date, current_contract)
-                )
-                checks_okay = False
-
-            try:
-                next_price = next_prices.loc[roll_date]
-            except KeyError:
-                print(
-                    "Roll date %s missing from prices for %s"
-                    % (roll_date, next_contract)
-                )
-                checks_okay = False
-
-            if np.isnan(current_price):
-                print(
-                    "NAN for price on %s for %s " %
-                    (roll_date, current_contract))
-                checks_okay = False
-
-            if np.isnan(next_price):
-                print(
-                    "NAN for price on %s for %s " %
-                    (roll_date, current_contract))
+            if not checks_okay_this_row:
+                # single failure is a total failure
                 checks_okay = False
 
         return checks_okay
@@ -669,3 +557,160 @@ def _add_carry_calendar(
 
     return roll_calendar
 
+def _back_out_roll_calendar_from_multiple_prices(multiple_prices: futuresMultiplePrices)\
+        -> pd.DataFrame:
+
+    multiple_prices_unique = multiple_prices[
+        ~multiple_prices.index.duplicated(keep="last")
+    ]
+
+    roll_calendar = _get_roll_calendar_from_unique_prices(multiple_prices_unique)
+
+    roll_calendar = _add_extra_row_to_implied_roll_calendar(roll_calendar, multiple_prices_unique)
+
+    return roll_calendar
+
+
+def _get_roll_calendar_from_unique_prices(multiple_prices_unique: pd.DataFrame) -> pd.DataFrame:
+
+    tuple_of_roll_dates = _get_time_indices_from_multiple_prices(multiple_prices_unique)
+    roll_calendar = _get_roll_calendar_from_roll_dates_and_unique_prices(multiple_prices_unique, tuple_of_roll_dates)
+
+    return roll_calendar
+
+def _get_time_indices_from_multiple_prices(multiple_prices_unique: pd.DataFrame) \
+        -> tuple:
+    roll_dates = multiple_prices_unique.index[1:][
+        multiple_prices_unique[1:].PRICE_CONTRACT.values
+        > multiple_prices_unique[:-1].PRICE_CONTRACT.values
+        ]
+    days_before = multiple_prices_unique.index[:-1][
+        multiple_prices_unique[:-1].PRICE_CONTRACT.values
+        < multiple_prices_unique[1:].PRICE_CONTRACT.values
+        ]
+
+    return roll_dates, days_before
+
+
+def _get_roll_calendar_from_roll_dates_and_unique_prices(multiple_prices_unique: pd.DataFrame,
+                                                         tuple_of_roll_dates: tuple)\
+                                                    -> pd.DataFrame:
+
+    roll_dates, days_before = tuple_of_roll_dates
+
+    current_contracts =_extract_contract_from_multiple_prices(days_before, multiple_prices_unique, "PRICE_CONTRACT")
+    next_contracts = _extract_contract_from_multiple_prices(roll_dates, multiple_prices_unique, "PRICE_CONTRACT")
+    carry_contracts = _extract_contract_from_multiple_prices(days_before, multiple_prices_unique,  "CARRY_CONTRACT")
+
+    roll_calendar = pd.DataFrame(
+        dict(
+            current_contract=current_contracts,
+            next_contract=next_contracts,
+            carry_contract=carry_contracts,
+        ),
+        index=roll_dates,
+    )
+
+    return roll_calendar
+
+def _extract_contract_from_multiple_prices(index_of_dates: list,
+                                           multiple_prices_unique: pd.DataFrame,
+                                           column_name:str) -> list:
+    results = [
+        _float_to_contract_str(multiple_prices_unique, date_index, column_name)
+        for date_index in index_of_dates
+    ]
+    return results
+
+def _float_to_contract_str(multiple_prices_unique, date_index, column_name):
+    contract_date = contractDate(
+        str(int(multiple_prices_unique.loc[date_index][column_name]))
+    ).date_str
+
+    date_str = contract_date
+
+    return date_str
+
+def _add_extra_row_to_implied_roll_calendar(roll_calendar: pd.DataFrame,
+                                            multiple_prices_unique: pd.DataFrame):
+    final_date = multiple_prices_unique.index[-1]
+    extra_row = pd.DataFrame(
+
+        dict(
+            current_contract=[_float_to_contract_str(multiple_prices_unique,final_date, "PRICE_CONTRACT")
+            ],
+            next_contract=[_float_to_contract_str(multiple_prices_unique,final_date, "FORWARD_CONTRACT")
+            ],
+            carry_contract=[_float_to_contract_str(multiple_prices_unique,final_date, "CARRY_CONTRACT")
+            ],
+        ),
+        index=[final_date],
+    )
+    roll_calendar = pd.concat([roll_calendar, extra_row], axis=0)
+
+    return roll_calendar
+
+def _check_row_of_row_calendar(calendar_row: pd.Series,
+                               dict_of_futures_contract_prices: dictFuturesContractFinalPrices) ->bool:
+
+    current_contract = calendar_row.current_contract
+    next_contract = calendar_row.next_contract
+    carry_contract = calendar_row.carry_contract
+    roll_date = calendar_row.date
+
+    checks_okay_this_row = True
+
+    try:
+        current_prices = dict_of_futures_contract_prices[current_contract]
+    except KeyError:
+        print(
+            "On roll date %s contract %s is missing from futures prices" %
+            (roll_date, current_contract))
+        checks_okay_this_row = False
+    try:
+        next_prices = dict_of_futures_contract_prices[next_contract]
+    except KeyError:
+        print(
+            "On roll date %s contract %s is missing from futures prices" %
+            (roll_date, next_contract))
+        checks_okay_this_row = False
+
+    try:
+        carry_prices = dict_of_futures_contract_prices[carry_contract]
+    except KeyError:
+        print(
+            "On roll date %s contract %s is missing from futures prices" %
+            (roll_date, carry_contract))
+        checks_okay_this_row = False
+
+    try:
+        current_price = current_prices.loc[roll_date]
+    except KeyError:
+        print(
+            "Roll date %s missing from prices for %s"
+            % (roll_date, current_contract)
+        )
+        checks_okay_this_row = False
+
+    try:
+        next_price = next_prices.loc[roll_date]
+    except KeyError:
+        print(
+            "Roll date %s missing from prices for %s"
+            % (roll_date, next_contract)
+        )
+        checks_okay_this_row = False
+
+    if np.isnan(current_price):
+        print(
+            "NAN for price on %s for %s " %
+            (roll_date, current_contract))
+        checks_okay_this_row = False
+
+    if np.isnan(next_price):
+        print(
+            "NAN for price on %s for %s " %
+            (roll_date, current_contract))
+        checks_okay_this_row = False
+
+    return checks_okay_this_row
