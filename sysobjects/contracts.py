@@ -66,6 +66,11 @@ class futuresContract(object):
 
         self._is_empty = False
 
+    def specific_log(self, log):
+        new_log = log.setup(instrument_code = self.instrument_code, contract_date = self.date_str)
+
+        return new_log
+
     @property
     def instrument(self):
         return self._instrument
@@ -215,8 +220,27 @@ MAX_CONTRACT_SIZE = 10000
 
 class listOfFuturesContracts(list):
     """
-    List of futuresContracts for a single instrument code (not enforced)
+    List of futuresContracts
     """
+    def unique_list_of_instrument_codes(self):
+        list_of_instruments = [
+            contract.instrument_code for contract in self]
+
+        # will contain duplicates, make unique
+        unique_list_of_instruments = list(set(list_of_instruments))
+
+        return unique_list_of_instruments
+
+    def contracts_with_price_data_for_instrument_code(self, instrument_code: str):
+        list_of_contracts = [
+            contract
+            for contract in self
+            if contract.instrument_code == instrument_code
+        ]
+
+        list_of_contracts = listOfFuturesContracts(list_of_contracts)
+
+        return list_of_contracts
 
     def currently_sampling(self):
         contracts_currently_sampling = [

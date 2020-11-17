@@ -1,15 +1,19 @@
 from syscore.objects import data_error
 
-from sysdata.data import baseData
-
-from sysobjects.contracts import futuresContract
+from sysobjects.contracts import futuresContract, listOfFuturesContracts
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from sysobjects.dict_of_futures_per_contract_prices import dictFuturesContractPrices
 
+from syslogdiag.log import logtoscreen
+
 BASE_CLASS_ERROR = "You have used a base class for futures price data; you need to use a class that inherits with a specific data source"
 
+## REDUCE USE OF CODE/DATE STRING CALLS...
+## SPLIT OUT SOMEWHAT?
+## TICKER OBJECTS ETC DO THEY REALLY NEED TO BE HERE, AS NOT USED EXCEPT IN BROKER INHERITANCE?
 
-class futuresContractPriceData(baseData):
+
+class futuresContractPriceData(object):
     """
     Extends the baseData object to a data source that reads in and writes prices for specific futures contracts
 
@@ -19,10 +23,17 @@ class futuresContractPriceData(baseData):
      or object.get_prices_for_contract_object(futuresContract(....))
     """
 
+    def __init__(self, log=logtoscreen("futuresContractPriceData")):
+        setattr(self, "_log", log)
+
+    @property
+    def log(self):
+        return self._log
+
     def __repr__(self):
         return "Individual futures contract price data - DO NOT USE"
 
-    def __getitem__(self, contract_object):
+    def __getitem__(self, contract_object: futuresContract):
         """
         convenience method to get the price, make it look like a dict
 
@@ -39,54 +50,69 @@ class futuresContractPriceData(baseData):
         """
         return self.get_contracts_with_price_data()
 
-    def get_contracts_with_price_data(self):
+    def get_contracts_with_price_data(self) ->listOfFuturesContracts:
         """
 
         :return: list of futuresContact
         """
         raise NotImplementedError(BASE_CLASS_ERROR)
 
-    def get_instruments_with_price_data(self):
+    def get_list_of_instrument_codes_with_price_data(self)->list:
         """
 
         :return: list of str
         """
 
         list_of_contracts_with_price_data = self.get_contracts_with_price_data()
-        list_of_instruments = [
-            contract.instrument_code for contract in list_of_contracts_with_price_data]
+        unique_list_of_instruments = list_of_contracts_with_price_data.unique_list_of_instrument_codes()
 
-        # will contain duplicates, make unique
-        list_of_instruments = list(set(list_of_instruments))
+        return unique_list_of_instruments
 
-        return list_of_instruments
 
-    def has_data_for_instrument_code_and_contract_date(
-        self, instrument_code, contract_date
-    ):
-        """
-        Convenience method for when we have a code and date str, and don't want to build an object
-
-        :return: data
-        """
-
-        ans = self._perform_contract_method_for_instrument_code_and_contract_date(
-            instrument_code, contract_date, "has_data_for_contract")
-
-        return ans
-
-    def has_data_for_contract(self, contract_object):
-
-        contract_date = contract_object.date_str
-        instrument_code = contract_object.instrument_code
-
-        if contract_date in self.contract_dates_with_price_data_for_instrument_code(
-                instrument_code):
+    def has_data_for_contract(self, contract_object: futuresContract) ->bool:
+        list_of_contracts = self.get_contracts_with_price_data()
+        if contract_object in list_of_contracts:
             return True
         else:
             return False
 
-    def get_all_prices_for_instrument(self, instrument_code):
+    def contracts_with_price_data_for_instrument_code(self, instrument_code):
+        """
+        Valid contracts
+
+        :param instrument_code: str
+        :return: list of contract_date
+        """
+
+        list_of_contracts_with_price_data = self.get_contracts_with_price_data()
+        list_of_contracts_for_instrument = \
+            list_of_contracts_with_price_data.contracts_with_price_data_for_instrument_code(instrument_code)
+
+        return list_of_contracts_for_instrument
+
+    def contract_dates_with_price_data_for_instrument_code(
+            self, instrument_code):
+        """
+
+        :param instrument_code:
+        :return: list of str
+        """
+
+        list_of_contracts_with_price_data = (
+            self.contracts_with_price_data_for_instrument_code(instrument_code)
+        )
+
+        contract_dates = [
+            str(contract.date_str)
+            for contract in list_of_contracts_with_price_data
+        ]
+
+        return contract_dates
+
+
+
+
+    def get_all_prices_for_instrument(self, instrument_code: str) ->dictFuturesContractPrices:
         """
         Get all the prices for this code, returned as dict
 
@@ -94,22 +120,20 @@ class futuresContractPriceData(baseData):
         :return: dictFuturesContractPrices
         """
 
-        contractid_list = self.contract_dates_with_price_data_for_instrument_code(
-            instrument_code)
+        list_of_contracts = self.contracts_with_price_data_for_instrument_code(instrument_code)
         dict_of_prices = dictFuturesContractPrices(
             [
                 (
-                    contract_date,
-                    self.get_prices_for_instrument_code_and_contract_date(
-                        instrument_code, contract_date
-                    ),
+                    contract.date_str,
+                    self.get_prices_for_contract_object(contract),
                 )
-                for contract_date in contractid_list
+                for contract in list_of_contracts
             ]
         )
 
         return dict_of_prices
 
+    ## WHERE USED - TRY AND REMOVE
     def get_prices_for_instrument_code_and_contract_date(
         self, instrument_code, contract_date
     ):
@@ -124,6 +148,8 @@ class futuresContractPriceData(baseData):
 
         return ans
 
+
+    ### MOVE
     def get_recent_bid_ask_tick_data_for_instrument_code_and_contract_date(
         self, instrument_code, contract_date
     ):
@@ -141,6 +167,7 @@ class futuresContractPriceData(baseData):
 
         return ans
 
+    ## MOVE
     def get_recent_bid_ask_tick_data_for_order(self, order):
         ans = self._perform_contract_method_for_order(
             order, "get_recent_bid_ask_tick_data_for_contract_object"
@@ -202,6 +229,7 @@ class futuresContractPriceData(baseData):
         else:
             return futuresContractPrices.create_empty()
 
+    ## WHERE USED MOVE
     def get_prices_at_frequency_for_instrument_code_and_contract_date(
         self, instrument_code, contract_date, freq="D"
     ):
@@ -260,6 +288,7 @@ class futuresContractPriceData(baseData):
 
         raise NotImplementedError(BASE_CLASS_ERROR)
 
+    ## WHERE USED MOVE
     def write_prices_for_instrument_code_and_contract_date(
         self,
         instrument_code,
@@ -299,16 +328,14 @@ class futuresContractPriceData(baseData):
         :return: None
         """
 
-        new_log = self.log.setup(
-            instrument_code=futures_contract_object.instrument_code,
-            contract_date=futures_contract_object.date_str,
-        )
         if self.has_data_for_contract(futures_contract_object):
             if ignore_duplication:
                 pass
             else:
-                new_log.warn(
-                    "There is already existing data, you have to delete it first"
+                self.log.warn(
+                    "There is already existing data, you have to delete it first",
+                    instrument_code=futures_contract_object.instrument_code,
+                    contract_date=futures_contract_object.date_str
                 )
                 return None
 
@@ -330,9 +357,11 @@ class futuresContractPriceData(baseData):
 
         raise NotImplementedError(BASE_CLASS_ERROR)
 
+    ## MOVE
     def get_brokers_instrument_code(self, instrument_code):
         raise NotImplementedError(BASE_CLASS_ERROR)
 
+    ## WHERE USED REMOVE
     def update_prices_for_for_instrument_code_and_contract_date(
         self, instrument_code, contract_date, new_futures_per_contract_prices
     ):
@@ -397,9 +426,10 @@ class futuresContractPriceData(baseData):
 
         return rows_added
 
+    ## ARE THESE DELETION METHODS ACTUALL USED??
     def _delete_all_prices_for_all_instruments(self, are_you_sure=False):
         if are_you_sure:
-            instrument_list = self.get_instruments_with_price_data()
+            instrument_list = self.get_list_of_instrument_codes_with_price_data()
             for instrument_code in instrument_list:
                 self.delete_all_prices_for_instrument_code(
                     instrument_code, areyousure=are_you_sure
@@ -447,42 +477,7 @@ class futuresContractPriceData(baseData):
     ):
         raise NotImplementedError(BASE_CLASS_ERROR)
 
-    def contracts_with_price_data_for_instrument_code(self, instrument_code):
-        """
-        Valid contracts
-
-        :param instrument_code: str
-        :return: list of contract_date
-        """
-
-        list_of_contracts_with_price_data = self.get_contracts_with_price_data()
-        list_of_contracts = [
-            contract
-            for contract in list_of_contracts_with_price_data
-            if contract.instrument_code == instrument_code
-        ]
-
-        return list_of_contracts
-
-    def contract_dates_with_price_data_for_instrument_code(
-            self, instrument_code):
-        """
-
-        :param instrument_code:
-        :return: list of str
-        """
-
-        list_of_contracts_with_price_data = (
-            self.contracts_with_price_data_for_instrument_code(instrument_code)
-        )
-
-        contract_dates = [
-            str(contract.date_str)
-            for contract in list_of_contracts_with_price_data
-        ]
-
-        return contract_dates
-
+    ## AIM TO EVENTUALLY REMOVE
     def _perform_contract_method_for_instrument_code_and_contract_date(
         self, instrument_code, contract_date, method_name, *args, **kwargs
     ):
