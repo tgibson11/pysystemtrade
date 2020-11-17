@@ -79,6 +79,10 @@ def get_and_add_prices_for_frequency(data, log, contract_object, frequency="D"):
     db_futures_prices = updatePrices(data)
 
     quandl_prices = quandl_data_source.get_prices_for_contract_object(contract_object)
+    if len(quandl_prices) == 0:
+        log.msg("No prices from broker for %s" % str(contract_object))
+        return failure
+
     rows_added = db_futures_prices.update_prices_for_contract(contract_object, quandl_prices,
                                                               check_for_spike=True)
     if rows_added is data_error:
