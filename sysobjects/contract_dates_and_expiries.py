@@ -106,7 +106,7 @@ class singleContractDate(object):
         return self.date_str
 
     def __eq__(self, other):
-        return self.expiry_date == other.expiry_date
+        return self.date_str == other.date_str
 
     @property
     def date_str(self):
