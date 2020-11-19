@@ -4,7 +4,7 @@ Roll adjusted and multiple prices for a given contract, after checking that we d
 NOTE: this does not update the roll calendar .csv files stored elsewhere. Under DRY the sole source of production
   roll info is the multiple prices series
 """
-
+import traceback
 from copy import copy
 import numpy as np
 import pandas as pd
@@ -201,6 +201,7 @@ def _roll_adjusted_and_multiple_prices(data, instrument_code):
         )
     except Exception as e:
         data.log.warn("%s : went wrong when rolling: No roll has happened" % e)
+        data.log.warn(traceback.format_exc())
         return failure
 
     # We want user input before we do anything
@@ -338,10 +339,11 @@ def update_multiple_prices_on_roll(
             instrument_code, old_forward_contract
         )
     )
-    new_forward_contract_date = new_price_contract_date_object.next_held_contract()
-    new_carry_contract_date = new_price_contract_date_object.carry_contract()
+    new_price_contract_date = new_price_contract_date_object.contract_date
+    new_forward_contract_date = new_price_contract_date_object.next_held_contract().contract_date
+    new_carry_contract_date = new_price_contract_date_object.carry_contract().contract_date
 
-    new_price_contract_object = futuresContract(instrument_object, new_price_contract_date_object)
+    new_price_contract_object = futuresContract(instrument_object, new_price_contract_date)
     new_forward_contract_object = futuresContract(instrument_object, new_forward_contract_date)
     new_carry_contract_object = futuresContract(instrument_object, new_carry_contract_date)
 
