@@ -10,8 +10,6 @@ from syscore.dateutils import (
 )
 from sysobjects.contract_dates_and_expiries import (
     contractDate,
-    from_contract_numbers_to_contract_string,
-    NO_DAY_PASSED,
     contract_given_tuple
 
 )
@@ -26,7 +24,7 @@ class rollCycle(object):
     Only works with monthly contracts
     """
 
-    def __init__(self, cyclestring):
+    def __init__(self, cyclestring: str):
 
         assert isinstance(cyclestring, str)
 
@@ -39,67 +37,7 @@ class rollCycle(object):
     def cyclestring(self):
         return self._cyclestring
 
-    def _yearmonth_inrollcycle_before_dateNOTUSED(self, reference_date):
-        ## FEELS LIKE WE SHOULD BE WORKING IN CONTRACT DATES RATHER THAN TUPLES HERE...
-        ## IS THIS CODE USED??
-        """
-        Returns a tuple (month,year) which is in this roll cycle; and which is just before reference_date
-
-        :param reference_date: datetime.datetime
-        :return: tuple (int, int)
-        """
-
-        relevant_year = reference_date.year
-        relevant_month = reference_date.month
-        roll_cycle_as_list = self._as_list()
-
-        closest_month_index = bisect_left(
-            roll_cycle_as_list, relevant_month) - 1
-
-        if closest_month_index == -1:
-            # We are to the left of, or equal to the first month, go back one
-            first_month_in_year_as_str = self._cyclestring[0]
-            adjusted_year_int, adjusted_month_str = self._previous_year_month_given_tuple(
-                relevant_year, first_month_in_year_as_str
-            )
-            adjusted_month_int = month_from_contract_letter(adjusted_month_str)
-        else:
-            adjusted_month_int = roll_cycle_as_list[closest_month_index]
-            adjusted_year_int = relevant_year
-
-        return (adjusted_year_int, adjusted_month_int)
-
-    def _yearmonth_inrollcycle_after_dateNOTUSED(self, reference_date):
-        """
-        Returns a tuple (month,year) which is in this roll cycle; and which is just before reference_date
-
-        :param reference_date: datetime.datetime
-        :return: tuple (int, int)
-        """
-
-        relevant_year = reference_date.year
-        relevant_month = reference_date.month
-
-        roll_cycle_as_list = self._as_list()
-
-        closest_month_index = bisect_right(roll_cycle_as_list, relevant_month)
-
-        if closest_month_index == len(roll_cycle_as_list):
-            # fallen into the next year
-            # go forward one from the last month
-            last_month_in_year_as_str = self._cyclestring[-1]
-            adjusted_year_int, adjusted_month_str = self._next_year_month_given_tuple(
-                relevant_year, last_month_in_year_as_str
-            )
-            adjusted_month_int = month_from_contract_letter(adjusted_month_str)
-        else:
-            adjusted_month_int = roll_cycle_as_list[closest_month_index]
-            adjusted_year_int = relevant_year
-
-        return (adjusted_year_int, adjusted_month_int)
-
-
-    def iterate_contract(self, direction: int, contract_date: contractDate):
+    def iterate_contract_date(self, direction: int, contract_date: contractDate) -> contractDate:
         year_value, month_str = contract_date.date_str_to_year_month()
         if direction==forward:
             new_year_value, new_month_str = self._next_year_month_given_tuple(year_value, month_str)
@@ -162,7 +100,7 @@ class rollCycle(object):
 
         return self._offset_month(current_month, -1)
 
-    def _offset_month(self, current_month:str, offset: int):
+    def _offset_month(self, current_month:str, offset: int) -> str:
         """
         Move a number of months in the expiry cycle
 
@@ -193,7 +131,7 @@ class rollCycle(object):
 
         return self.cyclestring.index(current_month)
 
-    def _month_is_first(self, current_month:str) -> int:
+    def _month_is_first(self, current_month:str) -> bool:
         """
         Is this the first month in the expiry cycle?
 
@@ -203,7 +141,7 @@ class rollCycle(object):
 
         return self._where_month(current_month) == 0
 
-    def _month_is_last(self, current_month: str) -> int:
+    def _month_is_last(self, current_month: str) -> bool:
         """
         Is this the last month in the expiry cycle?
 
@@ -309,13 +247,13 @@ class rollParameters(object):
         return self._global_rollcycle
 
     @classmethod
-    def create_from_dict(rollData, roll_data_dict):
+    def create_from_dict(rollData, roll_data_dict: dict):
 
         futures_instrument_roll_data = rollData(**roll_data_dict)
 
         return futures_instrument_roll_data
 
-    def as_dict(self):
+    def as_dict(self) -> dict:
 
         return dict(
             hold_rollcycle=self.hold_rollcycle.cyclestring,
@@ -515,8 +453,8 @@ class contractDateWithRollParameters(object):
                 % (str(self.contract_date), rollcycle_name, str(rollcycle_to_use))
             )
 
-        new_contract_date = rollcycle_to_use.iterate_contract(direction,
-                                                                        self.contract_date)
+        new_contract_date = rollcycle_to_use.iterate_contract_date(direction,
+                                                                   self.contract_date)
 
         existing_roll_parameters = self.roll_parameters
 
@@ -526,13 +464,13 @@ class contractDateWithRollParameters(object):
 
         return new_contract_date_with_roll_data_object
 
-    def _valid_date_in_priced_rollcycle(self):
+    def _valid_date_in_priced_rollcycle(self) ->bool:
         return self._valid_date_in_named_rollcycle("priced_rollcycle")
 
-    def _valid_date_in_hold_rollcycle(self):
+    def _valid_date_in_hold_rollcycle(self) ->bool:
         return self._valid_date_in_named_rollcycle("hold_rollcycle")
 
-    def _valid_date_in_named_rollcycle(self, rollcycle_name):
+    def _valid_date_in_named_rollcycle(self, rollcycle_name:str) ->bool:
 
         relevant_rollcycle = getattr(self.roll_parameters, rollcycle_name)
         current_month = self.contract_date.letter_month()
