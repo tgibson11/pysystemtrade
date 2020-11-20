@@ -17,7 +17,7 @@ from sysdata.csv.csv_strategy_position_data import csvStrategyPositionData
 from sysdata.csv.csv_historic_orders import csvStrategyHistoricOrdersData, csvContractHistoricOrdersData, csvBrokerHistoricOrdersData
 from sysdata.csv.csv_capital_data import csvCapitalData
 from sysdata.csv.csv_optimal_position import csvOptimalPositionData
-from sysdata.csv.csv_instrument_config import csvFuturesInstrumentData
+from sysdata.csv.csv_instrument_data import csvFuturesInstrumentData
 from sysdata.csv.csv_roll_state_storage import csvRollStateData
 
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
@@ -131,15 +131,13 @@ def backup_futures_contract_prices_to_csv(data):
         data.arctic_futures_contract_price.get_list_of_instrument_codes_with_price_data()
     )
     for instrument_code in instrument_list:
-        contract_dates = data.arctic_futures_contract_price.contract_dates_with_price_data_for_instrument_code(
+        list_of_contracts = data.arctic_futures_contract_price.contracts_with_price_data_for_instrument_code(
             instrument_code)
 
-        for contract_date in contract_dates:
-            arctic_data = data.arctic_futures_contract_price.get_prices_for_instrument_code_and_contract_date(
-                instrument_code, contract_date)
+        for contract in list_of_contracts:
+            arctic_data = data.arctic_futures_contract_price.get_prices_for_contract_object(contract)
 
-            csv_data = data.csv_futures_contract_price.get_prices_for_instrument_code_and_contract_date(
-                instrument_code, contract_date)
+            csv_data = data.csv_futures_contract_price.get_prices_for_contract_object(contract)
 
             if check_df_equals(arctic_data, csv_data):
                 # No updated needed, move on
@@ -147,16 +145,16 @@ def backup_futures_contract_prices_to_csv(data):
             else:
                 # Write backup
                 try:
-                    data.csv_futures_contract_price.write_prices_for_instrument_code_and_contract_date(
-                        instrument_code, contract_date, arctic_data, ignore_duplication=True, )
+                    data.csv_futures_contract_price.write_prices_for_contract_object(
+                        contract, arctic_data, ignore_duplication=True, )
                     data.log.msg(
-                        "Written backup .csv of prices for %s %s"
-                        % (instrument_code, contract_date)
+                        "Written backup .csv of prices for %s"
+                        % (contract)
                     )
                 except BaseException:
                     data.log.warn(
-                        "Problem writing .csv of prices for %s %s"
-                        % (instrument_code, contract_date)
+                        "Problem writing .csv of prices for %s"
+                        % (contract)
                     )
 
 

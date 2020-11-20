@@ -1,5 +1,6 @@
 import pandas as pd
-from sysdata.fx.spotfx import fxPricesData, fxPrices
+from sysdata.fx.spotfx import fxPricesData
+from sysobjects.spot_fx_prices import fxPrices
 from syslogdiag.log import logtoscreen
 from syscore.fileutils import get_filename_for_package
 from syscore.objects import missing_file, missing_instrument
@@ -11,7 +12,7 @@ IB_CCY_CONFIG_FILE = get_filename_for_package(
 class ibFxPricesData(fxPricesData):
     def __init__(self, ibconnection, log=logtoscreen("ibFxPricesData")):
         setattr(self, "ibconnection", ibconnection)
-        setattr(self, "log", log)
+        super().__init__(log=log)
 
     def __repr__(self):
         return "IB FX price data"

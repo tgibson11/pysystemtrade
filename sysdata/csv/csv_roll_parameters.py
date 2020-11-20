@@ -1,5 +1,5 @@
 from syscore.fileutils import get_filename_for_package
-from sysdata.futures.rolls import rollParametersData
+from sysdata.futures.rolls_parameters import rollParametersData
 from sysobjects.rolls import rollParameters
 
 import pandas as pd
@@ -7,7 +7,7 @@ import pandas as pd
 ROLLS_CONFIG_FILE = "sysinit.futures.config.rollconfig.csv"
 
 
-class initCsvFuturesRollData(rollParametersData):
+class csvRollParametersData(rollParametersData):
     """
     Get data about instruments from a special configuration used for initialising the system
 
@@ -18,7 +18,6 @@ class initCsvFuturesRollData(rollParametersData):
         super().__init__()
 
         self._config_file = get_filename_for_package(config_file)
-        self.name = "Roll data for initialising system config"
 
     def _get_config_information(self):
         """
@@ -42,12 +41,12 @@ class initCsvFuturesRollData(rollParametersData):
         return config_data
 
     def __repr__(self):
-        return self.name
+        return "Roll data for initialising system config"
 
-    def get_list_of_instruments(self):
+    def get_list_of_instruments(self) -> list:
         return list(self._get_config_information().index)
 
-    def _get_roll_parameters_without_checking(self, instrument_code):
+    def _get_roll_parameters_without_checking(self, instrument_code:str) ->rollParameters:
         config_for_this_instrument = self._get_config_information(
         ).loc[instrument_code]
         roll_parameters_object = rollParameters(
@@ -59,3 +58,12 @@ class initCsvFuturesRollData(rollParametersData):
         )
 
         return roll_parameters_object
+
+    def _delete_roll_parameters_data_without_any_warning_be_careful(self,
+            instrument_code:str):
+        raise NotImplementedError("csv is read only")
+
+    def _add_roll_parameters_without_checking_for_existing_entry(self, instrument_code: str,
+                                                                 roll_parameters: rollParameters):
+        raise NotImplementedError("csv is read only")
+
