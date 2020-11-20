@@ -31,7 +31,7 @@ class dbconnections(simData):
         Use a different database
         """
 
-        super().__init__(log = log)
+        super().__init__(log=log)
         if mongo_db is arg_not_supplied:
             mongo_db = mongoDb()
 
@@ -126,7 +126,7 @@ class arcticFuturesAdjustedPriceSimData(
 
     def _get_adj_prices_data_object(self):
 
-        adj_prices_data = arcticFuturesAdjustedPricesData(self.mongo_db, log = self.log)
+        adj_prices_data = arcticFuturesAdjustedPricesData(self.mongo_db, log=self.log)
 
         return adj_prices_data
 
@@ -159,8 +159,7 @@ class arcticFuturesMultiplePriceSimData(
 
     def _get_all_prices_data_object(self):
 
-        multiple_prices_data_object = arcticFuturesMultiplePricesData(
-            self.mongo_db, log = self.log)
+        multiple_prices_data_object = arcticFuturesMultiplePricesData(self.mongo_db, log=self.log)
 
         return multiple_prices_data_object
 
@@ -202,7 +201,7 @@ class arcticFXSimData(dbconnections, simData):
 
     def _get_fx_data_object(self):
 
-        fx_prices_data_object = arcticFxPricesData(self.mongo_db, log = self.log)
+        fx_prices_data_object = arcticFxPricesData(self.mongo_db, log=self.log)
 
         return fx_prices_data_object
 
