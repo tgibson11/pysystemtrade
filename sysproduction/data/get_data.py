@@ -1,6 +1,6 @@
 # Get all the data we need to run production code
 # Stick in a standard 'blob', so the names are common
-
+import traceback
 from copy import copy
 
 from sysbrokers.IB.ib_connection import connectionIB
@@ -162,12 +162,13 @@ class dataBlob(object):
         try:
             resolved_instance = class_object(datapath = datapath, log = log)
         except Exception as e:
-                class_name = get_class_name(class_object)
-                msg = (
-                        "Error %s couldn't evaluate %s(datapath = datapath, log = self.log.setup(component = %s)) \
-                        This might be because import is missing\
-                         or arguments don't follow pattern" % (str(e), class_name, class_name))
-                self._raise_and_log_error(msg)
+            print(traceback.format_exc())
+            class_name = get_class_name(class_object)
+            msg = (
+                    "Error %s couldn't evaluate %s(datapath = datapath, log = self.log.setup(component = %s)) \
+                    This might be because import is missing\
+                     or arguments don't follow pattern" % (str(e), class_name, class_name))
+            self._raise_and_log_error(msg)
 
         return resolved_instance
 
