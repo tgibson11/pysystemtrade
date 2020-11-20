@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 
+from sysdata.futures.contracts import ContractNotFound
 from sysproduction.data.volumes import diagVolumes
 from sysproduction.data.contracts import diagContracts
 from sysproduction.data.prices import diagPrices
@@ -74,13 +75,23 @@ def get_roll_data_for_instrument(instrument_code, data):
 
 
     # length to expiries / length to suggested roll
-    price_expiry = c_data.get_priced_expiry(instrument_code)
-    carry_expiry = c_data.get_carry_expiry(instrument_code)
-    when_to_roll = c_data.when_to_roll_priced_contract(instrument_code)
-
     now = datetime.datetime.now()
-    price_expiry_days = (price_expiry - now).days
-    carry_expiry_days = (carry_expiry - now).days
+
+    try:
+        price_expiry = c_data.get_priced_expiry(instrument_code)
+        price_expiry_days = (price_expiry - now).days
+    except ContractNotFound:
+        # IB doesn't have data for the contract (most likely because it's already expired)
+        price_expiry_days = 0
+
+    try:
+        carry_expiry = c_data.get_carry_expiry(instrument_code)
+        carry_expiry_days = (carry_expiry - now).days
+    except ContractNotFound:
+        # IB doesn't have data for the contract (most likely because it's already expired)
+        carry_expiry_days = 0
+
+    when_to_roll = c_data.when_to_roll_priced_contract(instrument_code)
     when_to_roll_days = (when_to_roll - now).days
 
     # roll status
