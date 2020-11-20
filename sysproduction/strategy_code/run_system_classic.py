@@ -136,6 +136,7 @@ def updated_buffered_positions(data, strategy_name, system):
                 "Couldn't get or update buffered positions error %s" % e,
                 instrument_code=instrument_code,
             )
+            raise
 
     return success
 
