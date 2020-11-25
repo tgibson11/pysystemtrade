@@ -124,6 +124,8 @@ class RollData(object):
                     print("OK. Choose again.")
                     # back to top of loop
                     continue
+            else:
+                invalid_input = False
 
         self.set_new_roll_state(roll_state_required)
 
