@@ -7,6 +7,7 @@ import os
 
 import pandas as pd
 
+from syscore.objects import arg_not_supplied
 from sysdata.base_data import simData
 from sysdata.futures.futuresDataForSim import (
     futuresAdjustedPriceData,
@@ -24,7 +25,7 @@ Static variables to store location of data
 
 
 class csvPaths(simData):
-    def __init__(self, override_datapath=None, datapath_dict={}):
+    def __init__(self, override_datapath=arg_not_supplied, datapath_dict={}):
         """
 
         We look for data in .csv files
@@ -44,10 +45,10 @@ class csvPaths(simData):
         setattr(self, "_override_datapath", override_datapath)
         setattr(self, "_datapath_dict", datapath_dict)
 
-    def _resolve_path(self, path_attr_name, fallback_path=None):
+    def _resolve_path(self, path_attr_name, fallback_path=arg_not_supplied):
 
         # a global 'datapath' overrides everything
-        if self._override_datapath is not None:
+        if self._override_datapath is not arg_not_supplied:
             return self._override_datapath
 
         # if a specific path is provided use that
@@ -183,7 +184,7 @@ class csvFuturesAdjustedPriceData(csvPaths, futuresAdjustedPriceData):
         pathname = self._resolve_path("adjusted_prices")
 
         adj_prices_data = csvFuturesAdjustedPricesData(pathname)
-        adj_prices_data.log = self.log
+        adj_prices_data._log = self.log
 
         return adj_prices_data
 
@@ -233,7 +234,7 @@ class csvFuturesMultiplePriceData(csvPaths, futuresMultiplePriceData):
 
         csv_multiple_prices_data = csvFuturesMultiplePricesData(
             datapath=pathname)
-        csv_multiple_prices_data.log = self.log
+        csv_multiple_prices_data._log = self.log
 
         return csv_multiple_prices_data
 
@@ -279,7 +280,7 @@ class csvFXData(csvPaths, simData):
     def _get_fx_data_object(self):
         pathname = self._resolve_path("spot_fx_data")
         csv_fx_prices_data = csvFxPricesData(pathname)
-        csv_fx_prices_data.log = self.log
+        csv_fx_prices_data._log = self.log
 
         return csv_fx_prices_data
 

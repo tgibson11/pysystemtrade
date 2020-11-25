@@ -1,4 +1,6 @@
-from syscore.objects import arg_not_supplied
+from dataclasses import  dataclass
+
+from syscore.objects import arg_not_supplied, missing_contract
 
 from syslogdiag.log import logger
 
@@ -6,9 +8,6 @@ from sysobjects.contract_dates_and_expiries import contractDate, expiryDate
 from sysobjects.instruments import futuresInstrument
 
 
-from dataclasses import  dataclass
-
-import datetime
 
 NO_ROLL_CYCLE_PASSED = object()
 
@@ -68,8 +67,6 @@ class futuresContract(object):
         self._params = parameter_object
 
 
-        self._is_empty = False
-
     def specific_log(self, log):
         new_log = log.setup(instrument_code = self.instrument_code, contract_date = self.date_str)
 
@@ -92,7 +89,7 @@ class futuresContract(object):
 
     def __eq__(self, other):
         instruments_match = self.instrument == other.instrument
-        contracts_match = self.contract_date == other.contract_date
+        contracts_match = self.date_str == other.date_str
 
         if instruments_match and contracts_match:
             return True
