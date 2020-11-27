@@ -6,7 +6,7 @@ from sysproduction.update_sampled_contracts import updateSampledContracts
 from sysproduction.update_historical_prices_quandl import updateHistoricalPricesQuandl
 from sysproduction.update_multiple_adjusted_prices import updateMultipleAdjustedPrices
 
-from sysproduction.data.get_data import dataBlob
+from sysdata.data_blob import dataBlob
 
 logging.getLogger("arctic").setLevel(logging.ERROR)
 

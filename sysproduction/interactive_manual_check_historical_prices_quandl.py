@@ -6,11 +6,11 @@ Apply a check to each price series
 
 from syscore.objects import success, failure
 from sysdata.futures.manual_price_checker import manual_price_checker
-from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
+from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesContractPriceData
 from sysobjects.contracts import futuresContract
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from sysproduction.data.contracts import diagContracts
-from sysproduction.data.get_data import dataBlob
+from sysdata.data_blob import dataBlob
 from sysproduction.data.prices import (
     diagPrices,
     updatePrices,
@@ -91,7 +91,7 @@ def update_historical_prices_with_checks_for_instrument_and_contract(
 
 def get_and_check_prices_for_frequency(
         data: dataBlob, contract_object: futuresContract):
-    quandl_data = quandlFuturesContractPriceData()
+    quandl_data = QuandlFuturesContractPriceData()
     price_data = diagPrices(data)
     price_updater = updatePrices(data)
 

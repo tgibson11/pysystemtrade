@@ -4,10 +4,10 @@ Update historical data per contract from Quandl data, dump into mongodb
 
 from syscore.objects import success, failure, data_error
 from sysdata.futures.futures_per_contract_prices import DAILY_PRICE_FREQ
-from sysdata.quandl.quandl_futures import quandlFuturesContractPriceData
+from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesContractPriceData
 from sysobjects.contracts import futuresContract
 from sysproduction.data.contracts import diagContracts
-from sysproduction.data.get_data import dataBlob
+from sysdata.data_blob import dataBlob
 from sysproduction.data.prices import diagPrices, updatePrices
 from sysproduction.diagnostic.emailing import send_production_mail_msg
 
@@ -84,7 +84,7 @@ def update_historical_prices_for_instrument_and_contract(
 
 def get_and_add_prices_for_frequency(
         data: dataBlob, contract_object: futuresContract, frequency: str = "D"):
-    quandl_data_source = quandlFuturesContractPriceData()
+    quandl_data_source = QuandlFuturesContractPriceData()
     db_futures_prices = updatePrices(data)
 
     quandl_prices = quandl_data_source.get_prices_for_contract_object(contract_object)

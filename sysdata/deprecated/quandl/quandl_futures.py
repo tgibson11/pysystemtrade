@@ -3,26 +3,26 @@ Get data from quandl for futures
 
 """
 
-from sysobjects.contracts import futuresContract
+from sysobjects.contracts import futuresContract, listOfFuturesContracts
 from syscore.dateutils import adjust_timestamp
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
 )
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from syscore.fileutils import get_filename_for_package
-from sysdata.quandl.quandl_utils import load_private_key
+from sysdata.deprecated.quandl.quandl_utils import load_private_key
 
 import quandl
 import pandas as pd
 
 QUANDL_FUTURES_CONFIG_FILE = get_filename_for_package(
-    "sysdata.quandl.QuandlFuturesConfig.csv"
+    "sysdata.deprecated.quandl.QuandlFuturesConfig.csv"
 )
 
 quandl.ApiConfig.api_key = load_private_key()
 
 
-class quandlFuturesConfiguration(object):
+class QuandlFuturesConfiguration(object):
     def __init__(self, config_file=QUANDL_FUTURES_CONFIG_FILE):
 
         self._config_file = config_file
@@ -62,7 +62,7 @@ class quandlFuturesConfiguration(object):
             config_data.drop("CODE", 1, inplace=True)
 
         except BaseException:
-            raise Exception("Badly configured file %s" % (self._config_file))
+            raise Exception("Badly configured file %s" % self._config_file)
 
         return config_data
 
@@ -94,7 +94,7 @@ class quandlFuturesConfiguration(object):
 USE_DEFAULT = object()
 
 
-class _quandlFuturesContract(futuresContract):
+class _QuandlFuturesContract(futuresContract):
     """
     An individual futures contract, with additional Quandl methods
     """
@@ -109,7 +109,7 @@ class _quandlFuturesContract(futuresContract):
         super().__init__(futures_contract.instrument, futures_contract.date_str)
 
         if quandl_instrument_data is USE_DEFAULT:
-            quandl_instrument_data = quandlFuturesConfiguration()
+            quandl_instrument_data = QuandlFuturesConfiguration()
 
         self._quandl_instrument_data = quandl_instrument_data
 
@@ -123,20 +123,14 @@ class _quandlFuturesContract(futuresContract):
         quandl_year = str(self.contract_date.year())
         quandl_month = self.contract_date.letter_month()
 
-        try:
-            quandl_date_id = quandl_month + quandl_year
+        quandl_date_id = quandl_month + quandl_year
 
-            market = self.get_quandlmarket_for_instrument()
-            codename = self.get_quandlcode_for_instrument()
+        market = self.get_quandlmarket_for_instrument()
+        codename = self.get_quandlcode_for_instrument()
 
-            quandldef = "%s/%s%s" % (market, codename, quandl_date_id)
+        quandldef = "%s/%s%s" % (market, codename, quandl_date_id)
 
-            return quandldef
-        except BaseException:
-            raise ValueError(
-                "Can't turn %s %s into a Quandl Contract"
-                % (self.instrument_code, self.contract_date)
-            )
+        return quandldef
 
     def get_quandlcode_for_instrument(self):
 
@@ -152,7 +146,7 @@ class _quandlFuturesContract(futuresContract):
 
     def get_start_date(self):
 
-        return self._quandl_instrument_data.get_start_date(
+        return self._quandl_instrument_data.get_first_contract_date(
             self.instrument_code)
 
     def get_dividing_factor(self):
@@ -162,7 +156,7 @@ class _quandlFuturesContract(futuresContract):
         )
 
 
-class quandlFuturesContractPriceData(futuresContractPriceData):
+class QuandlFuturesContractPriceData(futuresContractPriceData):
     """
     Class to specifically get individual futures price data for quandl
     """
@@ -195,13 +189,7 @@ class quandlFuturesContractPriceData(futuresContractPriceData):
             contract_date=futures_contract_object.date_str,
         )
 
-        try:
-            quandl_contract = _quandlFuturesContract(futures_contract_object)
-        except BaseException:
-            self.log.warning(
-                "Can't parse contract object to find the QUANDL identifier"
-            )
-            return futuresContractPrices.create_empty()
+        quandl_contract = _QuandlFuturesContract(futures_contract_object)
 
         try:
             contract_data = quandl.get(quandl_contract.quandl_identifier())
@@ -213,7 +201,7 @@ class quandlFuturesContractPriceData(futuresContractPriceData):
             return futuresContractPrices.create_empty()
 
         try:
-            data = quandlFuturesContractPrices(contract_data)
+            data = QuandlFuturesContractPrices(contract_data)
         except BaseException:
             self.log.error(
                 "Quandl API error: data fields are not as expected %s"
@@ -227,8 +215,22 @@ class quandlFuturesContractPriceData(futuresContractPriceData):
 
         return data
 
+    def get_contracts_with_price_data(self) -> listOfFuturesContracts:
+        raise NotImplementedError
 
-class quandlFuturesContractPrices(futuresContractPrices):
+    def _delete_prices_for_contract_object_with_no_checks_be_careful(self, futures_contract_object: futuresContract):
+        raise NotImplementedError
+
+    def _write_prices_for_contract_object_no_checking(self, futures_contract_object: futuresContract,
+                                                      futures_price_data: futuresContractPrices):
+        raise NotImplementedError
+
+    def _get_prices_at_frequency_for_contract_object_no_checking(self, contract_object: futuresContract,
+                                                                 freq: str) -> futuresContractPrices:
+        raise NotImplementedError
+
+
+class QuandlFuturesContractPrices(futuresContractPrices):
     """
     Parses Quandl format into our format
 
@@ -288,3 +290,7 @@ class quandlFuturesContractPrices(futuresContractPrices):
         new_data.index = date_index
 
         super().__init__(new_data)
+
+    @property
+    def _constructor_expanddim(self):
+        raise NotImplementedError
