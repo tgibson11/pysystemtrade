@@ -141,7 +141,6 @@ class mongoConnection(object):
             return []
 
         # '__id__' is always in index if there is data
-        print(raw_index_information)
         raw_index_information.pop(MONGO_ID_STR)
 
         # mongo have buried this deep...
