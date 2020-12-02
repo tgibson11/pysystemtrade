@@ -37,7 +37,10 @@ class rollCycle(object):
     def cyclestring(self):
         return self._cyclestring
 
-    def iterate_contract_date(self, direction: int, contract_date: contractDate) -> contractDate:
+    def iterate_contract_date(self,
+                              direction: int,
+                              contract_date: contractDate,
+                              approx_expiry_offset: int = 0) -> contractDate:
         year_value, month_str = contract_date.date_str_to_year_month()
         if direction==forward:
             new_year_value, new_month_str = self._next_year_month_given_tuple(year_value, month_str)
@@ -46,7 +49,10 @@ class rollCycle(object):
         else:
             raise Exception("Direction %d has to be %s or %s" % (direction, forward, backwards))
 
-        return contract_given_tuple(contract_date, new_year_value, new_month_str)
+        return contract_given_tuple(contract_date,
+                                    new_year_value,
+                                    new_month_str,
+                                    approx_expiry_offset=approx_expiry_offset)
 
     def _previous_year_month_given_tuple(self, year_value: int, month_str: str)-> (int, str):
         """
@@ -453,8 +459,10 @@ class contractDateWithRollParameters(object):
                 % (str(self.contract_date), rollcycle_name, str(rollcycle_to_use))
             )
 
-        new_contract_date = rollcycle_to_use.iterate_contract_date(direction,
-                                                                   self.contract_date)
+        new_contract_date = rollcycle_to_use.iterate_contract_date(
+            direction,
+            self.contract_date,
+            approx_expiry_offset=self.roll_parameters.approx_expiry_offset)
 
         existing_roll_parameters = self.roll_parameters
 

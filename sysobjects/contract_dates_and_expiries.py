@@ -517,7 +517,7 @@ def create_contract_date_from_old_style_dict(contractDate, results_dict: dict):
         expiry_date=expiry_date)
 
 
-def contract_given_tuple(contract_date: contractDate, year_value:int, month_str: str):
+def contract_given_tuple(contract_date: contractDate, year_value:int, month_str: str, approx_expiry_offset: int = 0):
     if contract_date.only_has_month:
         new_day_number = 0
     else:
@@ -526,4 +526,4 @@ def contract_given_tuple(contract_date: contractDate, year_value:int, month_str:
     month_int = month_from_contract_letter(month_str)
     date_str = from_contract_numbers_to_contract_string(year_value, month_int, new_day_number)
 
-    return contractDate(date_str)
+    return contractDate(date_str, approx_expiry_offset=approx_expiry_offset)
