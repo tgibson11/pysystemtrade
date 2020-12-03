@@ -9,12 +9,9 @@ import datetime
 from sysdata.arctic.arctic_futures_per_contract_prices import (
     arcticFuturesContractPriceData,
 )
+from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesConfiguration, QuandlFuturesContractPriceData
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
-from sysdata.quandl.quandl_futures import (
-    quandlFuturesConfiguration,
-    quandlFuturesContractPriceData,
-)
 from sysobjects.contract_dates_and_expiries import contractDate
 from sysobjects.contracts import listOfFuturesContracts, futuresContract
 from sysobjects.instruments import futuresInstrument
@@ -26,16 +23,12 @@ def get_roll_parameters_from_mongo(instrument_code):
 
     roll_parameters = mongo_roll_parameters.get_roll_parameters(
         instrument_code)
-    if roll_parameters.empty():
-        raise Exception(
-            "Instrument %s missing from %s" %
-            (instrument_code, mongo_roll_parameters))
 
     return roll_parameters
 
 
 def get_first_contract_date_from_quandl(instrument_code):
-    config = quandlFuturesConfiguration()
+    config = QuandlFuturesConfiguration()
     return config.get_first_contract_date(instrument_code)
 
 
@@ -54,7 +47,7 @@ def create_list_of_contracts(instrument_code):
 
 def get_and_write_prices_for_contract_list_from_quandl_to_arctic(
         list_of_contracts):
-    quandl_prices_data = quandlFuturesContractPriceData()
+    quandl_prices_data = QuandlFuturesContractPriceData()
     arctic_prices_data = arcticFuturesContractPriceData()
 
     for contract_object in list_of_contracts:
@@ -113,10 +106,10 @@ def historical_price_contracts(
 
     assert end_date > first_contract.expiry_date
 
-    current_held_contract_date = roll_parameters.approx_first_held_futuresContract_at_date(end_date)
+    current_held_contract_date = roll_parameters.approx_first_held_contractDate_at_date(end_date)
     current_held_contract = futuresContract(instrument_object, current_held_contract_date)
 
-    current_priced_contract_date = roll_parameters.approx_first_priced_futuresContract_at_date(end_date)
+    current_priced_contract_date = roll_parameters.approx_first_priced_contractDate_at_date(end_date)
     current_priced_contract = futuresContract(instrument_object, current_priced_contract_date)
 
     current_carry_contract = current_held_contract_date.carry_contract()
