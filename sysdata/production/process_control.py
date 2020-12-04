@@ -52,12 +52,14 @@ class controlProcess(object):
             run_string = "running"
         else:
             run_string = "not running"
-        return "Last started %s Last ended %s is %s, status %s, PID %s" % (
+        status_string = f"{''+self.status:<7}"
+        process_id_string = f"{''+str(self.process_id):<10}"
+        return "Last started %s Last ended status %s %s PID %s is %s" % (
             self.last_start_time,
             self.last_end_time,
+            status_string,
+            process_id_string,
             run_string,
-            self.status,
-            str(self.process_id),
         )
 
     @property
