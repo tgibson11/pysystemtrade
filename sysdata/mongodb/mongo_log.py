@@ -55,9 +55,9 @@ class logToMongod(logToDb):
     def update_log_id(self, next_id: int):
         # reserve log_id with a blank record
         try:
-            self.mongo_data.add_data(next_id, {})
+            self.mongo_data.add_data(next_id, {}, allow_overwrite=True)
         except existingData:
-            raise Exception("ID %d is already used")
+            raise Exception("ID %d is already used" % next_id)
 
     def add_log_record(self, log_entry):
         record_as_dict = log_entry.log_dict()
