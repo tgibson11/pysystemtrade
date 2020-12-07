@@ -73,7 +73,8 @@ def get_time_difference(time_zone_id):
     time_diff_dict = {'CST (Central Standard Time)': -1,
                       'EST (Eastern Standard Time)': -2,
                       'America/Belize': -1,
-                      'US/Central': -1}
+                      'US/Central': -1,
+                      'US/Eastern': -2}
     diff_hours = time_diff_dict.get(time_zone_id, None)
     if diff_hours is None:
         raise Exception("Time zone '%s' not found!" % time_zone_id)
