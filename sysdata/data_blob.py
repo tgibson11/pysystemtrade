@@ -6,6 +6,7 @@ from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.mongodb.mongo_log import logToMongod
 from syslogdiag.log import logger
 
+from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 
 class dataBlob(object):
     def __init__(
@@ -228,6 +229,8 @@ class dataBlob(object):
     def close(self):
         if self._ib_conn is not arg_not_supplied:
             self.ib_conn.close_connection()
+            self.db_ib_broker_client_id.release_clientid(
+                self.ib_conn.client_id())
 
         # No need to explicitly close Mongo connections; handled by Python garbage collection
 
@@ -235,7 +238,11 @@ class dataBlob(object):
     def ib_conn(self):
         ib_conn = getattr(self, "_ib_conn", arg_not_supplied)
         if ib_conn is arg_not_supplied:
-            ib_conn = connectionIB(log=self.log, mongo_db=self.mongo_db)
+
+            ## default to tracking ID through mongo change if required
+            self.add_class_object(mongoIbBrokerClientIdData)
+            client_id = self.db_ib_broker_client_id.return_valid_client_id()
+            ib_conn = connectionIB(client_id, log=self.log)
             self._ib_conn = ib_conn
 
         return ib_conn

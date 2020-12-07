@@ -1,3 +1,4 @@
+from syscore.objects import arg_not_supplied
 from sysdata.mongodb.mongo_connection import mongoConnection, mongoDb
 from sysdata.mongodb.mongo_generic import mongoData, MONGO_ID_KEY, existingData
 from syscore.dateutils import long_to_datetime, datetime_to_long
@@ -22,7 +23,7 @@ class logToMongod(logToDb):
         type: str,
         data=None,
         log_level: str="Off",
-        mongo_db: mongoDb=None,
+        mongo_db: mongoDb=arg_not_supplied,
         **kwargs,
     ):
         super().__init__(type=type, log_level=log_level, **kwargs)
@@ -37,6 +38,22 @@ class logToMongod(logToDb):
     def mongo_data(self):
         return self._mongo_data
 
+    def get_next_log_id(self) -> int:
+        invalid_id = True
+        counter = 0
+        while invalid_id:
+            last_id = self.get_last_used_log_id()
+            next_id = last_id + 1
+            reversed_okay = self.reserved_log_id(next_id)
+            if reversed_okay:
+                invalid_id = False
+            counter = counter + 1
+            if counter>100:
+                self.log.critical("Couldn't reserve log ID")
+                raise Exception("Couldn't reserve log ID")
+
+        return next_id
+
     def get_last_used_log_id(self) -> int:
         """
         Get last used log id. Returns None if not present
@@ -45,19 +62,20 @@ class logToMongod(logToDb):
         """
         all_log_ids = self.get_all_log_ids()
         if len(all_log_ids)==0:
-            return None
+            return 0
 
         return max(all_log_ids)
 
     def get_all_log_ids(self) -> list:
         return self.mongo_data.get_list_of_keys()
 
-    def update_log_id(self, next_id: int):
-        # reserve log_id with a blank record
+    def reserved_log_id(self, next_id: int) -> bool:
         try:
-            self.mongo_data.add_data(next_id, {}, allow_overwrite=True)
+            self.mongo_data.add_data(next_id, {})
         except existingData:
-            raise Exception("ID %d is already used" % next_id)
+            return False
+        else:
+            return True
 
     def add_log_record(self, log_entry):
         record_as_dict = log_entry.log_dict()
@@ -68,7 +86,7 @@ class logToMongod(logToDb):
 
 class mongoLogData(logData):
     # Need to change so uses data
-    def __init__(self, mongo_db=None, log=logtoscreen("mongoLogData")):
+    def __init__(self, mongo_db=arg_not_supplied, log=logtoscreen("mongoLogData")):
         self._mongo_data = mongoData(LOG_COLLECTION_NAME, LOG_RECORD_ID, mongo_db=mongo_db)
         super().__init__(log=log)
 

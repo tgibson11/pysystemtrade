@@ -1,4 +1,5 @@
 from copy import copy
+from syscore.objects import arg_not_supplied
 from sysdata.mongodb.mongo_connection import (
     mongoConnection,
     MONGO_ID_KEY,
@@ -15,10 +16,10 @@ class mongoData(object):
     """
 
 
-    def __init__(self, collection_name, key_name, mongo_db=None):
+    def __init__(self, collection_name, key_name, mongo_db=arg_not_supplied):
         self.init_mongo(collection_name, key_name, mongo_db=mongo_db)
 
-    def init_mongo(self, collection_name: str, key_name: str, mongo_db = None,):
+    def init_mongo(self, collection_name: str, key_name: str, mongo_db =arg_not_supplied,):
         mongo_object = mongoConnection(collection_name, mongo_db=mongo_db)
 
         self._mongo = mongo_object
@@ -83,6 +84,9 @@ class mongoData(object):
     def get_result_dict_for_key_without_key_value(self, key: str) ->dict:
         key_name = self.key_name
         result_dict = self.get_result_dict_for_key(key)
+        if result_dict is missing_data:
+            return missing_data
+
         result_dict.pop(key_name)
 
         return result_dict
