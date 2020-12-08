@@ -19,7 +19,7 @@ We kick them all off in the crontab at a specific time (midnight is easiest), bu
 """
 import traceback
 
-from syscontrol.data_interface import dataControlProcess, diagProcessConfig
+from syscontrol.data_interface import dataControlProcess, diagControlProcess
 from syscontrol.data_objects import process_no_run, process_stop, process_running
 from syscontrol.timer_functions import _get_list_of_timer_functions
 
@@ -40,8 +40,7 @@ class processToRun(object):
         self,
         process_name,
         data,
-        list_of_timer_names_and_functions,
-        use_strategy_config=False,
+        list_of_timer_names_and_functions
     ):
         self.data = data
         self._process_name = process_name
@@ -49,15 +48,14 @@ class processToRun(object):
         self._list_of_timer_functions = _get_list_of_timer_functions(
             data,
             process_name,
-            list_of_timer_names_and_functions,
-            use_strategy_config=use_strategy_config,
+            list_of_timer_names_and_functions
         )
 
     def _setup(self):
         self.log = self.data.log
         data_control = dataControlProcess(self.data)
         self.data_control = data_control
-        diag_process = diagProcessConfig(self.data)
+        diag_process = diagControlProcess(self.data)
         self.diag_process = diag_process
         self._logged_wait_messages = False
 

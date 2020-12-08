@@ -70,12 +70,12 @@ def _send_msg(msg):
 
     """
 
-    email_server, email_port, email_from_address, email_pwd, email_to_address, = get_email_details()
+    email_server, email_port, email_address, email_pwd, email_to = get_email_details()
 
-    me = email_from_address
-    you = email_to_address
-    msg['From'] = me
-    msg['To'] = you
+    me = email_address
+    you = email_to
+    msg["From"] = me
+    msg["To"] = you
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(email_server, email_port, context=context) as s:
@@ -84,13 +84,17 @@ def _send_msg(msg):
 
 
 def get_email_details():
-    yaml_dict = get_list_of_private_config_values(['email_from_address', 'email_pwd', 'email_server',
-                                                   'email_port', 'email_to_address'])
+    try:
+        yaml_dict = get_list_of_private_config_values(
+        ["email_address", "email_pwd", "email_server", "email_to", "email_port"]
+        )
+    except:
+        raise Exception("Need to have all of these for email to work in private config: email_address, email_pwd, email_server, email_to")
 
-    email_from_address = yaml_dict['email_from_address']
-    email_pwd = yaml_dict['email_pwd']
-    email_server = yaml_dict['email_server']
-    email_port = yaml_dict['email_port']
-    email_to_address = yaml_dict['email_to_address']
+    email_address = yaml_dict["email_address"]
+    email_pwd = yaml_dict["email_pwd"]
+    email_server = yaml_dict["email_server"]
+    email_to = yaml_dict["email_to"]
+    email_port = yaml_dict["email_port"]
 
-    return email_server, email_port, email_from_address, email_pwd, email_to_address
+    return email_server, email_port, email_address, email_pwd, email_to

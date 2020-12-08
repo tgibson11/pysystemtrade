@@ -7,7 +7,8 @@ For a given process:
  - is my status NO-RUN, STOP or GO?
  - have I run today and finished running?
 """
-from dataclasses import dataclass
+
+from copy import copy
 import datetime
 import os
 
@@ -20,7 +21,6 @@ from syscore.objects import (
     missing_data,
 )
 
-from dataclasses import  dataclass
 
 process_stop = _named_object("process stop")
 process_no_run = _named_object("process no run")
@@ -33,30 +33,75 @@ from syslogdiag.log import logtoscreen
 go_status = "GO"
 no_run_status = "NO-RUN"
 stop_status = "STOP"
-default_id = "?"
+default_id = 0
 no_id = "None"
 
 possible_status = [go_status, no_run_status, stop_status]
 
-@dataclass
-class runningMethod:
-    method_name: str
-    last_run: datetime.datetime
+start_run_idx = 0
+end_run_idx = 1
 
-    def log_run(self):
-        self.last_run = datetime.datetime.now()
+missing_date_str=""
 
 class dictOfRunningMethods(dict):
-    def log_run_for_method(self, method_name: str):
-        self[method_name] = datetime.datetime.now()
+    def log_start_run_for_method(self, method_name: str):
+        current_entry = self.get_current_entry(method_name)
+        current_entry[start_run_idx] = datetime.datetime.now()
+        self.set_entry(method_name, current_entry)
 
-    def when_last_run(self, method_name):
-        last_run = self.get(method_name, missing_data)
-        return last_run
+    def log_end_run_for_method(self, method_name: str):
+        current_entry = self.get_current_entry(method_name)
+        current_entry[end_run_idx] = datetime.datetime.now()
+        self.set_entry(method_name, current_entry)
+
+    def currently_running(self, method_name):
+        last_start = self.when_last_start_run(method_name)
+        last_end = self.when_last_end_run(method_name)
+        if last_start is missing_data:
+            return False
+        if last_end is missing_data:
+            return True
+
+        if last_start>last_end:
+            return True
+
+        return False
+
+    def when_last_start_run(self, method_name):
+        current_entry = self.get_current_entry(method_name)
+        start_run = current_entry[start_run_idx]
+        if start_run == missing_date_str:
+            return missing_data
+        return start_run
+
+    def when_last_end_run(self, method_name):
+        current_entry = self.get_current_entry(method_name)
+        end_run = current_entry[end_run_idx]
+        if end_run == missing_date_str:
+            return missing_data
+        return end_run
+
 
     def as_dict(self):
         return dict(self)
 
+    def get_current_entry(self, method_name) -> list:
+        ans= copy(self.get(method_name, [missing_date_str, missing_date_str]))
+        #FIXME TEMP FIX
+        if type(ans) is datetime.datetime:
+            return [missing_date_str, missing_date_str]
+        if ans is None:
+            return [missing_date_str, missing_date_str]
+        # END OF FIX
+
+        return ans
+
+    def set_entry(self, method_name, new_entry):
+        self[method_name] = new_entry
+
+not_running = "not running"
+still_running_and_pid_ok = "still running, PID active"
+was_running_pid_notok_closed = "PID was inactive, marked as finished"
 
 class controlProcess(object):
     def __init__(
@@ -65,7 +110,7 @@ class controlProcess(object):
         last_end_time: datetime.datetime=None,
         currently_running: bool=False,
         status: str=go_status,
-        process_id=default_id,
+        process_id: int=default_id,
         running_methods: dictOfRunningMethods = dictOfRunningMethods()
     ):
         assert status in possible_status
@@ -81,6 +126,7 @@ class controlProcess(object):
             run_string = "running"
         else:
             run_string = "not running"
+
         status_string = f"{''+self.status:<7}"
         process_id_string = f"{''+str(self.process_id):<10}"
         return "Last started %s Last ended status %s %s PID %s is %s" % (
@@ -161,16 +207,32 @@ class controlProcess(object):
 
         return success
 
-    def log_run_for_method(self, method_name: str):
-        self.running_methods.log_run_for_method(method_name)
+    def log_start_run_for_method(self, method_name: str):
+        self.running_methods.log_start_run_for_method(method_name)
 
-    def when_method_last_run(self, method_name: str):
-        return self.running_methods.when_last_run(method_name)
+    def when_method_last_started(self, method_name: str):
+        return self.running_methods.when_last_start_run(method_name)
 
-    def check_if_pid_running_and_if_not_finish(self):
+    def log_end_run_for_method(self, method_name: str):
+        self.running_methods.log_end_run_for_method(method_name)
+
+    def when_method_last_ended(self, method_name: str):
+        return self.running_methods.when_last_end_run(method_name)
+
+    def method_currently_running(self, method_name: str):
+        return self.running_methods.currently_running(method_name)
+
+    def check_if_pid_running_and_if_not_finish_return_status(self) -> str:
+        if not self.currently_running:
+            return not_running
+
         pid_running = self.check_if_pid_running()
-        if not pid_running:
-            self.finish_process()
+        if pid_running:
+            return still_running_and_pid_ok
+
+        self.finish_process()
+
+        return was_running_pid_notok_closed
 
     def check_if_pid_running(self) -> bool:
         ## I don't normally make jokes in code, or use weird variable names, so allow me this one please
@@ -233,15 +295,15 @@ class controlProcessData(baseData):
 
     def get_dict_of_control_processes(self) ->dict:
         list_of_names = self.get_list_of_process_names()
-        output_dict = dict([(process_name, self._get_control_for_process_name(
+        output_dict = dict([(process_name, self.get_control_for_process_name(
             process_name)) for process_name in list_of_names])
 
         return output_dict
 
     def get_list_of_process_names(self) ->list:
-        return self._control_store.keys()
+        return list(self._control_store.keys())
 
-    def _get_control_for_process_name(self, process_name) -> controlProcess:
+    def get_control_for_process_name(self, process_name) -> controlProcess:
         control = self._get_control_for_process_name_without_default(
             process_name)
         if control is missing_data:
@@ -280,7 +342,7 @@ class controlProcessData(baseData):
         :param process_name: str
         :return:  success, or if not okay: process_no_run, process_stop, process_running
         """
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         result = original_process.check_if_okay_to_start_process()
 
         return result
@@ -291,13 +353,32 @@ class controlProcessData(baseData):
         :param process_name: str
         :return:  success, or if not okay: process_no_run, process_stop, process_running
         """
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         result = original_process.start_process()
         if result is success:
             self._update_control_for_process_name(
                 process_name, original_process)
 
         return result
+
+    def check_if_pid_running_and_if_not_finish_all_processes(self):
+
+        list_of_names = self.get_list_of_process_names()
+        list_of_results = [self.check_if_pid_running_and_if_not_finish(process_name) for process_name in list_of_names]
+
+        return list_of_results
+
+
+    def check_if_pid_running_and_if_not_finish(self, process_name: str):
+        original_process = self.get_control_for_process_name(process_name)
+        PID = original_process.process_id
+        result = original_process.check_if_pid_running_and_if_not_finish_return_status()
+
+        if result is was_running_pid_notok_closed:
+            self.log.critical("Process %s with PID %d appears to have crashed, marking as finished: you may want to restart" % (process_name, PID))
+            self._update_control_for_process_name(process_name, original_process)
+
+        return process_name, result
 
     def finish_all_processes(self):
 
@@ -312,7 +393,7 @@ class controlProcessData(baseData):
         :param process_name: str
         :return: sucess or failure if can't finish process (maybe already running?)
         """
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         result = original_process.finish_process()
         if result is success:
             self._update_control_for_process_name(
@@ -326,7 +407,7 @@ class controlProcessData(baseData):
         :param process_name: str
         :return: bool
         """
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         result = original_process.check_if_process_status_stopped()
 
         return result
@@ -337,34 +418,47 @@ class controlProcessData(baseData):
         :param process_name: str
         :return: bool
         """
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         result = original_process.has_process_finished_in_last_day()
 
         return result
 
     def change_status_to_stop(self, process_name: str):
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         original_process.change_status_to_stop()
         self._update_control_for_process_name(process_name, original_process)
 
     def change_status_to_go(self, process_name: str):
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         original_process.change_status_to_go()
         self._update_control_for_process_name(process_name, original_process)
 
     def change_status_to_no_run(self, process_name: str):
-        original_process = self._get_control_for_process_name(process_name)
+        original_process = self.get_control_for_process_name(process_name)
         original_process.change_status_to_no_run()
         self._update_control_for_process_name(process_name, original_process)
 
-    def log_run_for_method(self, process_name: str, method_name: str):
-        original_process = self._get_control_for_process_name(process_name)
-        original_process.log_run_for_method(method_name)
+    def log_start_run_for_method(self, process_name: str, method_name: str):
+        original_process = self.get_control_for_process_name(process_name)
+        original_process.log_start_run_for_method(method_name)
         self._update_control_for_process_name(process_name, original_process)
 
-    def when_method_last_run(self, process_name: str, method_name: str) -> datetime.datetime:
-        original_process = self._get_control_for_process_name(process_name)
-        return original_process.when_method_last_run(method_name)
+    def log_end_run_for_method(self, process_name: str, method_name: str):
+        original_process = self.get_control_for_process_name(process_name)
+        original_process.log_end_run_for_method(method_name)
+        self._update_control_for_process_name(process_name, original_process)
+
+    def when_method_last_started(self, process_name: str, method_name: str) -> datetime.datetime:
+        original_process = self.get_control_for_process_name(process_name)
+        return original_process.when_method_last_started(method_name)
+
+    def when_method_last_ended(self, process_name: str, method_name: str) -> datetime.datetime:
+        original_process = self.get_control_for_process_name(process_name)
+        return original_process.when_method_last_ended(method_name)
+
+    def method_currently_running(self, process_name: str, method_name: str) -> bool:
+        original_process = self.get_control_for_process_name(process_name)
+        return original_process.method_currently_running(method_name)
 
 
 def list_of_all_running_pids():
