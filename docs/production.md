@@ -18,6 +18,7 @@ Related documents (which you should read before this one!):
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [Quick start guide](#quick-start-guide)
    * [Production system data flow](#production-system-data-flow)
    * [Overview of a production system](#overview-of-a-production-system)
@@ -72,11 +73,14 @@ Table of Contents
             * [Trade limits](#trade-limits)
             * [Position limits](#position-limits)
             * [Trade control / override](#trade-control--override)
+            * [Broker client IDs](#broker-client-ids)
             * [Process control &amp; monitoring](#process-control--monitoring)
                * [View processes](#view-processes)
                * [Change status of process](#change-status-of-process)
-               * [View process configuration](#view-process-configuration)
+               * [Global status change](#global-status-change)
                * [Mark as finished](#mark-as-finished)
+               * [Mark all dead processes as finished](#mark-all-dead-processes-as-finished)
+               * [View process configuration](#view-process-configuration)
          * [Interactive diagnostics](#interactive-diagnostics)
             * [Backtest objects](#backtest-objects)
                * [Output choice](#output-choice)
@@ -135,8 +139,8 @@ Table of Contents
          * [Configuring the scheduling](#configuring-the-scheduling)
             * [The crontab](#the-crontab)
             * [Process configuration](#process-configuration)
+         * [System monitor](#system-monitor)
          * [Troubleshooting?](#troubleshooting)
-         * [The details](#the-details)
    * [Production system concepts](#production-system-concepts)
       * [Configuration files](#configuration-files)
          * [System defaults &amp; Private config](#system-defaults--private-config)
@@ -195,23 +199,23 @@ You need to:
     - Install the pysystemtrade package, and install or update, any dependencies in directory $PYSYS_CODE (it's possible to put it elsewhere, but you will need to modify the environment variables listed above). If using git clone from your home directory this should create the directory '/home/user_name/pysystemtrade/'
     - [Set up interactive brokers](/docs/IB.md), download and install their python code, and get a gateway running.
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/)
-    - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a 'private_control_config.yaml' file
+    - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a ['private_control_config.yaml' file in the same directory](#process-configuration)
     - [check a mongodb server is running with the right data directory](/docs/futures.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
     - launch an IB gateway (this could be done automatically depending on your security setup)
 - FX data:
     - [Initialise the spot FX data in MongoDB from .csv files](/sysinit/futures/repocsv_spotfx_prices.py) (this will be out of date, but you will update it in a moment)
-    - Check that you have got spot FX data present: command line:`. /pysystemtrade/sysproduction/linux/scripts/interactive_diagnostics` option 3, option 33
     - Update the FX price data in MongoDB using interactive brokers: command line:`. /home/your_user_name/pysystemtrade/sysproduction/linux/scripts/update_fx_prices`
 - Instrument configuration:
     - Set up futures instrument configuration using this script [instruments_csv_mongo.py](/sysinit/futures/instruments_csv_mongo.py).
+- Futures contract prices:
+    - [You must have a source of individual futures prices, then backfill them into the Arctic database](/docs/futures.md#get_historical_data).
 - Roll calendars:
     - For *roll configuration* we need to initialise by running the code in this file [roll_parameters_csv_mongo.py](/sysinit/futures/roll_parameters_csv_mongo.py).
-    - Create roll calendars for each instrument you are trading. Assuming you are happy to infer these from the supplied data [use this script](/sysinit/futures/rollcalendars_from_providedcsv_prices.py)
-- Futures contract prices:
-    - [If you have a source of individual futures prices, then backfill them into the Arctic database](/docs/futures.md#get_historical_data)
+    - [Create roll calendars for each instrument you are trading](/docs/futures.md#roll-calendars).
 - Adjusted futures prices:
-    - Create 'multiple prices' in Arctic. Assuming you have prices in Artic and roll calendars in csv use [this script](/sysinit/futures/multipleprices_from_arcticprices_and_csv_calendars_to_arctic.py). I recommend *not* writing the multiple prices to .csv, so that you can compare the legacy .csv data with the new prices
-    - Create adjusted prices. Assuming you have multiple prices in Arctic use [this script](/sysinit/futures/adjustedprices_from_mongo_multiple_to_mongo.py)
+    - [Create 'multiple prices' in Arctic](/docs/futures.md#creating-and-storing-multiple-prices). 
+    - [Create adjusted prices in Arctic](/docs/futures.md#creating-and-storing-back-adjusted-prices)
+- Use [interactive diagnostics](#interactive-diagnostics) to check all your prices are in place correctly
 - Live production backtest:
     - Create a yaml config file to run the live production 'backtest'. For speed I recommend you do not estimate parameters, but use fixed parameters, using the [yaml_config_with_estimated_parameters method of systemDiag](/systems/diagoutput.py) function to output these to a .yaml file.
 - Scheduling:
@@ -500,7 +504,7 @@ mongodump -o ~/dump/
 cp -rf ~/dump/* $MONGO_BACKUP_PATH
 ```
 
-This is done by the scheduled backup process (see [scheduling](#scheduling)).
+This is done by the scheduled backup process (see [scheduling](#scheduling)), and also by [this script]((#backup-files)
 
 Then to restore, from a linux command line:
 ```
@@ -534,15 +538,9 @@ As I am super paranoid, I also like to output all my mongo_db data into .csv fil
 This currently supports: FX, individual futures contract prices, multiple prices, adjusted prices, position data, historical trades, capital, contract meta-data, instrument data, optimal positions. Some other state information relating to the control of trading and processes is also stored in the database and this will be lost, however this can be recovered with a litle work: roll status, trade limits, position limits, and overrides. Log data will also be lost; but archived [echo files](#echos-stdout-output) could be searched if neccessary.
 
 
-```python
-from sysproduction.update_backup_to_csv import backup_adj_to_csv
-
-backup_adj_to_csv()
-```
-
 Linux script:
 ```
-. $SCRIPT_PATH/update_backup_to_csv
+. $SCRIPT_PATH/backup_arctic_to_csv
 ```
 
 
@@ -792,7 +790,7 @@ Normally it's possible to call a process directly (eg _backup_files) on an ad-ho
 
 These are listed here for convenience, but more documentation is given below in the relevant section for each script
 
-- run_backups: Runs [backup_arctic_to_csv](#backup-arctic-data-to-csv-files), [backup_files](#backup-files): create backups
+- run_backups: Runs [backup_arctic_to_csv](#backup-arctic-data-to-csv-files), [backup state files](#backup-files): [mongo dump backup](#mongo-dump-backup)
 - run_capital_updates: Runs [update_strategy_capital](#allocate-capital-to-strategies), [update_total_capital](#update-capital-and-pl-by-polling-brokerage-account): update capital
 - run_cleaners: Runs [clean_truncate_backtest_states](#delete-old-pickled-backtest-state-objects), [clean_truncate_echo_files](#truncate-echo-files), [clean_truncate_log_files](#clean-up-old-logs): Clean up
 - run_daily_price_updates: Runs [update_fx_prices](#get-spot-fx-data-from-interactive-brokers-write-to-mongodb-daily), [update_sampled_contracts](#update-sampled-contracts-daily), [update_historical_prices](#update-futures-contract-historical-price-data-daily), [update_multiple_adjusted_prices](#update-multiple-and-adjusted-prices-daily): daily price and contract data updates
@@ -1615,14 +1613,18 @@ Called by: `run_backups`
 
 See [backups](#mongo--csv-data).
 
+- It copies data out of mongo and Arctic into a temporary .csv directory
+- It then copies the .csv files  to the backup directory,  "offsystem_backup_directory", subdirectory /csv
 
-### Backup files
+
+
+### Backup state files
 
 
 Python:
 ```python
-from sysproduction.backup_files import backup_files
-backup_files()
+from sysproduction.backup_state_files import backup_state_files
+backup_state_files()
 ```
 
 Linux script:
@@ -1632,12 +1634,26 @@ Linux script:
 
 Called by: `run_backups`
 
-This copies a bunch of stuff to backup directories (ideally on a different machine, NAS...)
+It copies backtest pickle and config files to the backup directory,  "offsystem_backup_directory", subdirectory /statefile
+
+### Backup mongo dump
+
+
+Python:
+```python
+from sysproduction.backup_mongo_data_as_dump import *
+backup_mongo_data_as_dump()
+```
+
+Linux script:
+```
+. $SCRIPT_PATH/backup_mongo_data_as_dump
+```
+
+Called by: `run_backups`
 
 - Firstly it dumps the mongo databases to the local directory specified in the config parameter (defaults.yaml or private config yaml file) "mongo_dump_directory".
 - Then it copies those dumps to the backup directory specified in the config parameter "offsystem_backup_directory", subdirectory /mongo
-- It then copies the .csv files (saved by backup_arctic_to_csv) to the backup directory,  "offsystem_backup_directory", subdirectory /csv
-- Finally it copies backtest pickle and config files to the backup directory,  "offsystem_backup_directory", subdirectory /statefile
 
 
 ### Start up script
@@ -1834,11 +1850,13 @@ process_configuration_methods:
       max_executions: 1
     trade_report:
       max_executions: 1
-  run_backups: # all this stuff happens once. 
+  run_backups:
     backup_arctic_to_csv:
       max_executions: 1
     backup_files:
-      backup_files: 1
+      max_executions: 1
+    backup_mongo_data_as_dump:
+      max_executions: 1
   run_cleaners:  # all this stuff happens once. 
     clean_backtest_states:
       max_executions: 1

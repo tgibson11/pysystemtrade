@@ -197,7 +197,7 @@ def calc_trade_limit_for_instrument(data, instrument_code, risk_multiplier, trad
 
     adj_trade_multiplier = (float(day_count)**.5) * trade_multiplier
     standard_trade = float(standard_position) * adj_trade_multiplier
-    standard_trade_int = max(1, int(np.ceil(abs(standard_trade))))
+    standard_trade_int = max(4, int(np.ceil(abs(standard_trade))))
 
     return standard_trade_int
 
@@ -372,10 +372,7 @@ def clear_used_client_ids(data):
 def view_process_controls(data):
     dict_of_controls = get_dict_of_process_controls(data)
     print("\nControlled processes:\n")
-    for key, value in dict_of_controls.items():
-        padded_key = f"{''+key:<30}"
-        print("%s: %s" % (padded_key, str(value)))
-    return dict_of_controls
+    print(dict_of_controls)
 
 
 def get_dict_of_process_controls(data):
