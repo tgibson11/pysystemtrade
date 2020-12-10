@@ -48,7 +48,7 @@ class listOfEntriesData(baseData):
 
     @property
     def _data_class(self):
-        return  resolve_function(self._data_class_name)
+        return resolve_function(self._data_class_name())
 
     @property
     def _empty_data_series(self):
