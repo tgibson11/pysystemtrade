@@ -156,9 +156,13 @@ class stackHandlerCreateBrokerOrders(stackHandlerCore):
 
         #print("Order after trade limits%s" % str(contract_order_after_trade_limits))
 
-        contract_order = self.liquidity_size_contract_order(
-            contract_order_after_trade_limits
-        )
+        contract_order = contract_order_after_trade_limits
+        # This code prevents orders from being submitted when IB market data is not available
+        # Uncomment if using IB market data
+        #
+        # contract_order = self.liquidity_size_contract_order(
+        #     contract_order_after_trade_limits
+        # )
 
         #print("Order after liquiditysizing %s" % str(contract_order))
 
