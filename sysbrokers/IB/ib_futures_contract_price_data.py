@@ -303,6 +303,7 @@ class ibFuturesContractPriceData(futuresContractPriceData):
             contract_object_with_ib_data,
             trade_list_for_multiple_legs=trade_list_for_multiple_legs,
         )
+        print(tick_data)
         if tick_data is missing_contract:
             return missing_data
 
