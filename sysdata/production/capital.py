@@ -2,20 +2,23 @@ import datetime
 import pandas as pd
 from syscore.objects import arg_not_supplied, failure, success, missing_data
 from sysdata.production.generic_timed_storage import (
-    timedEntry,
-    listOfEntries,
     listOfEntriesData,
 )
+from sysobjects.production.timed_storage import timedEntry, listOfEntries
 
 
 class capitalEntry(timedEntry):
-    def _setup_args_data(self):
-        self._star_args = ["capital_value"]  # compulsory args
 
+    @property
+    def required_argument_names(self) -> list:
+        return ["capital_value"]  # compulsory args
+
+    @property
     def _name_(self):
         return "Capital"
 
-    def _containing_data_class_name(self):
+    @property
+    def containing_data_class_name(self):
         return "sysdata.production.capital.capitalForStrategy"
 
 

@@ -15,10 +15,9 @@ from syscore.objects import arg_not_supplied, failure, success, missing_data
 from sysdata.base_data import baseData
 from syslogdiag.log import logtoscreen
 from sysdata.production.generic_timed_storage import (
-    timedEntry,
-    listOfEntries,
     listOfEntriesData,
 )
+from sysobjects.production.timed_storage import timedEntry, listOfEntries
 from sysdata.production.current_positions import (
     instrumentStrategy,
     instrumentStrategyPosition,
@@ -31,13 +30,16 @@ class simpleOptimalPosition(timedEntry):
 
     """
 
-    def _setup_args_data(self):
-        self._star_args = ["position"]  # compulsory args
+    @property
+    def required_argument_names(self) -> list:
+        return ["position"]  # compulsory args
 
+    @property
     def _name_(self):
         return "simpleOptimalPosition"
 
-    def _containing_data_class_name(self):
+    @property
+    def containing_data_class_name(self):
         return "sysdata.production.optimal_positions.simpleOptimalPositionForInstrument"
 
     def check_position_break(self, position):
@@ -50,23 +52,26 @@ class bufferedOptimalPositions(timedEntry):
 
     """
 
-    def _setup_args_data(self):
-        self._star_args = [
+    @property
+    def required_argument_names(self) -> list:
+        return [
             "lower_position",
             "upper_position",
             "reference_price",
             "reference_contract",
         ]  # compulsory args
 
+    @property
     def _name_(self):
         return "bufferedOptimalPosition"
 
-    def _containing_data_class_name(self):
+    @property
+    def containing_data_class_name(self):
         return (
             "sysdata.production.optimal_positions.bufferedOptimalPositionForInstrument"
         )
 
-    def _kwargs_checks(self, kwargs):
+    def _argument_checks(self, kwargs):
         try:
             assert kwargs["upper_position"] >= kwargs["lower_position"]
         except BaseException:

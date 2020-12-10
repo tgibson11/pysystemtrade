@@ -2,10 +2,9 @@ from syscore.objects import success, arg_not_supplied
 from sysobjects.contracts import futuresContract
 
 from sysdata.production.generic_timed_storage import (
-    timedEntry,
-    listOfEntries,
     listOfEntriesData,
 )
+from sysobjects.production.timed_storage import timedEntry, listOfEntries
 from sysdata.production.current_positions import (
     contractPosition,
     listOfContractPositions,
@@ -22,13 +21,16 @@ class historicPosition(timedEntry):
 
     """
 
-    def _setup_args_data(self):
-        self._star_args = ["position"]  # compulsory args
+    @property
+    def required_argument_names(self) -> list:
+        return ["position"]  # compulsory args
 
+    @property
     def _name_(self):
         return "Position"
 
-    def _containing_data_class_name(self):
+    @property
+    def containing_data_class_name(self):
         return "sysdata.production.historic_positions.listPositions"
 
 
