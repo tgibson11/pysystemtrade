@@ -51,6 +51,7 @@ class logToDb(logger):
             send_production_mail_msg(data, str(log_entry), "*CRITICAL ERROR*")
         except BaseException:
             self.error("Couldn't email user")
+            raise
 
 
 class logData(baseData):
