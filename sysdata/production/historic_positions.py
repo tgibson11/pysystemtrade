@@ -314,7 +314,7 @@ class contractPositionData(listOfEntriesData):
                 "Error %s when updating position for %s with %s"
                 % (str(e), contractid, str(position_entry))
             )
-            return failure
+            raise
         return success
 
     def delete_last_position_for_contract_object(
