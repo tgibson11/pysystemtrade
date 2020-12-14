@@ -17,5 +17,6 @@ class mongoStrategyPositionData(
     def _collection_name(self):
         return POSITION_STRATEGY_COLLECTION
 
+    @property
     def _data_name(self):
         return "mongoStrategyPositionData"
