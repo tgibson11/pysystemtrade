@@ -25,7 +25,7 @@ from sysproduction.data.positions import diagPositions, dataOptimalPositions
 from sysproduction.data.prices import get_valid_instrument_code_from_user, diagPrices
 from sysproduction.data.strategies import get_valid_strategy_name_from_user
 
-from sysproduction.diagnostic.emailing import retrieve_and_delete_stored_messages
+from syslogdiag.email_via_db_interface import retrieve_and_delete_stored_messages
 from sysproduction.diagnostic.reporting import run_report
 from sysproduction.diagnostic.rolls import ALL_ROLL_INSTRUMENTS
 from sysproduction.diagnostic.strategies import ALL_STRATEGIES
@@ -239,13 +239,7 @@ def get_report_dates(data):
 
 # logs emails errors
 def retrieve_emails(data):
-    subject = get_and_convert(
-        "Subject of emails (copy from emails)?",
-        type_expected=str,
-        allow_default=True,
-        default_value=None,
-    )
-    messages = retrieve_and_delete_stored_messages(data, subject=subject)
+    messages = retrieve_and_delete_stored_messages(data)
     for msg in messages:
         print(msg)
 
@@ -406,7 +400,7 @@ def actual_instrument_position(data):
         return None
 
     instrument_code_list = (
-        diag_positions.get_list_of_instruments_for_strategy_with_position(strategy_name))
+        diag_positions.get_list_of_instruments_for_strategy_with_position(strategy_name, ignore_zero_positions=False))
     instrument_code = get_valid_code_from_list(instrument_code_list)
     if instrument_code is user_exit:
         return None
@@ -557,7 +551,7 @@ dict_of_functions = {
     14: reconcile_report,
     15: strategy_report,
     16: risk_report,
-    20: retrieve_and_delete_stored_messages,
+    20: retrieve_emails,
     21: view_errors,
     22: view_logs,
     30: individual_prices,

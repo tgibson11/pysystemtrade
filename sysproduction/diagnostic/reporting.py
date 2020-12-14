@@ -6,7 +6,7 @@ from syscore.objects import resolve_function, success, failure, arg_not_supplied
 from syscore.objects import header, table, body_text
 
 from sysdata.data_blob import dataBlob
-from sysproduction.diagnostic.emailing import send_production_mail_msg
+from syslogdiag.email_via_db_interface import send_production_mail_msg
 
 pd.set_option("display.width", 1000)
 pd.set_option("display.max_columns", 1000)
@@ -56,7 +56,9 @@ def run_report_with_data_blob(report_config, data):
     if report_config.output == "console":
         print(parsed_report)
     elif report_config.output == "email":
-        send_production_mail_msg(data, parsed_report, subject = report_config.title, report = True)
+        send_production_mail_msg(
+            data, parsed_report, subject=report_config.title, email_is_report=True
+        )
 
     return report_result
 
