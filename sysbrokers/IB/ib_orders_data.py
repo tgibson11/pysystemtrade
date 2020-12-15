@@ -433,7 +433,7 @@ def add_trade_info_to_broker_order(
 def match_control_order_on_permid(
         dict_of_broker_control_orders,
         broker_order_to_match):
-    list_of_broker_control_orders = dict_of_broker_control_orders.values()
+    list_of_broker_control_orders = list(dict_of_broker_control_orders.values())
     list_of_broker_orders = [
         control_order.order for control_order in list_of_broker_control_orders
     ]
