@@ -3,6 +3,8 @@ from syscore.objects import missing_data
 from syscore.pdutils import check_df_equals, check_ts_equals
 from sysdata.private_config import get_private_then_default_key_value
 
+from sysobjects.production.strategy import instrumentStrategy
+
 from sysdata.data_blob import dataBlob
 from sysproduction.data.strategies import get_list_of_strategies
 import os
@@ -250,12 +252,12 @@ def backup_contract_position_data(data):
     instrument_list = (
         data.mongo_contract_position.get_list_of_instruments_with_any_position())
     for instrument_code in instrument_list:
-        contract_list = data.mongo_contract_position.get_list_of_contracts_with_any_position_for_instrument(
+        contract_list = data.mongo_contract_position.get_list_of_contract_date_str_with_any_position_for_instrument(
             instrument_code)
         for contract in contract_list:
-            mongo_data = data.mongo_contract_position.get_position_as_df_for_instrument_and_contract_date(
-                instrument_code, contract)
-            data.csv_contract_position.write_position_df_for_instrument_and_contract_date(
+            mongo_data = data.mongo_contract_position.get_position_as_df_for_contract_object(
+                contract)
+            data.csv_contract_position.write_position_df_for_contract(
                 instrument_code, contract, mongo_data)
             data.log.msg(
                 "Backed up %s %s contract position data" %
@@ -268,12 +270,12 @@ def backup_strategy_position_data(data):
         data.mongo_contract_position.get_list_of_instruments_with_any_position())
     for strategy_name in strategy_list:
         for instrument_code in instrument_list:
-            mongo_data = data.mongo_strategy_position.get_position_as_df_for_strategy_and_instrument(
-                strategy_name, instrument_code)
+            instrument_strategy = instrumentStrategy(strategy_name=strategy_name, instrument_code=instrument_code)
+            mongo_data = data.mongo_strategy_position.get_position_as_df_for_instrument_strategy_object(instrument_strategy)
             if mongo_data is missing_data:
                 continue
             data.csv_strategy_position.write_position_df_for_instrument_strategy(
-                strategy_name, instrument_code, mongo_data)
+                instrument_strategy, mongo_data)
             data.log.msg(
                 "Backed up %s %s strategy position data"
                 % (instrument_code, strategy_name)
@@ -337,21 +339,19 @@ def backup_capital(data):
 
 
 def backup_optimal_positions(data):
-    strategy_list = get_list_of_strategies(data)
-    for strategy_name in strategy_list:
-        instrument_list = data.mongo_optimal_position.get_list_of_instruments_for_strategy_with_optimal_position(
-            strategy_name)
-        for instrument_code in instrument_list:
-            mongo_data = data.mongo_optimal_position.get_optimal_position_as_df_for_strategy_and_instrument(
-                strategy_name, instrument_code)
-            if mongo_data is missing_data:
-                continue
-            data.csv_optimal_position.write_position_df_for_instrument_strategy(
-                strategy_name, instrument_code, mongo_data)
-            data.log.msg(
-                "Backed up %s %s optimal position data"
-                % (instrument_code, strategy_name)
-            )
+
+    strategy_instrument_list = data.mongo_optimal_position.get_list_of_instrument_strategies_with_optimal_position()
+
+    for instrument_strategy in strategy_instrument_list:
+        mongo_data = data.mongo_optimal_position.get_optimal_position_as_df_for_instrument_strategy(instrument_strategy)
+        if mongo_data is missing_data:
+            continue
+        data.csv_optimal_position.write_position_df_for_instrument_strategy(
+            instrument_strategy, mongo_data)
+        data.log.msg(
+            "Backed up %s  optimal position data"
+            % str(instrument_strategy)
+        )
 
 
 def backup_instrument_data(data):

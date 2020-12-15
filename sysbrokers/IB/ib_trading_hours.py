@@ -2,13 +2,19 @@ import datetime
 
 
 def get_trading_hours(ib_contract_details):
-    time_zone_id = ib_contract_details.timeZoneId
-    time_zone_adjustment = get_time_difference(time_zone_id)
-    one_off_adjustment = one_off_adjustments(ib_contract_details.contract.symbol)
-    trading_hours_string = ib_contract_details.tradingHours
-    list_of_open_times = parse_trading_hours_string(trading_hours_string,
-                                                    adjustment_hours = time_zone_adjustment,
-                                                    one_off_adjustment=one_off_adjustment)
+    try:
+        time_zone_id = ib_contract_details.timeZoneId
+        time_zone_adjustment = get_time_difference(time_zone_id)
+        one_off_adjustment = one_off_adjustments(
+            ib_contract_details.contract.symbol)
+        trading_hours_string = ib_contract_details.tradingHours
+        list_of_open_times = parse_trading_hours_string(
+            trading_hours_string,
+            adjustment_hours=time_zone_adjustment,
+            one_off_adjustment=one_off_adjustment,
+        )
+    except Exception as e:
+        raise e
 
     return list_of_open_times
 
@@ -69,12 +75,14 @@ def parse_phrase(phrase, adjustment_hours=0, additional_adjust=0):
 
 
 def get_time_difference(time_zone_id):
-    ## Doesn't deal with DST. We will be conservative and only trade 1 hour after and 1 hour before
-    time_diff_dict = {'CST (Central Standard Time)': -1,
-                      'EST (Eastern Standard Time)': -2,
-                      'America/Belize': -1,
-                      'US/Central': -1,
-                      'US/Eastern': -2}
+    # Doesn't deal with DST. We will be conservative and only trade 1 hour
+    # after and 1 hour before
+    time_diff_dict = {"CST (Central Standard Time)": -1,
+                      "US/Central": -1,
+                      "America/Belize": -1,
+                      "EST (Eastern Standard Time)": -2,
+                      "US/Eastern": -2,
+                      "": 0}
     diff_hours = time_diff_dict.get(time_zone_id, None)
     if diff_hours is None:
         raise Exception("Time zone '%s' not found!" % time_zone_id)

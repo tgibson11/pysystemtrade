@@ -47,10 +47,9 @@ class instrumentPosition(Position):
 
 
 class instrumentStrategyPosition(Position):
-    def __init__(self, position: int, strategy_name: str, instrument_code: str):
-        tradeable_object = instrumentStrategy(strategy_name, instrument_code)
+    def __init__(self, position: int, instrument_strategy: instrumentStrategy):
 
-        super().__init__(position, tradeable_object)
+        super().__init__(position, instrument_strategy)
 
     @property
     def instrument_strategy(self) -> instrumentStrategy:
@@ -66,9 +65,8 @@ class instrumentStrategyPosition(Position):
 
 
 class contractPosition(Position):
-    def __init__(self, position:int, instrument_code: str, contract_date_str: str):
-        tradeable_object = futuresContract(instrument_code, contract_date_str)
-        super().__init__(position, tradeable_object)
+    def __init__(self, position:int, contract: futuresContract):
+        super().__init__(position, contract)
 
     @property
     def contract(self) -> futuresContract:
@@ -230,8 +228,10 @@ class listOfInstrumentStrategyPositions(listOfPositions):
     @classmethod
     def from_pd_df(listOfInstrumentStrategyPositions, pd_df: pd.DataFrame):
         def _element_object_from_row(dfrow):
+            instrument_strategy = instrumentStrategy(strategy_name=dfrow[KEY_STRATEGY_NAME],
+                                                     instrument_code=dfrow[KEY_INSTRUMENT_CODE])
             return instrumentStrategyPosition(
-                dfrow[KEY_POSITION], dfrow[KEY_STRATEGY_NAME], dfrow[KEY_INSTRUMENT_CODE]
+                dfrow[KEY_POSITION], instrument_strategy
             )
 
         list_of_positions = listOfInstrumentStrategyPositions()
@@ -253,13 +253,27 @@ class listOfInstrumentStrategyPositions(listOfPositions):
     def sum_for_instrument(self):
         return sum_for_instrument(self)
 
+    def position_object_for_instrument_strategy(self, instrument_strategy: instrumentStrategy):
+
+        result = list(filter(lambda position: position.instrument_strategy == instrument_strategy, self))
+        if len(result)==0:
+            return instrumentStrategyPosition(
+                0, instrument_strategy
+            )
+        elif len(result)==1:
+            return result[0]
+        else:
+            raise Exception("Multiple instances of %s found in list of positions!" % str(instrument_strategy))
+
 
 class listOfContractPositions(listOfPositions):
     @classmethod
     def from_pd_df(listOfInstrumentContractPositions, pd_df):
         def _element_object_from_row(dfrow):
-            return instrumentStrategyPosition(
-                dfrow.position, dfrow.contract_id, dfrow.instrument_code
+            contract = futuresContract(dfrow.instrument_code, dfrow.contract_id)
+
+            return contractPosition(
+                dfrow.position, contract
             )
 
         list_of_positions = listOfInstrumentContractPositions()
