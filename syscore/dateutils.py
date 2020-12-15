@@ -424,7 +424,7 @@ missing_string =    "     ???      "
 
 
 def last_run_or_heartbeat_from_date_or_none(last_run_or_heartbeat):
-    if last_run_or_heartbeat is missing_data:
+    if last_run_or_heartbeat is missing_data or last_run_or_heartbeat is None:
         last_run_or_heartbeat = missing_string
     else:
         last_run_or_heartbeat = last_run_or_heartbeat.strftime(
