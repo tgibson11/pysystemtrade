@@ -5,7 +5,7 @@ from syscore.genutils import (
     get_and_convert,
     print_menu_and_get_response,
 )
-from sysdata.production.override import override_dict, Override
+from sysobjects.production.override import override_dict, Override
 
 from sysdata.data_blob import dataBlob
 from sysproduction.data.controls import (
@@ -355,7 +355,7 @@ def get_overide_object_from_user():
         value = input("Your value?")
         value = float(value)
         try:
-            override_object = Override.from_float(value)
+            override_object = Override.from_numeric_value(value)
             return override_object
         except Exception as e:
             print(e)
