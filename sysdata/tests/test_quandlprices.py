@@ -1,5 +1,5 @@
 import unittest
-from sysdata.deprecated.quandl import quandlFuturesContractPriceData
+from sysdata.quandl import quandlFuturesContractPriceData
 
 
 class MyTestCase(unittest.TestCase):

@@ -6,7 +6,7 @@ Apply a check to each price series
 
 from syscore.objects import success, failure
 from sysdata.futures.manual_price_checker import manual_price_checker
-from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesContractPriceData
+from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
 from sysobjects.contracts import futuresContract
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from sysproduction.data.contracts import diagContracts

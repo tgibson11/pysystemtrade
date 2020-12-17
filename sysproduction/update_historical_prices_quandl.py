@@ -4,7 +4,7 @@ Update historical data per contract from Quandl data, dump into mongodb
 
 from syscore.objects import success, failure, data_error
 from sysdata.futures.futures_per_contract_prices import DAILY_PRICE_FREQ
-from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesContractPriceData
+from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
 from sysobjects.contracts import futuresContract
 from sysproduction.data.contracts import diagContracts
 from sysdata.data_blob import dataBlob

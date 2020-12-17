@@ -9,7 +9,7 @@ import datetime
 from sysdata.arctic.arctic_futures_per_contract_prices import (
     arcticFuturesContractPriceData,
 )
-from sysdata.deprecated.quandl.quandl_futures import QuandlFuturesConfiguration, QuandlFuturesContractPriceData
+from sysdata.quandl.quandl_futures import QuandlFuturesConfiguration, QuandlFuturesContractPriceData
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysobjects.contract_dates_and_expiries import contractDate
