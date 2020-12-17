@@ -16,9 +16,11 @@ from sysdata.mongodb.mongo_optimal_position import mongoOptimalPositionData
 from sysdata.data_blob import dataBlob
 from sysdata.production.historic_positions import listOfInstrumentStrategyPositions
 
-from sysobjects.production.strategy import instrumentStrategy
+from sysobjects.production.strategy import instrumentStrategy, listOfInstrumentStrategies
 from sysobjects.production.optimal_positions import simpleOptimalPosition
+from sysobjects.production.roll_state import RollState, is_forced_roll_state, is_type_of_active_rolling_roll_state
 from sysobjects.contracts import futuresContract
+
 from sysproduction.data.contracts import missing_contract
 
 
@@ -34,7 +36,34 @@ class diagPositions(object):
         self.data = data
         self.log = data.log
 
-    def get_roll_state(self, instrument_code):
+    def is_forced_roll_required(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return is_forced_roll_state(roll_state)
+
+    def is_roll_state_passive(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return roll_state == RollState.Passive
+
+    def is_roll_state_no_roll(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return roll_state == RollState.No_Roll
+
+    def is_roll_state_force(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return roll_state == RollState.Force
+
+    def is_roll_state_force_outright(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return roll_state == RollState.Force_Outright
+
+    def is_type_of_active_rolling_roll_state(self, instrument_code: str) -> bool:
+        roll_state = self.get_roll_state(instrument_code)
+        return is_type_of_active_rolling_roll_state(roll_state)
+
+    def get_name_of_roll_state(self, instrument_code: str) -> RollState:
+        return self.data.db_roll_state.get_name_of_roll_state(instrument_code)
+
+    def get_roll_state(self, instrument_code: str) -> RollState:
         return self.data.db_roll_state.get_roll_state(instrument_code)
 
 
@@ -137,6 +166,8 @@ class diagPositions(object):
 
         return list_of_strategies
 
+    def get_list_of_strategies_and_instruments_with_positions(self) -> listOfInstrumentStrategies:
+        return self.data.db_strategy_position.get_list_of_strategies_and_instruments_with_positions()
 
     def get_all_current_contract_positions(self):
         return (
@@ -284,7 +315,7 @@ class updatePositions(object):
     def diag_positions(self):
         return diagPositions(self.data)
 
-    def set_roll_state(self, instrument_code, roll_state_required):
+    def set_roll_state(self, instrument_code: str, roll_state_required: RollState):
         return self.data.db_roll_state.set_roll_state(
             instrument_code, roll_state_required
         )
