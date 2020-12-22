@@ -265,7 +265,7 @@ class brokerOrder(contractOrder):
             filled_price=filled_price,
             fill_datetime=fill_datetime,
             mid_price=mid_price,
-            side_price=side_price
+            side_price=side_price,
             **order_info
         )
 
