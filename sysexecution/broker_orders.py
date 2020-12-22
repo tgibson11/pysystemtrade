@@ -238,6 +238,8 @@ class brokerOrder(contractOrder):
         fill = order_as_dict.pop("fill")
         filled_price = order_as_dict.pop("filled_price")
         fill_datetime = order_as_dict.pop("fill_datetime")
+        mid_price = order_as_dict.pop("mid_price")
+        side_price = order_as_dict.pop("side_price")
 
         locked = order_as_dict.pop("locked")
         order_id = none_to_object(order_as_dict.pop("order_id"), no_order_id)
@@ -262,6 +264,8 @@ class brokerOrder(contractOrder):
             active=active,
             filled_price=filled_price,
             fill_datetime=fill_datetime,
+            mid_price=mid_price,
+            side_price=side_price
             **order_info
         )
 
@@ -336,12 +340,6 @@ class brokerOrder(contractOrder):
 
         list_of_derived_broker_orders = []
         original_as_dict = self.as_dict()
-        print(f"contractId={self.contract_id}")
-        print(f"trade={self.trade}")
-        print(f"fill={self.fill}")
-        print(f"filled_price={self.filled_price}")
-        print(f"mid_price={self.mid_price}")
-        print(f"side_price={self.side_price}")
         for contractid, trade_qty, fill, fill_price, mid_price, side_price in zip(
             self.contract_id,
             self.trade,
