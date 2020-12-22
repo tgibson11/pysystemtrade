@@ -346,7 +346,7 @@ class brokerOrder(contractOrder):
             self.fill,
             self.filled_price,
             self.mid_price,
-            self.side_price,
+            self.side_price
         ):
 
             new_order_as_dict = copy(original_as_dict)
