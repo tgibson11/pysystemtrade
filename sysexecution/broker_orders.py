@@ -340,6 +340,13 @@ class brokerOrder(contractOrder):
 
         list_of_derived_broker_orders = []
         original_as_dict = self.as_dict()
+        print(zip(
+            self.contract_id,
+            self.trade,
+            self.fill,
+            self.filled_price,
+            self.mid_price,
+            self.side_price))
         for contractid, trade_qty, fill, fill_price, mid_price, side_price in zip(
             self.contract_id,
             self.trade,
