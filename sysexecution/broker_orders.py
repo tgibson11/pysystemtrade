@@ -336,13 +336,22 @@ class brokerOrder(contractOrder):
 
         list_of_derived_broker_orders = []
         original_as_dict = self.as_dict()
+
+        mid_price = self.mid_price
+        if mid_price is None:
+            mid_price = [None] * len(self.contract_id)
+
+        side_price = self.side_price
+        if side_price is None:
+            side_price = [None] * len(self.contract_id)
+
         for contractid, trade_qty, fill, fill_price, mid_price, side_price in zip(
             self.contract_id,
             self.trade,
             self.fill,
             self.filled_price,
-            self.mid_price,
-            self.side_price
+            mid_price,
+            side_price
         ):
 
             new_order_as_dict = copy(original_as_dict)
