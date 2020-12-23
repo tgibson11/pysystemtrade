@@ -239,16 +239,6 @@ class brokerOrder(contractOrder):
         filled_price = order_as_dict.pop("filled_price")
         fill_datetime = order_as_dict.pop("fill_datetime")
 
-        mid_price = order_as_dict.pop("mid_price")
-        # Temporary code to handle orders where mid_price was saved as None
-        if mid_price is None:
-            mid_price = [None] * len(key)
-
-        side_price = order_as_dict.pop("side_price")
-        # Temporary code to handle orders where side_price was saved as None
-        if side_price is None:
-            side_price = [None] * len(key)
-
         locked = order_as_dict.pop("locked")
         order_id = none_to_object(order_as_dict.pop("order_id"), no_order_id)
         modification_status = order_as_dict.pop("modification_status")
