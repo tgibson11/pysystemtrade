@@ -118,8 +118,6 @@ class tradeQuantity(object):
                 float):
             list_of_prices = [list_of_prices]
 
-        print(self._trade_or_fill_qty)
-        print(list_of_prices)
         assert len(self._trade_or_fill_qty) == len(list_of_prices)
 
         if len(self._trade_or_fill_qty) == 1:
