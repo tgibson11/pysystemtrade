@@ -77,12 +77,16 @@ def parse_phrase(phrase, adjustment_hours=0, additional_adjust=0):
 def get_time_difference(time_zone_id):
     # Doesn't deal with DST. We will be conservative and only trade 1 hour
     # after and 1 hour before
-    time_diff_dict = {"CST (Central Standard Time)": -1,
-                      "US/Central": -1,
-                      "America/Belize": -1,
-                      "EST (Eastern Standard Time)": -2,
-                      "US/Eastern": -2,
-                      "": 0}
+    # confusingly, IB seem to have changed their time zone codes in 2020
+    time_diff_dict = {
+        "CST (Central Standard Time)": -1,
+        "EST (Eastern Standard Time)": -2,
+        "EST": -2,
+        "US/Central": -1,
+        "US/Eastern": -2,
+        "America/Belize": -1,
+        "": 0
+    }
     diff_hours = time_diff_dict.get(time_zone_id, None)
     if diff_hours is None:
         raise Exception("Time zone '%s' not found!" % time_zone_id)
