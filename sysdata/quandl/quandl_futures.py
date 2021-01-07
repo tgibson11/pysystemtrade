@@ -4,7 +4,7 @@ Get data from quandl for futures
 """
 
 from sysobjects.contracts import futuresContract, listOfFuturesContracts
-from syscore.dateutils import adjust_timestamp
+from syscore.dateutils import adjust_timestamp_to_include_notional_close_and_time_offset
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
 )
@@ -284,7 +284,7 @@ class QuandlFuturesContractPrices(futuresContractPrices):
 
         # Adjust timestamps to notional closing time
         date_index = [
-            adjust_timestamp(timestamp)
+            adjust_timestamp_to_include_notional_close_and_time_offset(timestamp)
             for timestamp in new_data.index
         ]
         new_data.index = date_index
