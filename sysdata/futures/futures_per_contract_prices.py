@@ -1,5 +1,5 @@
 from sysdata.base_data import baseData
-from syscore.objects import data_error
+from syscore.merge_data import spike_in_data
 
 from sysobjects.contracts import futuresContract, listOfFuturesContracts
 from sysobjects.contract_dates_and_expiries import listOfContractDateStr
@@ -197,20 +197,28 @@ class futuresContractPriceData(baseData):
         """
         new_log = contract_object.log(self.log)
 
+        if len(new_futures_per_contract_prices) == 0:
+            new_log.msg("No new data")
+            return 0
+
         old_prices = self.get_prices_for_contract_object(
             contract_object)
         merged_prices = old_prices.add_rows_to_existing_data(
             new_futures_per_contract_prices, check_for_spike=check_for_spike
         )
 
-        if merged_prices is data_error:
+        if merged_prices is spike_in_data:
             new_log.msg(
                 "Price has moved too much - will need to manually check - no price updated done")
-            return data_error
+            return spike_in_data
 
         rows_added = len(merged_prices) - len(old_prices)
 
-        if rows_added == 0:
+        if rows_added<0:
+            new_log.critical("Can't remove prices something gone wrong!")
+            return 0
+
+        elif rows_added == 0:
             if len(old_prices) == 0:
                 new_log.msg("No existing or additional data")
                 return 0

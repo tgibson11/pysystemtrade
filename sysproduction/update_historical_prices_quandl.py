@@ -1,8 +1,8 @@
 """
 Update historical data per contract from Quandl data, dump into mongodb
 """
-
-from syscore.objects import success, failure, data_error
+from syscore.merge_data import spike_in_data
+from syscore.objects import success, failure
 from sysdata.futures.futures_per_contract_prices import DAILY_PRICE_FREQ
 from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
 from sysobjects.contracts import futuresContract
@@ -95,7 +95,7 @@ def get_and_add_prices_for_frequency(
     error_or_rows_added = db_futures_prices.update_prices_for_contract(
         contract_object, quandl_prices, check_for_spike=True
     )
-    if error_or_rows_added is data_error:
+    if error_or_rows_added is spike_in_data:
         report_price_spike(data, contract_object)
         return failure
 
