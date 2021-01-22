@@ -81,9 +81,9 @@ def get_time_difference(time_zone_id):
     time_diff_dict = {
         "CST (Central Standard Time)": -1,
         "EST (Eastern Standard Time)": -2,
+        "US/Eastern": -2,
         "EST": -2,
         "US/Central": -1,
-        "US/Eastern": -2,
         "America/Belize": -1,
         "": 0
     }
