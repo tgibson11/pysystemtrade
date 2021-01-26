@@ -165,7 +165,7 @@ def format_roll_data_for_instrument(results_dict):
     for col_number in range(width_contract_columns):
         table2_dict["C%d" % col_number] = [
             str(results_dict[code]["contract_labels"][col_number])
-            for code in instrument_codes
+            for code in instrument_codes if len(results_dict[code]["contract_labels"]) > col_number
         ]
 
     table2_df = pd.DataFrame(table2_dict, index=instrument_codes)
