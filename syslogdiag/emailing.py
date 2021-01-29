@@ -1,5 +1,4 @@
 import smtplib
-import ssl
 
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -70,22 +69,17 @@ def _send_msg(msg):
 
     """
 
-    email_server, email_port, email_address, email_pwd, email_to = get_email_details()
+    email_server, email_address, email_pwd, email_to, email_port = get_email_details()
 
     me = email_address
     you = email_to
     msg["From"] = me
     msg["To"] = you
 
-    # context = ssl.create_default_context()
-    # with smtplib.SMTP_SSL(email_server, email_port, context=context) as s:
-    #     s.login(me, email_pwd)
-    #     s.sendmail(me, [you], msg.as_string())
-
     # Send the message via our own SMTP server, but don't include the
     # envelope header.
-    s = smtplib.SMTP(email_server, 587)
-    # add tls for those using yahoo or gmail.
+    s = smtplib.SMTP(email_server, email_port)
+    # add tls for those using yahoo or gmail. 
     try:
         s.starttls()
     except:
@@ -101,7 +95,7 @@ def get_email_details():
         ["email_address", "email_pwd", "email_server", "email_to", "email_port"]
         )
     except:
-        raise Exception("Need to have all of these for email to work in private config: email_address, email_pwd, email_server, email_to")
+        raise Exception("Need to have all of these for email to work in private config: email_address, email_pwd, email_server, email_to", "email_port")
 
     email_address = yaml_dict["email_address"]
     email_pwd = yaml_dict["email_pwd"]
@@ -109,4 +103,4 @@ def get_email_details():
     email_to = yaml_dict["email_to"]
     email_port = yaml_dict["email_port"]
 
-    return email_server, email_port, email_address, email_pwd, email_to
+    return email_server, email_address, email_pwd, email_to, email_port

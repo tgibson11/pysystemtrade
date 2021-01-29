@@ -1,7 +1,8 @@
+import numpy as np
 from copy import copy
 import datetime
 
-from syscore.genutils import none_to_object, object_to_none
+from syscore.genutils import none_to_object, object_to_none, list_of_ints_with_highest_common_factor_positive_first
 from syscore.objects import no_order_id, no_children, no_parent
 
 from sysexecution.trade_qty import tradeQuantity
@@ -74,15 +75,15 @@ class Order(object):
         (
             resolved_trade,
             resolved_fill,
-            resolved_filled_price,
-        ) = resolve_inputs_to_order(trade, fill, filled_price)
+
+        ) = resolve_inputs_to_order(trade, fill)
 
         if children == []:
             children = no_children
 
         self._trade = resolved_trade
         self._fill = resolved_fill
-        self._filled_price = resolved_filled_price
+        self._filled_price = filled_price
         self._fill_datetime = fill_datetime
         self._locked = locked
         self._order_id = order_id
@@ -405,32 +406,15 @@ class Order(object):
         return log
 
 
-class oldStyleSplitOrderCantRead(Exception):
-    pass
 
-def resolve_inputs_to_order(trade, fill, filled_price) -> (tradeQuantity, tradeQuantity, float):
+def resolve_inputs_to_order(trade, fill) -> (tradeQuantity, tradeQuantity):
     resolved_trade = tradeQuantity(trade)
     if fill is None:
         resolved_fill = resolved_trade.zero_version()
     else:
         resolved_fill = tradeQuantity(fill)
 
-    filled_price =resolve_possible_list_like_to_float(filled_price)
-
-    return resolved_trade, resolved_fill, filled_price
-
-def resolve_possible_list_like_to_float(possible_list):
-    if type(possible_list) is list:
-        try:
-            assert len(possible_list)==1
-        except:
-            raise oldStyleSplitOrderCantRead(
-                "Prices can no longer be longer than length 1: can't read this historic order")
-
-        return possible_list[0]
-
-    else:
-        return possible_list
+    return resolved_trade, resolved_fill
 
 
 def resolve_orderid(order_id:int):
@@ -449,3 +433,19 @@ def resolve_parent(parent: int):
     parent= int(parent)
 
     return parent
+
+
+def resolve_multi_leg_price_to_single_price(trade_list: tradeQuantity, price_list: list) -> float:
+    if len(price_list)==1:
+        return price_list[0]
+
+    assert len(price_list) == len(trade_list)
+
+    trade_list_as_common_factor = list_of_ints_with_highest_common_factor_positive_first(trade_list)
+    fill_price = [x * y for x,y in zip(trade_list_as_common_factor, price_list)]
+
+    fill_price = sum(fill_price)
+    if np.isnan(fill_price):
+        return None
+
+    return fill_price

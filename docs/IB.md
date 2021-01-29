@@ -1,4 +1,4 @@
-This document is specifically about using pysystemtrade to connect with [*Interactive Brokers (IB)*](https://www.interactivebrokers.com/).
+This document is specifically about using pysystemtrade to connect with *Interactive Brokers (IB)*
 
 As of version 0.28.0, this requires the [ib_insync](https://github.com/erdewit/ib_insync) library.
 
@@ -60,12 +60,6 @@ You may want to read [my blog posts](https://qoppac.blogspot.com/2017/03/interac
 
 You need to download either the gateway or TWS software from the IB website. I recommend using the Gateway as it is much more stable and lightweight, and does not regularly reboot itself.
 
-These links may break or become outdated - use google to find the appropriate page on IB's website.
-
-[For Windows](https://www.interactivebrokers.co.uk/en/index.php?f=1341)
-
-[For Linux](https://www.interactivebrokers.co.uk/en/index.php?f=16454)
-
 
 ### IB-insync library
 
@@ -124,8 +118,8 @@ There are three types of objects in the [sysbrokers/IB](/sysbrokers/IB/) area of
 
 
 ## Data source objects
-
-We treat IB as another data source, which means it has to conform to the data object API (see [storing futures and spot FX data](/docs/futures.md)). However we can't delete or write to IB.  Normally these functions would be called by the `/sysproduction/data/broker/` [interface functions](/docs/data.md#production-interface); it's discouraged to call them directly as the interface abstracts away exactly which broker you are talking to. 
+f
+We treat IB as another data source, which means it has to conform to the data object API (see [storing futures and spot FX data](/docs/data.md)). However we can't delete or write to IB.  Normally these functions would be called by the `/sysproduction/data/broker/` [interface functions](/docs/data.md#production-interface); it's discouraged to call them directly as the interface abstracts away exactly which broker you are talking to. 
 
 Data source objects are instanced with and contain a *connection object* (and optionally a logger). They contain, and make calls to, *client objects*. They are in this [module](/sysbrokers/IB/)
 
