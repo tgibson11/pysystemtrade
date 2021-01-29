@@ -1,4 +1,4 @@
-from sysdata.private_config import get_private_config_key_value
+from sysdata.config.private_config import get_private_config_key_value
 from syscore.objects import missing_data
 
 
