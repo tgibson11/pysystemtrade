@@ -4,8 +4,8 @@ import datetime
 
 from collections import namedtuple
 
-from syscore.dateutils import ROOT_BDAYS_INYEAR
 from syscore.objects import header, table, body_text, missing_data
+from syscore.dateutils import ROOT_BDAYS_INYEAR
 from sysproduction.diagnostic.backtest_state import from_marker_to_datetime
 from sysproduction.data.positions import diagPositions
 
@@ -500,11 +500,16 @@ def get_position_for_instrument_code_at_timestamp(
         data_backtest.strategy_name, instrument_code)
     datetime_cutoff = from_marker_to_datetime(data_backtest.timestamp)
     if positions_over_time is not missing_data:
-        position_at_backtest_state = positions_over_time[:datetime_cutoff].ffill().values[-1]
+        positions_over_time_ffill =  positions_over_time.ffill()
+        positions_before_cutoff =   positions_over_time_ffill[:datetime_cutoff]
     else:
-        position_at_backtest_state = [0]
+        positions_before_cutoff = []
 
-    return position_at_backtest_state
+    if len(positions_before_cutoff)==0:
+        return [0]
+    final_position = positions_before_cutoff.values[-1]
+
+    return final_position
 
 
 def get_current_position_for_instrument_code(
