@@ -498,6 +498,8 @@ def get_position_for_instrument_code_at_timestamp(
     diag_positions = diagPositions(data)
     positions_over_time = diag_positions.get_position_df_for_strategy_and_instrument(
         data_backtest.strategy_name, instrument_code)
+    if positions_over_time is missing_data:
+        return np.nan
     datetime_cutoff = from_marker_to_datetime(data_backtest.timestamp)
     if positions_over_time is not missing_data:
         positions_over_time_ffill =  positions_over_time.ffill()
