@@ -9,6 +9,7 @@ dist
 build
 private
 restats
+venv
 
 # Coverage reports
 .coverage
