@@ -21,6 +21,7 @@ class contractOrderType(orderType):
         return ['best', 'market', 'limit', 'balance_trade', '']
 
 best_order_type  = contractOrderType('best')
+market_order_type = contractOrderType('market')
 balance_order_type = contractOrderType('balance_trade')
 
 NO_CONTROLLING_ALGO = None
