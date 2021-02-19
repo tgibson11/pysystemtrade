@@ -1,4 +1,4 @@
-from sysdata.config.private_config import get_private_config_key_value
+from sysdata.config.production_config import get_production_config
 from syscore.objects import missing_data
 
 
@@ -10,7 +10,7 @@ def load_private_key():
     """
     dict_key = "quandl_key"
 
-    key = get_private_config_key_value(dict_key)
+    key = getattr(get_production_config(), dict_key)
     if key is missing_data:
         # no private key
         print("No private key found for QUANDL - you will be subject to data limits")
