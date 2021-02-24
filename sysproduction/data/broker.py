@@ -1,4 +1,4 @@
-
+from copy import copy
 from sysbrokers.IB.ib_capital_data import ibCapitalData
 from sysbrokers.IB.ib_spot_FX_data import ibFxPricesData
 from sysbrokers.IB.ib_futures_contract_price_data import ibFuturesContractPriceData
@@ -9,7 +9,7 @@ from sysbrokers.IB.ib_orders_data import ibOrdersData
 from sysbrokers.IB.ib_misc_data import ibMiscData
 
 from syscore.objects import arg_not_supplied, missing_order, missing_contract, missing_data
-
+from syscore.dateutils import Frequency
 from sysdata.data_blob import dataBlob
 
 from sysexecution.orders.broker_orders import brokerOrder
@@ -28,25 +28,20 @@ from sysobjects.futures_per_contract_prices import futuresContractPrices
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.currency_data import dataCurrency
 from sysproduction.data.control_process import diagControlProcess
+from sysproduction.data.generic_production_data import productionDataLayerGeneric
 
+class dataBroker(productionDataLayerGeneric):
 
-class dataBroker(object):
-    def __init__(self, data: dataBlob=arg_not_supplied):
-        # Check data has the right elements to do this
-        if data is arg_not_supplied:
-            data = dataBlob()
-
+    def _add_required_classes_to_data(self, data) -> dataBlob:
+        ## Modify these to use another broker
+        ## These will be aliased as self.data.broker_fx_prices, self.data.broker_futures_contract_price ... and so on
         data.add_class_list([
             ibFxPricesData, ibFuturesContractPriceData, ibFuturesContractData,
         ibContractPositionData, ibOrdersData, ibMiscData, ibCapitalData,
         ibFuturesInstrumentData]
         )
 
-        self._data = data
-
-    @property
-    def data(self) -> dataBlob:
-        return self._data
+        return data
 
     def broker_fx_balances(self) -> dict:
         return self.data.broker_misc.broker_fx_balances()
@@ -77,7 +72,7 @@ class dataBroker(object):
 
     def get_prices_at_frequency_for_contract_object(
             self, contract_object: futuresContract,
-            frequency: str) -> futuresContractPrices:
+            frequency: Frequency) -> futuresContractPrices:
 
         return self.data.broker_futures_contract_price.get_prices_at_frequency_for_contract_object(
             contract_object, frequency)
@@ -98,18 +93,20 @@ class dataBroker(object):
             instrument_code
         )
 
-
-    def less_than_one_hour_of_trading_leg_for_contract(
-            self, contract: futuresContract) -> bool:
+    def less_than_N_hours_of_trading_left_for_contract(
+            self,
+            contract: futuresContract,
+            N_hours: float = 1.0) -> bool:
 
         diag_controls = diagControlProcess()
         hours_left_before_process_finishes = diag_controls.how_long_in_hours_before_trading_process_finishes()
 
-        if hours_left_before_process_finishes<1:
+        if hours_left_before_process_finishes<N_hours:
             ## irespective of instrument traded
             return True
 
-        result = self.data.broker_futures_contract.less_than_one_hour_of_trading_leg_for_contract(contract)
+        result = self.data.broker_futures_contract.less_than_N_hours_of_trading_left_for_contract(contract,
+                                                                                                  N_hours = N_hours)
 
         return result
 
@@ -120,7 +117,6 @@ class dataBroker(object):
     def get_min_tick_size_for_contract(self, contract: futuresContract) -> float:
         result = self.data.broker_futures_contract.get_min_tick_size_for_contract(contract)
         return result
-
 
     def get_trading_hours_for_contract(
         self, contract: futuresContract
@@ -141,27 +137,38 @@ class dataBroker(object):
         self, original_position_list: listOfContractPositions
     ) -> listOfContractPositions:
 
-        for idx, position_entry in enumerate(original_position_list):
-            position_entry = original_position_list[idx]
-            original_contract = position_entry.contract
-            actual_expiry = self.get_actual_expiry_date_for_single_contract(
-                original_contract
-            )
-            if actual_expiry is missing_contract:
-                log = original_contract.specific_log(self.data.log)
-                log.warn("Contract %s is missing from IB probably expired - need to manually close on DB" % str(original_contract))
-                contract = original_contract
-            else:
-                expiry_date_as_str = actual_expiry.as_str()
-                instrument_code = position_entry.instrument_code
-                contract = futuresContract(instrument_code, expiry_date_as_str)
+        new_position_list = listOfContractPositions()
+        for position_entry in original_position_list:
+            new_position_entry = self.update_expiry_for_single_position(position_entry)
+            new_position_list.append(new_position_entry)
 
-            position = position_entry.position
-            new_entry = contractPosition(
-                position,contract)
-            original_position_list[idx] = new_entry
+        return new_position_list
 
-        return original_position_list
+    def update_expiry_for_single_position(self, position_entry: contractPosition) -> contractPosition:
+        original_contract = position_entry.contract
+        new_contract = self.update_expiry_for_single_contract(original_contract)
+
+        position = position_entry.position
+        new_position_entry = contractPosition(
+            position, new_contract)
+
+        return new_position_entry
+
+    def update_expiry_for_single_contract(self, original_contract: futuresContract) -> futuresContract:
+        actual_expiry = self.get_actual_expiry_date_for_single_contract(
+            original_contract
+        )
+        if actual_expiry is missing_contract:
+            log = original_contract.specific_log(self.data.log)
+            log.warn("Contract %s is missing from IB probably expired - need to manually close on DB" % str(
+                original_contract))
+            new_contract = copy(original_contract)
+        else:
+            expiry_date_as_str = actual_expiry.as_str()
+            instrument_code = original_contract.instrument_code
+            new_contract = futuresContract(instrument_code, expiry_date_as_str)
+
+        return new_contract
 
     def get_list_of_breaks_between_broker_and_db_contract_positions(self) -> list:
         db_contract_positions = self.get_db_contract_positions_with_IB_expiries()
@@ -190,7 +197,6 @@ class dataBroker(object):
         self.data.broker_futures_contract_price.cancel_market_data_for_order(
             order)
 
-
     def get_broker_account(self) -> str:
         return self.data.broker_misc.get_broker_account()
 
@@ -199,7 +205,6 @@ class dataBroker(object):
 
     def get_broker_name(self) -> str:
         return self.data.broker_misc.get_broker_name()
-
 
     def get_largest_offside_liquid_size_for_contract_order_by_leg(
             self, contract_order: contractOrder) -> tradeQuantity:
@@ -233,7 +238,7 @@ class dataBroker(object):
         for contract, qty in zip(
             list_of_contracts, list_of_trade_qty
         ):
-            pass
+
             market_conditions_this_contract = (
                 self.check_market_conditions_for_single_legged_contract_and_qty(contract, qty)
             )
@@ -243,8 +248,6 @@ class dataBroker(object):
             market_conditions.append(market_conditions_this_contract)
 
         return market_conditions
-
-
 
 
     def check_market_conditions_for_single_legged_contract_and_qty(
@@ -268,7 +271,6 @@ class dataBroker(object):
         analysis_of_tick_data = analyse_tick_data_frame(tick_data, qty)
 
         return analysis_of_tick_data
-
 
 
     def submit_broker_order(self, broker_order: brokerOrder) -> orderWithControls:
