@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 from syscore.objects import success
 
@@ -43,8 +44,8 @@ class updateStrategyCapital(object):
         except Exception as e:
             # Problem, will send email
             self.data.log.critical(
-                "Error %s whilst allocating strategy capital" %
-                e)
+                "Error whilst allocating strategy capital: %s" %
+                traceback.format_exc())
 
         return None
 
