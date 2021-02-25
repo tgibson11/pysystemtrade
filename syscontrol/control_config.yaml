@@ -21,7 +21,7 @@ process_configuration_stop_time:
 process_configuration_previous_process:
   run_systems: 'run_daily_prices_updates'
   run_strategy_order_generator: 'run_systems'
-  run_cleaners: 'run_strategy_order_generator'
+  # run_cleaners: 'run_strategy_order_generator'
   run_backups: 'run_cleaners'
   run_reports: 'run_strategy_order_generator'
 # we include every method to make process monitoring easier
