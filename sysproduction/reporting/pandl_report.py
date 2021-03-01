@@ -626,7 +626,7 @@ def get_price_series_for_contract(data, instrument_code, contract_id):
 
 def get_current_contract_price_series_for_instrument(data, instrument_code):
     diag_prices = diagPrices(data)
-    price_series = diag_prices.get_current_contract_prices_for_instrument(instrument_code)
+    price_series = diag_prices.get_current_priced_contract_prices_for_instrument(instrument_code)
 
     return price_series
 
@@ -634,9 +634,9 @@ def get_current_contract_price_series_for_instrument(data, instrument_code):
 def get_position_series_for_instrument_strategy(
         data, instrument_code, strategy_name):
     diag_positions = diagPositions(data)
-    pos_series = diag_positions.get_position_df_for_strategy_and_instrument(
-        strategy_name, instrument_code
-    )
+    instrument_strategy = instrumentStrategy(strategy_name=strategy_name, instrument_code=instrument_code)
+
+    pos_series = diag_positions.get_position_df_for_instrument_strategy(instrument_strategy)
     if pos_series is missing_data:
         return pd.Series()
 
@@ -662,11 +662,11 @@ def get_trade_df_for_instrument(data, instrument_code, strategy_name):
     return list_of_trades_as_pd_df
 
 
-def get_position_series_for_contract(data, instrument_code, contract_id):
+def get_position_series_for_contract(data, instrument_code:str, contract_id:str):
     diag_positions = diagPositions(data)
-    pos_series = diag_positions.get_position_df_for_instrument_and_contract_id(
-        instrument_code, contract_id
-    )
+    contract = futuresContract(instrument_code, contract_id)
+
+    pos_series = diag_positions.get_position_df_for_contract(contract)
     if pos_series is missing_data:
         return pd.Series()
 

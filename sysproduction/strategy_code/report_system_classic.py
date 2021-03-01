@@ -7,7 +7,9 @@ from collections import namedtuple
 from syscore.objects import header, table, body_text, missing_data
 from syscore.dateutils import ROOT_BDAYS_INYEAR, from_marker_to_datetime
 from sysproduction.data.positions import diagPositions
+
 from sysobjects.production.backtest_storage import interactiveBacktest
+from sysobjects.production.tradeable_object import instrumentStrategy
 
 def report_system_classic(data, data_backtest: interactiveBacktest):
     """
@@ -24,7 +26,7 @@ def report_system_classic(data, data_backtest: interactiveBacktest):
     format_output = []
     report_header = header(
         "Strategy report for %s backtest timestamp %s produced at %s" %
-        (strategy_name, data_backtest, str(
+        (strategy_name, timestamp, str(
             datetime.datetime.now())))
     format_output.append(report_header)
 
@@ -496,8 +498,11 @@ def get_position_at_timestamp_df_for_instrument_code_list(
 def get_position_for_instrument_code_at_timestamp(
         data_backtest, data, instrument_code):
     diag_positions = diagPositions(data)
-    positions_over_time = diag_positions.get_position_df_for_strategy_and_instrument(
-        data_backtest.strategy_name, instrument_code)
+
+    strategy_name = data_backtest.strategy_name
+    instrument_strategy = instrumentStrategy(strategy_name=strategy_name, instrument_code=instrument_code)
+
+    positions_over_time = diag_positions.get_position_df_for_instrument_strategy(instrument_strategy)
     if positions_over_time is missing_data:
         return np.nan
 
@@ -515,9 +520,10 @@ def get_position_for_instrument_code_at_timestamp(
 def get_current_position_for_instrument_code(
         data_backtest, data, instrument_code):
     diag_positions = diagPositions(data)
-    current_position = diag_positions.get_current_position_for_strategy_and_instrument(
-        data_backtest.strategy_name, instrument_code
-    )
+    strategy_name = data_backtest.strategy_name
+    instrument_strategy = instrumentStrategy(strategy_name=strategy_name, instrument_code=instrument_code)
+
+    current_position = diag_positions.get_current_position_for_instrument_strategy(instrument_strategy)
 
     return current_position
 
