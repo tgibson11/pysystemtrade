@@ -415,6 +415,7 @@ def get_valid_status_for_process():
             1: "Go",
             2: "Do not run (don't stop if already running)",
             3: "Stop (and don't run if not started)",
+            4: "Pause (carry on running process, but don't run methods)"
         },
         default_option=0,
         default_str="<CANCEL>",
@@ -430,6 +431,8 @@ def change_process_given_int(data, process_name, status_int):
         data_process.change_status_to_no_run(process_name)
     if status_int == 3:
         data_process.change_status_to_stop(process_name)
+    if status_int == 4:
+        data_process.change_status_to_pause(process_name)
 
 
 def get_process_name(data):
