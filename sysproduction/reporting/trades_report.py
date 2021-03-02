@@ -14,7 +14,7 @@ from sysproduction.data.orders import dataOrders
 from sysproduction.data.instruments import diagInstruments
 from sysproduction.data.prices import diagPrices
 
-from sysproduction.diagnostic.risk import  get_current_annualised_stdev_for_instrument
+from sysproduction.reporting.risk_report import get_current_annualised_stdev_for_instrument
 
 def trades_info(
     data=arg_not_supplied,

@@ -23,8 +23,8 @@ from syscore.objects import success, failure, status, named_object
 from sysobjects.production.roll_state import default_state, roll_adj_state, explain_roll_state_str, \
     allowable_roll_state_from_current_and_position, RollState
 
-from sysproduction.diagnostic.report_configs import roll_report_config
-from sysproduction.diagnostic.reporting import run_report_with_data_blob, landing_strip
+from sysproduction.reporting.report_configs import roll_report_config
+from sysproduction.reporting.reporting_functions import run_report_with_data_blob, landing_strip
 
 from sysproduction.data.positions import diagPositions, updatePositions
 from sysproduction.data.contracts import dataContracts
@@ -154,10 +154,11 @@ def setup_roll_data(data: dataBlob, instrument_code: str) -> RollData:
     original_roll_status = diag_positions.get_roll_state(instrument_code)
     priced_contract_date = diag_contracts.get_priced_contract_id(
         instrument_code)
+
+    contract = futuresContract(instrument_code, priced_contract_date)
+
     position_priced_contract = (
-        diag_positions.get_position_for_instrument_and_contract_date(
-            instrument_code, priced_contract_date
-        )
+        diag_positions.get_position_for_contract(contract)
     )
 
     allowable_roll_states = allowable_roll_state_from_current_and_position(

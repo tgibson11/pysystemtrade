@@ -119,13 +119,13 @@ class diagControlProcess(productionDataLayerGeneric):
         previous_process = self.previous_process_name(process_name)
         start_time = self.get_start_time(process_name)
         end_time = self.get_stop_time(process_name)
-        machine_name = self.required_machine_name(process_name)
+        # machine_name = self.required_machine_name(process_name)
 
         result_dict = dict(
             previous_process=previous_process,
             start_time=start_time,
             end_time=end_time,
-            machine_name=machine_name
+            # machine_name=machine_name
         )
 
         return result_dict
@@ -134,13 +134,13 @@ class diagControlProcess(productionDataLayerGeneric):
         time_to_stop = self.is_it_time_to_stop(process_name)
         time_to_start = self.is_it_time_to_run(process_name)
         prev_process = self.has_previous_process_finished_in_last_day(process_name)
-        right_machine = self.is_this_correct_machine(process_name)
+        # right_machine = self.is_this_correct_machine(process_name)
 
         result_dict = dict(
             time_to_start = time_to_start,
             time_to_stop = time_to_stop,
             prev_process = prev_process,
-            right_machine = right_machine
+            # right_machine = right_machine
         )
 
         return result_dict
@@ -166,17 +166,6 @@ class diagControlProcess(productionDataLayerGeneric):
         else:
             return False
 
-    def is_this_correct_machine(self, process_name: str) ->bool:
-        required_host = self.required_machine_name(process_name)
-        if required_host is None:
-            return True
-
-        hostname = socket.gethostname()
-
-        if hostname == required_host:
-            return True
-        else:
-            return False
 
     def is_it_time_to_stop(self, process_name:str) -> bool:
         stop_time = self.get_stop_time(process_name)
@@ -294,17 +283,6 @@ class diagControlProcess(productionDataLayerGeneric):
 
         return result
 
-    def required_machine_name(self, process_name: str)-> str:
-        """
-
-        :param process_name:
-        :return: str or None
-        """
-        result = self._get_configuration_item_for_process_name(
-            process_name, "host_name", default=None, use_config_default=False
-        )
-
-        return result
 
     def _get_configuration_item_for_process_name(
         self, process_name: str, item_name: str, default=None, use_config_default: bool=False

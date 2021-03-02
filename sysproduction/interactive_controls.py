@@ -20,7 +20,7 @@ from sysproduction.data.control_process import dataControlProcess, diagControlPr
 from sysproduction.data.prices import get_valid_instrument_code_from_user
 from sysproduction.data.strategies import get_valid_strategy_name_from_user
 from sysproduction.data.positions import diagPositions
-from sysproduction.diagnostic.risk import get_risk_data_for_instrument
+from sysproduction.reporting.risk_report import get_risk_data_for_instrument
 
 def interactive_controls():
     with dataBlob(log_name="Interactive-Controls") as data:
