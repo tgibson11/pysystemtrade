@@ -119,13 +119,13 @@ class diagControlProcess(productionDataLayerGeneric):
         previous_process = self.previous_process_name(process_name)
         start_time = self.get_start_time(process_name)
         end_time = self.get_stop_time(process_name)
-        machine_name = self.required_machine_name(process_name)
+        # machine_name = self.required_machine_name(process_name)
 
         result_dict = dict(
             previous_process=previous_process,
             start_time=start_time,
             end_time=end_time,
-            machine_name=machine_name
+            # machine_name=machine_name
         )
 
         return result_dict
@@ -134,13 +134,13 @@ class diagControlProcess(productionDataLayerGeneric):
         time_to_stop = self.is_it_time_to_stop(process_name)
         time_to_start = self.is_it_time_to_run(process_name)
         prev_process = self.has_previous_process_finished_in_last_day(process_name)
-        right_machine = self.is_this_correct_machine(process_name)
+        # right_machine = self.is_this_correct_machine(process_name)
 
         result_dict = dict(
             time_to_start = time_to_start,
             time_to_stop = time_to_stop,
             prev_process = prev_process,
-            right_machine = right_machine
+            # right_machine = right_machine
         )
 
         return result_dict
