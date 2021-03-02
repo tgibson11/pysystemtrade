@@ -18,7 +18,7 @@ from sysproduction.data.orders import dataOrders
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.instruments import diagInstruments
 from sysproduction.data.strategies import diagStrategiesConfig
-from sysproduction.diagnostic.system_status import get_last_price_updates_as_df
+from sysproduction.reporting.status_reporting import get_last_price_updates_as_df
 
 # We want a p&l (We could merge this into another kind of report)
 # We want to be able to have it emailed, or run it offline
