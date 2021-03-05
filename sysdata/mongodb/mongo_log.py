@@ -49,7 +49,7 @@ class logToMongod(logToDb):
                 invalid_id = False
             counter = counter + 1
             if counter>100:
-                self.log.critical("Couldn't reserve log ID")
+                self.critical("Couldn't reserve log ID")
                 raise Exception("Couldn't reserve log ID")
 
         return next_id
