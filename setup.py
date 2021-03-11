@@ -85,7 +85,7 @@ setup(
         "numpy>=1.19.4",
         "scipy>=1.0.0",
         "pymongo==3.9.0",
-        "arctic==1.79.2",
+        "arctic==1.79.4",
         "ib-insync==0.9.65"
     ],
     tests_require=[
