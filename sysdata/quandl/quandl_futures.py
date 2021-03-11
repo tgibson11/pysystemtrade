@@ -209,9 +209,11 @@ class QuandlFuturesContractPriceData(futuresContractPriceData):
             )
             raise
 
-        # apply multiplier
+        # apply multiplier to price columns
         factor = quandl_contract.get_dividing_factor()
-        data = data / factor
+        all_cols = data.columns.values
+        price_cols = all_cols[all_cols != 'VOLUME']
+        data[price_cols] /= factor
 
         return data
 
