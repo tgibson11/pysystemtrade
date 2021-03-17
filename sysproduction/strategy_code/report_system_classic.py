@@ -308,7 +308,7 @@ get_instrument_value_vol = configForMethod(
 
 get_daily_cash_vol_target = configForMethod(
     "positionSize",
-    "get_vol_target_dict",
+    "get_daily_cash_vol_target",
     "Daily Cash Vol Tgt",
     False,
     False,
