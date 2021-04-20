@@ -149,6 +149,9 @@ def merge_fill_prices_with_prices(prices: pd.Series,
     return prices_to_use
 
 def unique_trades_df(trade_df: pd.DataFrame):
+    trade_df["price"] = trade_df["price"].map(
+        lambda price: price if not isinstance(price, list) else price[0]
+    )
     cash_flow = trade_df.qty * trade_df.price
     trade_df["cash_flow"] = cash_flow
     new_df = trade_df.groupby(trade_df.index).sum()
