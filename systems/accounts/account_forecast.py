@@ -5,16 +5,12 @@ from syscore.objects import arg_not_supplied
 
 from sysquant.estimators.vol import robust_daily_vol_given_price
 
-from systems.system_cache import dont_cache, diagnostic, output
+from systems.system_cache import diagnostic
 from systems.accounts.account_costs import accountCosts
-from systems.accounts.pandl_calculation import pandlCalculationWithSRCosts
+from systems.accounts.pandl_calculators.pandl_SR_cost import pandlCalculationWithSRCosts
 from systems.accounts.curves.account_curve import accountCurve
 
 class accountForecast(accountCosts):
-
-    @property
-    def name(self):
-        return "accounts"
 
     @diagnostic(not_pickable=True)
     def pandl_for_instrument_forecast(
@@ -58,9 +54,7 @@ class accountForecast(accountCosts):
 
         price = self.get_raw_price(instrument_code)
 
-        daily_price_volatility = self.get_daily_returns_volatility(
-            instrument_code
-        )
+        daily_returns_volatility = self.get_daily_returns_volatility(instrument_code)
 
         # We NEVER use cash costs for forecasts ...
         SR_cost = self.get_SR_cost_for_instrument_forecast(
@@ -73,7 +67,7 @@ class accountForecast(accountCosts):
         # positions
         pandl_fcast = pandl_for_instrument_forecast(forecast,
                                   price = price,
-                                  daily_price_volatility = daily_price_volatility,
+                                  daily_returns_volatility = daily_returns_volatility,
                                   target_abs_forecast = target_abs_forecast,
                                   SR_cost = SR_cost,
                                   delayfill = delayfill)
@@ -87,47 +81,56 @@ ARBITRARY_FORECAST_CAPITAL = 100
 ARBITRARY_FORECAST_ANNUAL_RISK_TARGET = 0.16
 ARBITRARY_FORECAST_DAILY_RISK_TARGET = ARBITRARY_FORECAST_ANNUAL_RISK_TARGET / ROOT_BDAYS_INYEAR
 
+ARBITRARY_DAILY_CASH_VOL_TARGET = ARBITRARY_FORECAST_CAPITAL * ARBITRARY_FORECAST_DAILY_RISK_TARGET
 
+ARBITRARY_VALUE_OF_PRICE_POINT = 1.0
 
 
 def pandl_for_instrument_forecast(forecast: pd.Series,
                                   price: pd.Series,
-                                  daily_price_volatility: pd.Series = arg_not_supplied,
+                                  daily_returns_volatility: pd.Series = arg_not_supplied,
                                   target_abs_forecast: float = 10.0,
                                   SR_cost = 0.0,
-                                  delayfill = True):
+                                  delayfill = True) -> accountCurve:
 
-    if daily_price_volatility is arg_not_supplied:
-        daily_price_volatility = robust_daily_vol_given_price(price)
+    if daily_returns_volatility is arg_not_supplied:
+        daily_returns_volatility = robust_daily_vol_given_price(price)
 
-    notional_position = _get_notional_position_for_forecast(forecast,
-                                                            daily_returns_volatility =daily_price_volatility,
-                                                            target_abs_forecast = target_abs_forecast)
+    normalised_forecast = _get_normalised_forecast(forecast,
+                                                   target_abs_forecast = target_abs_forecast)
+
+    average_notional_position = -_get_average_notional_position(daily_returns_volatility)
+
+    notional_position = _get_notional_position_for_forecast(normalised_forecast,
+                                                            average_notional_position=average_notional_position)
 
     pandl_calculator = pandlCalculationWithSRCosts(price,
                                 SR_cost=SR_cost,
                                 positions= notional_position,
-                            daily_price_volatility = daily_price_volatility,
+                            daily_returns_volatility = daily_returns_volatility,
+                            average_position = average_notional_position,
                  capital = ARBITRARY_FORECAST_CAPITAL,
+                value_per_point=ARBITRARY_VALUE_OF_PRICE_POINT,
                 delayfill = delayfill)
 
     account_curve = accountCurve(pandl_calculator)
 
     return account_curve
 
-def _get_notional_position_for_forecast(forecast: pd.Series,
-                                  daily_returns_volatility: pd.Series = arg_not_supplied,
-                                        target_abs_forecast: float = 10.0) -> pd.Series:
+def _get_notional_position_for_forecast(normalised_forecast: pd.Series,
+                                  average_notional_position: pd.Series) -> pd.Series:
 
-    normalised_forecast = _get_normalised_forecast(forecast,
-                                                   target_abs_forecast = target_abs_forecast)
+    aligned_average = average_notional_position.reindex(normalised_forecast.index,
+                                                        method="ffill")
 
-    aligned_returns_volatility = daily_returns_volatility.reindex(normalised_forecast.index).ffill()
-    inverse_vol_scaling = (ARBITRARY_FORECAST_DAILY_RISK_TARGET  / aligned_returns_volatility)
+    return aligned_average * normalised_forecast
 
-    notional_position = inverse_vol_scaling * normalised_forecast
+def _get_average_notional_position(daily_returns_volatility: pd.Series) -> pd.Series:
 
-    return  notional_position
+    instrument_currency_vol = daily_returns_volatility * ARBITRARY_VALUE_OF_PRICE_POINT
+    average_notional_position = ARBITRARY_DAILY_CASH_VOL_TARGET / instrument_currency_vol
+
+    return average_notional_position
 
 def _get_normalised_forecast(forecast: pd.Series,
                              target_abs_forecast: float = 10.0) -> pd.Series:

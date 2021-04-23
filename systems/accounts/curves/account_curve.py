@@ -2,16 +2,19 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew,  ttest_1samp
 
-from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, from_frequency_to_times_per_year
+from syscore.dateutils import Frequency, from_frequency_to_times_per_year
 from syscore.pdutils import drawdown
 
-from systems.accounts.pandl_calculation import pandlCalculationWithGenericCosts, GROSS_CURVE, NET_CURVE, COSTS_CURVE
+from systems.accounts.pandl_calculators.pandl_generic_costs import GROSS_CURVE, NET_CURVE, COSTS_CURVE, \
+    pandlCalculationWithGenericCosts
+
 
 class accountCurve(pd.Series):
     def __init__(self, pandl_calculator_with_costs: pandlCalculationWithGenericCosts,
-                 frequency: Frequency = DAILY_PRICE_FREQ,
-                 curve_type: str = GROSS_CURVE,
-                is_percentage: bool = False
+                 frequency: Frequency = Frequency.BDay,
+                 curve_type: str = NET_CURVE,
+                is_percentage: bool = False,
+                 weighted = False
                  ):
 
         as_pd_series = pandl_calculator_with_costs.as_pd_series_for_frequency( percent = is_percentage,
@@ -25,16 +28,13 @@ class accountCurve(pd.Series):
         self._frequency = frequency ## frequency type
         self._curve_type = curve_type
         self._is_percentage = is_percentage
-
+        self._weighted = weighted
 
     def __repr__(self):
-        """
-        if self.weighted_flag:
+        if self.weighted:
             weight_comment = "Weighted"
         else:
             weight_comment = "Unweighted"
-        """
-        weight_comment = ""
 
         return (
             super().__repr__() +
@@ -79,28 +79,28 @@ class accountCurve(pd.Series):
         return accountCurve(self.pandl_calculator_with_costs,
                             curve_type=self.curve_type,
                             is_percentage=self.is_percentage,
-                            frequency=Frequency.Daily)
+                            frequency=Frequency.BDay)
 
     @property
     def weekly(self):
         return accountCurve(self.pandl_calculator_with_costs,
                             curve_type=self.curve_type,
                             is_percentage=self.is_percentage,
-                            frequency=Frequency.Weekly)
+                            frequency=Frequency.Week)
 
     @property
     def monthly(self):
         return accountCurve(self.pandl_calculator_with_costs,
                             curve_type=self.curve_type,
                             is_percentage=self.is_percentage,
-                            frequency=Frequency.Monthly)
+                            frequency=Frequency.Month)
 
     @property
     def annual(self):
         return accountCurve(self.pandl_calculator_with_costs,
                             curve_type=self.curve_type,
                             is_percentage=self.is_percentage,
-                            frequency=Frequency.Annual)
+                            frequency=Frequency.Year)
 
 
     @property
@@ -110,10 +110,6 @@ class accountCurve(pd.Series):
                             is_percentage=True,
                             frequency=self.frequency)
 
-
-    @property
-    def cumulative(self):
-        raise NotImplementedError
 
 
     @property
@@ -140,6 +136,10 @@ class accountCurve(pd.Series):
     @property
     def is_percentage(self) -> bool:
         return self._is_percentage
+
+    @property
+    def weighted(self)-> bool:
+        return self._weighted
 
     def curve(self):
         return self.cumsum().ffill()
@@ -204,7 +204,7 @@ class accountCurve(pd.Series):
     def sortino(self):
         period_stddev = np.std(self.losses())
 
-        ann_stdev = period_stddev * self._vol_scalar
+        ann_stdev = period_stddev * self.vol_scalar
         ann_mean = self.ann_mean()
 
         try:
@@ -260,7 +260,7 @@ class accountCurve(pd.Series):
 
     def rolling_ann_std(self, window=40):
         y = self.as_ts.rolling(window, min_periods=4, center=True).std().to_frame()
-        return y * self._vol_scalar
+        return y * self.vol_scalar
 
     def t_test(self):
         return ttest_1samp(self.vals(), 0.0)
@@ -309,3 +309,4 @@ class accountCurve(pd.Series):
         )
 
         return [build_stats, comment1]
+
