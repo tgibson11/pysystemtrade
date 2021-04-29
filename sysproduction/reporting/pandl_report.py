@@ -83,16 +83,14 @@ def get_pandl_report_data(data, start_date, end_date):
     data.temp_pandl_write = types.MethodType(temp_pandl_write, data)
 
     total_capital_pandl = (
-        get_total_capital_pandl(data, start_date, end_date=end_date) * 100
+        get_total_capital_pandl(data, start_date, end_date=end_date)
     )
     pandl_for_instruments_across_strategies = (
         get_ranked_list_of_pandl_by_instrument_all_strategies_in_date_range(
             data, start_date, end_date
         )
     )
-    pandl_for_instruments_across_strategies.pandl = (
-        pandl_for_instruments_across_strategies.pandl * 100
-    )
+
     total_for_futures = pandl_for_instruments_across_strategies.pandl.sum()
     residual = total_capital_pandl - total_for_futures
     strategies = get_strategy_pandl_and_residual(data, start_date, end_date)
@@ -155,7 +153,7 @@ def get_daily_perc_pandl(data):
 
     perc_pandl_series = daily_pandl_series / all_capital
 
-    return perc_pandl_series
+    return perc_pandl_series * 100
 
 
 def get_total_capital_pandl(data, start_date, end_date=arg_not_supplied):
@@ -180,7 +178,7 @@ def get_strategy_pandl_and_residual(data, start_date, end_date):
     residual_dfrow = pd.DataFrame(
         dict(codes=["residual"], pandl=residual_pandl))
     strategies_pandl = strategies_pandl.append(residual_dfrow)
-    strategies_pandl.pandl = strategies_pandl.pandl * 100
+    strategies_pandl.pandl = strategies_pandl.pandl
 
     return strategies_pandl
 
@@ -300,7 +298,7 @@ def get_period_perc_pandl_for_sector_in_date_range(
     ]
     asset_class_pandl = sum(instrument_pandl)
 
-    return asset_class_pandl * 100
+    return asset_class_pandl
 
 
 def get_period_perc_pandl_for_instrument_all_strategies_in_date_range(
