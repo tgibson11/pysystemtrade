@@ -246,7 +246,7 @@ ib_price_client.ib # live ib_inysnc.IB instance
 
 ## Connection objects
 
-You wouldn't normally open a seperate IB connection in pysystemtrade since they are opened by the [dataBlob](/docs/data.md#data-blobs) objects used in production. But it's useful to know how they work under the hood.
+You wouldn't normally open a separate IB connection in pysystemtrade since they are opened by the [dataBlob](/docs/data.md#data-blobs) objects used in production. But it's useful to know how they work under the hood.
 
 ### Creating and closing connection objects
 
@@ -260,7 +260,7 @@ Portid should match that in the Gateway configuration. Client ids (eg 1) must no
 If values for account, ib_ipaddress and ib_port are not passed here, they will default to:
 
 1- values supplied in file 'private_config.yaml' (see below)
-2- values supplied in the ['defaults.yaml' file](/syscontrol/config/defaults.yaml)
+2- values supplied in the ['defaults.yaml' file](/sysdata/config/defaults.yaml)
 
 You should first create a file 'private_config.yaml' in the private directory of [pysystemtrade](#/private). Then add one or more of these line:
 

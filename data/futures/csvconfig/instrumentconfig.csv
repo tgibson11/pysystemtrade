@@ -1,5 +1,6 @@
 Instrument,Pointsize,AssetClass,Currency,Slippage,PerBlock,Percentage,PerTrade,Description
 AUD,100000,FX,USD,5E-05,2.46,0,0,AUDUSD currency
+BITCOIN,0.1,Metals,USD,5,1,0,0,Micro Bitcoin
 COPPER,25000,Metals,USD,0.0006147655,2.31,0,0,Copper
 CORN,50,Ags,USD,0.125,2.9,0,0,Corn
 CRUDE_W,1000,OilGas,USD,0.0145328653,2.31,0,0,Light sweet crude Winter
@@ -22,5 +23,6 @@ US10,1000,Bond,USD,0.008,1.51,0,0,US 10 year bond note
 US2,2000,Bond,USD,0.004,1.51,0,0,US 2 year bond note
 US20,1000,Bond,USD,0.016,1.51,0,0,US 20 year bond
 US5,1000,Bond,USD,0.004,1.51,0,0,US 5 year bond note
+US-REALESTATE,100,Real estate,USD,0.05,2,0,0,US Real estate
 VIX,1000,Vol,USD,0.0255,2.2,0,0,Vol US equity VIX
 WHEAT,50,Ags,USD,0.25,2.9,0,0,Wheat

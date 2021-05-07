@@ -110,7 +110,7 @@ Hence there are five possible use cases:
 
 - You are happy to use the stale shipped .csv files data and are only backtesting. You don't need to do any of this!
 - You want to update the .csv data used for backtests that is shipped with pysystemtrade
-- You want to run backtests, but from faster databases rather than silly old .csv files, as I discuss how to do [later](#arcticfuturessimdata))
+- You want to run backtests, but from faster databases rather than silly old .csv files, as I discuss how to do [later](#dbfuturessimdata)
 - You want to run pysystemtrade in [production](/docs/production.md), which requires database storage.
 - You want both database storage and updated .csv files, maybe because you want to keep a backup of your data in .csv (someting that the production code does automatically, FWIW) or use that for backtesting
 
@@ -679,7 +679,7 @@ You need to specify an IP address (host), and database name when you connect to 
 
 - Firstly, arguments passed to a `mongoDb()` instance, which is then optionally passed to any data object with the argument `mongo_db=mongoDb(mongo_host='localhost', mongo_database_name='production', mongo_port = 27017)` All arguments are optional. 
 - Then, variables set in the private `.yaml` configuration file /private/private_config.yaml: mongo_host, mongo_db, mongo_port
-- Finally, default arguments in the [system defaults configuration file](/systems/provided/defaults.yaml): mongo_host, mongo_db, mongo_port
+- Finally, default arguments in the [system defaults configuration file](/sysdata/config/defaults.yaml): mongo_host, mongo_db, mongo_port
 
 Note that `localhost` is equivalent to `127.0.0.1`, i.e. this machine. Note also that if you have a non-standard mongo port, you must use the url format for specifying the mongo host, eg
 
