@@ -23,10 +23,10 @@ class cleanTruncateBacktestStates:
             % directory_to_use
         )
         delete_old_files_with_extension_in_pathname(
-            directory_to_use, days_old=2, extension=".pck"
+            directory_to_use, days_old=1, extension=".pck"
         )
         delete_old_files_with_extension_in_pathname(
-            directory_to_use, days_old=2, extension=".yaml"
+            directory_to_use, days_old=1, extension=".yaml"
         )
 
         # Also remove old backtests from backup directory to save space
@@ -36,10 +36,10 @@ class cleanTruncateBacktestStates:
             % directory_to_use
         )
         delete_old_files_with_extension_in_pathname(
-            directory_to_use, days_old=2, extension=".pck"
+            directory_to_use, days_old=1, extension=".pck"
         )
         delete_old_files_with_extension_in_pathname(
-            directory_to_use, days_old=2, extension=".yaml"
+            directory_to_use, days_old=1, extension=".yaml"
         )
 
 
