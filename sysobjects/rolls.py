@@ -50,8 +50,7 @@ class rollCycle(object):
 
         return contract_given_tuple(contract_date,
                                     new_year_value,
-                                    new_month_str,
-                                    approx_expiry_offset=approx_expiry_offset)
+                                    new_month_str)
 
     def _previous_year_month_given_tuple(self, year_value: int, month_str: str)-> (int, str):
         """

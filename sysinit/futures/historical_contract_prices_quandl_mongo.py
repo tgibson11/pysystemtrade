@@ -12,9 +12,9 @@ from sysdata.arctic.arctic_futures_per_contract_prices import (
 from sysdata.quandl.quandl_futures import QuandlFuturesConfiguration, QuandlFuturesContractPriceData
 from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
-from sysobjects.contract_dates_and_expiries import contractDate
 from sysobjects.contracts import listOfFuturesContracts, futuresContract
 from sysobjects.instruments import futuresInstrument
+from sysobjects.rolls import contractDateWithRollParameters
 
 
 def get_roll_parameters_from_mongo(instrument_code):
@@ -32,7 +32,7 @@ def get_first_contract_date_from_quandl(instrument_code):
     return config.get_first_contract_date(instrument_code)
 
 
-def create_list_of_contracts(instrument_code):
+def create_list_of_contract_dates(instrument_code):
     instrument_object = futuresInstrument(instrument_code)
     print(instrument_code)
     roll_parameters = get_roll_parameters_from_mongo(instrument_code)
@@ -45,13 +45,13 @@ def create_list_of_contracts(instrument_code):
     return list_of_contracts
 
 
-def get_and_write_prices_for_contract_list_from_quandl_to_arctic(
-        list_of_contracts):
+def get_and_write_prices_for_contract_list_from_quandl_to_arctic(instrument, list_of_contract_dates):
     quandl_prices_data = QuandlFuturesContractPriceData()
     arctic_prices_data = arcticFuturesContractPriceData()
 
-    for contract_object in list_of_contracts:
-        print("Processing %s" % contract_object.key)
+    for contract_date in list_of_contract_dates:
+        print("Processing %s" % contract_date.date_str)
+        contract_object = futuresContract(instrument, contract_date)
         quandl_price = quandl_prices_data.get_prices_for_contract_object(
             contract_object
         )
@@ -69,9 +69,6 @@ def get_and_write_prices_for_contract_list_from_quandl_to_arctic(
                     "Some kind of issue with arctic - stopping so you can fix it"
                 )
 
-
-# TODO the following functions used to be methods on listOfFuturesContracts
-# Rob has removed them as part of his refactoring; I'm not sure if this will be temporary or not
 
 MAX_CONTRACT_SIZE = 10000
 
@@ -100,28 +97,10 @@ def historical_price_contracts(
     :return: list of futuresContracts
     """
 
-    first_contract = futuresContract(
-        instrument_object, contractDate(
-            roll_parameters, first_contract_date))
+    first_contract = futuresContract(instrument_object, first_contract_date)
+    contract_date_with_roll_params = contractDateWithRollParameters(first_contract.contract_date, roll_parameters)
 
     assert end_date > first_contract.expiry_date
-
-    current_held_contract_date = roll_parameters.approx_first_held_contractDate_at_date(end_date)
-    current_held_contract = futuresContract(instrument_object, current_held_contract_date)
-
-    current_priced_contract_date = roll_parameters.approx_first_priced_contractDate_at_date(end_date)
-    current_priced_contract = futuresContract(instrument_object, current_priced_contract_date)
-
-    current_carry_contract = current_held_contract_date.carry_contract()
-
-    # these are all str thats okay
-    last_contract_date = max(
-        [
-            current_held_contract.date,
-            current_priced_contract.date,
-            current_carry_contract.date,
-        ]
-    )
 
     list_of_contracts = [first_contract]
 
@@ -131,31 +110,31 @@ def historical_price_contracts(
     current_contract = first_contract
 
     while date_still_valid:
-        next_contract = current_contract.next_priced_contract()
+        next_contract = contract_date_with_roll_params.next_priced_contract()
 
-        list_of_contracts.append(next_contract)
+        list_of_contracts.append(next_contract.contract_date)
 
-        if next_contract.date >= last_contract_date:
+        if next_contract.date_str >= str(end_date.year) + str(end_date.month):
             date_still_valid = False
             # will now terminate
         if len(list_of_contracts) > MAX_CONTRACT_SIZE:
             raise Exception("Too many contracts - check your inputs")
 
-        current_contract = next_contract
+        contract_date_with_roll_params = next_contract
 
     return listOfFuturesContracts(list_of_contracts)
 
 
 if __name__ == '__main__':
-    instrument_data = mongoFuturesInstrumentData()
-    print(instrument_data)
-    instrument_list = instrument_data.get_list_of_instruments()
+    # instrument_data = mongoFuturesInstrumentData()
+    # print(instrument_data)
+    # instrument_list = instrument_data.get_list_of_instruments()
 
-    for instrument in instrument_list:
+    for instrument in ['US-REALESTATE']:  # instrument_list:
 
-        contracts = create_list_of_contracts(instrument)
-        print(contracts)
+        contract_dates = create_list_of_contract_dates(instrument)
+        print(contract_dates)
 
-        print("Generated %d contracts" % len(contracts))
+        print("Generated %d contracts" % len(contract_dates))
 
-        get_and_write_prices_for_contract_list_from_quandl_to_arctic(contracts)
+        get_and_write_prices_for_contract_list_from_quandl_to_arctic(instrument, contract_dates)

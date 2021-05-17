@@ -69,4 +69,4 @@ if __name__ == "__main__":
     input("Will overwrite existing prices are you sure?! CTL-C to abort")
     # modify flags and datapath as required
     # process_adjusted_prices_all_instruments(ADD_TO_ARCTIC=True, ADD_TO_CSV=True, csv_adj_data_path=arg_not_supplied)
-    process_adjusted_prices_single_instrument("BITCOIN", ADD_TO_CSV=True)
+    process_adjusted_prices_single_instrument("US-REALESTATE", ADD_TO_CSV=True)
