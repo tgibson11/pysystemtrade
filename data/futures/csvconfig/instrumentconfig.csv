@@ -22,6 +22,7 @@ US10,1000,Bond,USD,0.008,1.51,0,0,US 10 year bond note
 US2,2000,Bond,USD,0.004,1.51,0,0,US 2 year bond note
 US20,1000,Bond,USD,0.016,1.51,0,0,US 20 year bond
 US5,1000,Bond,USD,0.004,1.51,0,0,US 5 year bond note
+US-REALESTATE,100,Real estate,USD,0.1,1.5,0,0,US Real estate
 VIX,1000,Vol,USD,0.0255,2.2,0,0,Vol US equity VIX
 WHEAT,50,Ags,USD,0.25,2.9,0,0,Wheat
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
