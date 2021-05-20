@@ -67,6 +67,7 @@ def turnover(x, y):
     return avg_daily * BUSINESS_DAYS_IN_YEAR
 
 
+
 def uniquets(x):
     """
     Makes x unique
@@ -170,15 +171,7 @@ def must_have_item(slice_data):
     >>>
     """
 
-    def _any_data(xseries):
-        data_present = [not np.isnan(x) for x in xseries]
-
-        return any(data_present)
-
-    some_data = slice_data.apply(_any_data, axis=0)
-    some_data_flags = list(some_data.values)
-
-    return some_data_flags
+    return list(~slice_data.isna().all().values)
 
 def get_bootstrap_series(data: pd.DataFrame):
     length_of_series = len(data.index)
@@ -269,16 +262,23 @@ def fix_weights_vs_position_or_forecast(weights: pd.DataFrame,
     adj_weights[np.isnan(pdm_ffill)] = 0.0
 
     # change rows so weights add to one
-    def _sum_row_fix(weight_row):
-        swr = sum(weight_row)
-        if swr == 0.0:
-            return weight_row
-        new_weights = weight_row / swr
-        return new_weights
+    normalised_weights = weights_sum_to_one(adj_weights)
 
-    adj_weights = adj_weights.apply(_sum_row_fix, 1)
+    return normalised_weights
 
-    return adj_weights
+def weights_sum_to_one(weights: pd.DataFrame):
+    sum_weights = weights.sum(axis=1)
+    sum_weights[sum_weights==0.0] = 0.0001
+    weight_multiplier = 1.0 / sum_weights
+    weight_multiplier_array = np.array([weight_multiplier]*len(weights.columns))
+    weight_values = weights.values
+
+    normalised_weights_np = weight_multiplier_array.transpose() * weight_values
+    normalised_weights = pd.DataFrame(normalised_weights_np,
+                                      columns = weights.columns,
+                                      index = weights.index)
+
+    return normalised_weights
 
 
 def drawdown(x):
@@ -396,54 +396,11 @@ def dataframe_pad(starting_df, column_list, padwith=0.0):
 
     return new_df
 
+def apply_abs_min(x: pd.Series, min_value=0.1):
+    x[(x<min_value) & (x>0)] = min_value
+    x[(x > min_value) & (x < 0)] = -min_value
 
-def proportion_pd_object_intraday(
-    data, closing_time=NOTIONAL_CLOSING_TIME_AS_PD_OFFSET
-):
-    """
-    Return the proportion of intraday data in a pd.Series or DataFrame
-
-    :param data: the underlying data
-    :param closing_time: the time which we are using as a closing time
-    :return: float, the proportion of the data.index that matches an intraday timestamp
-
-    So 0 = All daily data, 1= All intraday data
-    """
-
-    data_index = data.index
-    length_index = len(data_index)
-
-    count_matches = [
-        time_matches(index_entry, closing_time) for index_entry in data_index
-    ]
-    total_matches = sum(count_matches)
-    proportion_matching_close = float(total_matches) / float(length_index)
-    proportion_intraday = 1 - proportion_matching_close
-
-    return proportion_intraday
-
-
-def strip_out_intraday(
-    data, closing_time=pd.DateOffset(hours=23, minutes=0, seconds=0)
-):
-    """
-    Return a pd.Series or DataFrame with only the times matching closing_time
-    Used when we have a mix of daily and intraday data, where the daily data has been given a nominal timestamp
-
-    :param data: pd object
-    :param closing_time: pdDateOffset with
-    :return: pd object
-    """
-
-    data_index = data.index
-    length_index = len(data_index)
-
-    daily_matches = [
-        time_matches(index_entry, closing_time) for index_entry in data_index
-    ]
-
-    return data[daily_matches]
-
+    return x
 
 
 
