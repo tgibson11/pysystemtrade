@@ -164,4 +164,5 @@ if __name__ == "__main__":
     # process_multiple_prices_all_instruments(csv_multiple_data_path= csv_multiple_data_path,
     #                                         csv_roll_data_path = csv_roll_data_path)
 
-    process_multiple_prices_single_instrument(instrument_code="US-REALESTATE", ADD_TO_CSV=True)
+    for instrument in ["USIRS5", "USIRS10"]:
+        process_multiple_prices_single_instrument(instrument_code=instrument, ADD_TO_CSV=False)
