@@ -130,7 +130,8 @@ if __name__ == '__main__':
     # print(instrument_data)
     # instrument_list = instrument_data.get_list_of_instruments()
 
-    for instrument in ['USIRS5', 'USIRS10']:  # instrument_list:
+    for instrument in ['US-DISCRETE', 'US-STAPLES', 'US-ENERGY', 'US-FINANCE', 'US-HEALTH', 'US-INDUSTRY',
+                       'US-MATERIAL', 'US-PROPERTY', 'US-TECH', 'US-UTILS']:
 
         contract_dates = create_list_of_contract_dates(instrument)
         print(contract_dates)

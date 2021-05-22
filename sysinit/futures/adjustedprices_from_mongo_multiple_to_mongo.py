@@ -69,5 +69,6 @@ if __name__ == "__main__":
     input("Will overwrite existing prices are you sure?! CTL-C to abort")
     # modify flags and datapath as required
     # process_adjusted_prices_all_instruments(ADD_TO_ARCTIC=True, ADD_TO_CSV=True, csv_adj_data_path=arg_not_supplied)
-    for instrument in ["USIRS5", "USIRS10"]:
+    for instrument in ['US-DISCRETE', 'US-STAPLES', 'US-ENERGY', 'US-FINANCE', 'US-HEALTH', 'US-INDUSTRY',
+                       'US-MATERIAL', 'US-PROPERTY', 'US-TECH', 'US-UTILS']:
         process_adjusted_prices_single_instrument(instrument, ADD_TO_CSV=False)

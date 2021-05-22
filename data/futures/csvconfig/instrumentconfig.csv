@@ -27,4 +27,14 @@ USIRS10,1000,Bond,USD,0.0234375,1.5,0,0,US 10 year swap
 US-REALESTATE,100,Real estate,USD,0.1,1.5,0,0,US Real estate
 VIX,1000,Vol,USD,0.0255,2.2,0,0,Vol US equity VIX
 WHEAT,50,Ags,USD,0.25,2.9,0,0,Wheat
+US-DISCRETE,100,Sector,USD,0.3,1.5,0,0,Consumer Discretionary Select Sector Index
+US-STAPLES,100,Sector,USD,0.15,1.5,0,0,Consumer Staples Select Sector Index
+US-ENERGY,100,Sector,USD,0.15,1.5,0,0,Energy Select Sector Index
+US-FINANCE,250,Sector,USD,0.1,1.5,0,0,Financial Select Sector Index
+US-HEALTH,100,Sector,USD,0.25,1.5,0,0,Health Care Select Sector Index
+US-INDUSTRY,100,Sector,USD,0.2,1.5,0,0,Industrial Select Sector Index
+US-MATERIAL,100,Sector,USD,0.2,1.5,0,0,Materials Select Sector Index
+US-PROPERTY,250,Sector,USD,0.075,1.5,0,0,Real Estate Select Sector Index
+US-TECH,100,Sector,USD,0.25,1.5,0,0,Technology Select Sector Index -
+US-UTILS,100,Sector,USD,0.15,1.5,0,0,Utilities Select Sector Index
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
