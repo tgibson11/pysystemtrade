@@ -40,3 +40,4 @@ US-UTILS,100,Sector,USD,0.15,1.5,0,0,Utilities Select Sector Index
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
 FEEDCOW,500,Ags,USD,0.05,1.5,0,0,Feeder cattle
 BBCOMM,100,Ags,USD,0.05,1.5,0,0,Bloomberg Commodity Index
+SOYMEAL,100,Ags,USD,0.05,1.5,0,0,Soybean Meal
