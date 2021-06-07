@@ -471,7 +471,7 @@ rule_variations:
 You should then create a new system which points to the new config file:
 
 ```python
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 
 my_config=Config("private.this_system_name.config.yaml")
 
@@ -480,6 +480,8 @@ system=futures_system(config=my_config)
 ```
 
 See [here](#filenames) for how to specify filenames in pysystemtrade.
+
+
 
 ### Change instruments: Change the configuration object
 
@@ -519,6 +521,27 @@ new_config.rule_variations=dict(SP500=['ewmac16_64','carry'], KR10=['ewmac32_128
 system=futures_system(config=new_config)
 
 ```
+
+## How do I....Run a backtest on all available instruments
+
+If there are is no `instrument_weights` or `instruments element` in the config, then the backtest will be run over all available instruments in the data. 
+
+## How do I.... Exclude some instruments from the backtest
+
+If you want to run the backtest without certain instruments (but without individually specifying which ones you want) then you can add a config element `ignore_instruments`. This will be a list containing instrument codes.
+
+As an example, to exclude the 'full sized' contracts in the data and only use the mini/micro versions:
+
+```
+ignore_instruments:
+  - CRUDE_W
+  - GAS_US
+  - GOLD
+  - KOSPI
+  - NASDAQ
+  - SP500
+```
+
 
 
 <a name="how_do_i_write_rules"> </a>
@@ -1047,7 +1070,7 @@ There are three main ways to create a configuration object:
 #### 1) Creating a configuration object with a dictionary
 
 ```python
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 
 my_config_dict=dict(optionone=1, optiontwo=dict(a=3.0, b="beta", c=["a", "b"]), optionthree=[1.0, 2.0])
 my_config=Config(my_config_dict)
@@ -1081,7 +1104,7 @@ nested. If you want to learn more about yaml check [this
 out](https://pyyaml.org/wiki/PyYAMLDocumentation#YAMLsyntax).
 
 ```python
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 my_config=Config("private.filename.yaml") ## assuming the file is in "pysystemtrade/private/filename.yaml"
 ```
 
@@ -1123,7 +1146,7 @@ dict or filename. For example we could do this with the simple filename example
 above:
 
 ```python
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 
 my_config_dict=dict(optionfour=1, optionfive=dict(one=1, two=2.0))
 my_config=Config(["filename.yaml", my_config_dict])
@@ -1200,7 +1223,7 @@ Note this means that the config before, and after, it goes into a system object
 will probably be different; the latter will be populated with defaults.
 
 ```python
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 my_config=Config()
 print(my_config) ## empty config
 ```
@@ -1986,7 +2009,7 @@ Then it's a case of creating the python function. Here is an extract from the
 ## We probably need these to get our data
 
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 
 ## We now import all the stages we need
 from systems.forecasting import Rules
@@ -2536,7 +2559,7 @@ a look at an incomplete version of the pre-baked chapter 15 futures system.
 ## We probably need these to get our data
 
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 from systems.basesystem import System
 
 ## We now import all the stages we need
@@ -4425,12 +4448,12 @@ new_config=system.config
 
 ## Method two: from a config file
 from syscore.fileutils import get_pathname_for_package
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 
 my_config=Config(get_pathname_for_package("private", "this_system_name", "config.yaml"))
 
 ## Method three: with a blank config
-from sysdata.configdata import Config
+from sysdata.config.configdata import Config
 my_config=Config()
 ```
 
