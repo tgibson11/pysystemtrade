@@ -37,8 +37,9 @@ US-MATERIAL,100,Sector,USD,0.2,1.5,0,0,Materials Select Sector Index
 US-PROPERTY,250,Sector,USD,0.075,1.5,0,0,Real Estate Select Sector Index
 US-TECH,100,Sector,USD,0.25,1.5,0,0,Technology Select Sector Index -
 US-UTILS,100,Sector,USD,0.15,1.5,0,0,Utilities Select Sector Index
-NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
 FEEDCOW,500,Ags,USD,0.05,1.5,0,0,Feeder cattle
 BBCOMM,100,Ags,USD,0.05,1.5,0,0,Bloomberg Commodity Index
 SOYMEAL,100,Ags,USD,0.05,1.5,0,0,Soybean Meal
 OATIES,50,Ags,USD,0.625,1.5,0,0,Oat Futures
+RICE,2000,Ags,USD,0.015,1.5,0,0,Rough Rice
+NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
