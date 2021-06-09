@@ -43,4 +43,5 @@ SOYMEAL,100,Ags,USD,0.05,1.5,0,0,Soybean Meal
 REDWHEAT,50,Ags,USD,0.25,1.5,0,0,Hard Red Winter Wheat -KCBOT-
 OATIES,50,Ags,USD,0.625,1.5,0,0,Oat Futures
 RICE,2000,Ags,USD,0.015,1.5,0,0,Rough Rice
+MILK,2000,Ags,USD,0.035,1.5,0,0,Milk class III
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
