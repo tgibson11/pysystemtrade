@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # print(instrument_data)
     # instrument_list = instrument_data.get_list_of_instruments()
 
-    for instrument in ['MILK']:
+    for instrument in ['SOYOIL']:
 
         contract_dates = create_list_of_contract_dates(instrument)
         print(contract_dates)
