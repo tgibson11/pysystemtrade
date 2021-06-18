@@ -40,5 +40,5 @@ def init_arctic_with_csv_futures_contract_prices_for_code(instrument_code:str, d
 if __name__ == "__main__":
     input("Will overwrite existing prices are you sure?! CTL-C to abort")
     # modify flags as required
-    datapath = "/home/todd/Dropbox/MILK"
+    datapath = "/home/todd/Dropbox/GASOILINE"
     init_arctic_with_csv_futures_contract_prices(datapath)
