@@ -135,7 +135,8 @@ class mongoDataWithSingleKey(object):
         else:
             try:
                 self._add_new_cleaned_dict(key, cleaned_data_dict)
-            except Exception:
+            except:
+                ## this could happen if the key has just been added most likely for logs
                 raise existingData("Can't overwite existing data %s/%s for %s" % (self.key_name, key, self.name))
 
     def _update_existing_data_with_cleaned_dict(self, key, cleaned_data_dict):
