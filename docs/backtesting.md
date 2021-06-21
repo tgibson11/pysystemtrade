@@ -329,7 +329,7 @@ You should then create a new system which points to the new config file:
 from sysdata.config.configdata import Config
 from systems.provided.futures_chapter15.basesystem import futures_system
 
-my_config=Config("private.this_system_name.config.yaml"))
+my_config=Config("private.this_system_name.config.yaml")
 system=futures_system(config=my_config)
 ```
 
@@ -521,6 +521,18 @@ new_config.rule_variations=dict(SP500=['ewmac16_64','carry'], KR10=['ewmac32_128
 system=futures_system(config=new_config)
 
 ```
+
+## How do I.... run the backtest only on more recent data
+
+You need to set the start_date in the .yaml backtest configuration file:
+
+```
+## Note you must use this format
+start_date: 2000-01-19
+```
+
+
+
 
 ## How do I....Run a backtest on all available instruments
 
@@ -884,6 +896,22 @@ system.data.get_instrument_currency(instrument_code) # and so on
 (Note that when specifying a data item within a trading [rule](#rules) you
 should omit the system eg `data.get_raw_price`)
 
+If you set the start_date configuration option, then only a subset of the data will be shown:
+
+
+```python
+## using with a system
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system(data=data)
+
+# We could also do this in the .yaml file. Note the formatting used must be the same
+system.config.start_date = '2000-01-19'
+
+## or as a datetime (won't work in yaml obviously)
+import datetime
+system.config.start_date = datetime.datetime(2000,1,19)
+```
+
 
 
 <a name="csvdata"> </a>
@@ -992,8 +1020,7 @@ from sysdata.sim.db_futures_sim_data import dbFuturesSimData
 data = dbFuturesSimData()
 
 # using with a system
-
-system = futures_system(, log_level="on")
+system = futures_system(log_level="on")
 print(system.accounts.portfolio().sharpe())
 ```
 
