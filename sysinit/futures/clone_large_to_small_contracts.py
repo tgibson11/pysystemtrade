@@ -1,14 +1,15 @@
 from sysinit.futures.clone_data_for_instrument import clone_data_for_instrument
 
 
-## format is 'from' = 'to'
+# format is 'from' = 'to'
 mapping_dict = dict(
-                    # SP500 = 'SP500_micro',
-                    # CRUDE_W = 'CRUDE_W_mini',
-                    # GAS_US = 'GAS_US_mini',
-                    # GOLD = 'GOLD_micro',
+                    SP500='SP500_micro',
+                    CRUDE_W='CRUDE_W_mini',
+                    GAS_US='GAS_US_mini',
+                    GOLD='GOLD_micro',
                     # KOSPI = 'KOSPI_mini',
-                    NASDAQ = 'NASDAQ_micro')
+                    # NASDAQ = 'NASDAQ_micro'
+)
 
 
 if __name__ == "__main__":

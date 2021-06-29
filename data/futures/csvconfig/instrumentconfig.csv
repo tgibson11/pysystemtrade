@@ -22,23 +22,8 @@ US10,1000,Bond,USD,0.008,1.51,0,0,US 10 year bond note
 US2,2000,Bond,USD,0.004,1.51,0,0,US 2 year bond note
 US20,1000,Bond,USD,0.016,1.51,0,0,US 20 year bond
 US5,1000,Bond,USD,0.004,1.51,0,0,US 5 year bond note
-USIRS5,1000,Bond,USD,0.01171875,1.5,0,0,US 5 year swap
-USIRS10,1000,Bond,USD,0.0234375,1.5,0,0,US 10 year swap
-US-REALESTATE,100,Sector,USD,0.1,1.5,0,0,US Real estate
 VIX,1000,Vol,USD,0.0255,2.2,0,0,Vol US equity VIX
 WHEAT,50,Ags,USD,0.25,2.9,0,0,Wheat
-US-DISCRETE,100,Sector,USD,0.3,1.5,0,0,Consumer Discretionary Select Sector Index
-US-STAPLES,100,Sector,USD,0.15,1.5,0,0,Consumer Staples Select Sector Index
-US-ENERGY,100,Sector,USD,0.15,1.5,0,0,Energy Select Sector Index
-US-FINANCE,250,Sector,USD,0.1,1.5,0,0,Financial Select Sector Index
-US-HEALTH,100,Sector,USD,0.25,1.5,0,0,Health Care Select Sector Index
-US-INDUSTRY,100,Sector,USD,0.2,1.5,0,0,Industrial Select Sector Index
-US-MATERIAL,100,Sector,USD,0.2,1.5,0,0,Materials Select Sector Index
-US-PROPERTY,250,Sector,USD,0.075,1.5,0,0,Real Estate Select Sector Index
-US-TECH,100,Sector,USD,0.25,1.5,0,0,Technology Select Sector Index -
-US-UTILS,100,Sector,USD,0.15,1.5,0,0,Utilities Select Sector Index
-FEEDCOW,500,Ags,USD,0.05,1.5,0,0,Feeder cattle
-BBCOMM,100,Ags,USD,0.05,1.5,0,0,Bloomberg Commodity Index
 SOYMEAL,100,Ags,USD,0.05,1.5,0,0,Soybean Meal
 REDWHEAT,50,Ags,USD,0.25,1.5,0,0,Hard Red Winter Wheat -KCBOT-
 OATIES,50,Ags,USD,0.625,1.5,0,0,Oat Futures
@@ -47,4 +32,8 @@ MILK,2000,Ags,USD,0.035,1.5,0,0,Milk class III
 SOYOIL,600,Ags,USD,0.015,1.5,0,0,Soybean oil
 GASOILINE,42000,OilGas,USD,0.00035,1.5,0,0,RBOB Gasoline US
 HEATOIL,42000,OilGas,USD,0.00015,1.5,0,0,Heating oil
+CRUDE_W_mini,500,OilGas,USD,0.0125,1.5,0,0,Light sweet crude Winter mini
+GAS_US_mini,2500,OilGas,USD,0.0025,1.5,0,0,Natural gas US mini
+GOLD_micro,10,Metals,USD,0.1,0.25,0,0,Gold micro
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
+SP500_micro,5,Equity,USD,0.125,0.25,0,0,S&P 500 micro
