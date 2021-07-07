@@ -1,4 +1,4 @@
-
+from syscore.objects import missing_data
 from sysexecution.stack_handler.stackHandlerCore import stackHandlerCore
 from sysobjects.contracts import futuresContract
 
@@ -53,7 +53,8 @@ class stackHandlerAdditionalSampling(stackHandlerCore):
 
     def refresh_sampling_without_checks(self, contract: futuresContract):
         average_spread = self.get_average_spread(contract)
-        self.add_spread_data_to_db(contract, average_spread)
+        if average_spread is not missing_data:
+            self.add_spread_data_to_db(contract, average_spread)
 
     def get_average_spread(self, contract:futuresContract) -> float:
         data_broker = self.data_broker

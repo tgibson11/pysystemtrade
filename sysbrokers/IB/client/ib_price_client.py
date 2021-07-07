@@ -3,7 +3,7 @@ from dateutil.tz import tz
 import  datetime
 import pandas as pd
 
-from ib_insync import Contract as ibContract
+from ib_insync import Contract as ibContract, Ticker
 from ib_insync import util
 
 from sysbrokers.IB.client.ib_client import  PACING_INTERVAL_SECONDS
@@ -111,7 +111,7 @@ class ibPriceClient(ibContractsClient):
         self,
         contract_object_with_ib_data: futuresContract,
         tick_count=200,
-    ) -> list:
+    ) -> Ticker:
         """
 
         :param contract_object_with_ib_data:
@@ -139,9 +139,15 @@ class ibPriceClient(ibContractsClient):
 
         recent_ib_time = self.ib.reqCurrentTime() - datetime.timedelta(seconds=60)
 
-        tick_data = self.ib.reqHistoricalTicks(
-            ibcontract, recent_ib_time, "", tick_count, "BID_ASK", useRth=False
-        )
+        # tick_data = self.ib.reqHistoricalTicks(
+        #     ibcontract, recent_ib_time, "", tick_count, "BID_ASK", useRth=False
+        # )
+
+        # Request delayed streaming data instead of historical, which requires subscriptions
+        self.ib.reqMarketDataType(3)  # 1=live, 3=delayed
+        tick_data = self.ib.reqMktData(ibcontract)
+        self.ib.sleep(2)
+        self.ib.cancelMktData(ibcontract)
 
         return tick_data
 

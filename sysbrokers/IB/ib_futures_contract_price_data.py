@@ -49,16 +49,20 @@ class ibTickerObject(tickerObject):
 def from_ib_bid_ask_tick_data_to_dataframe(tick_data) ->dataFrameOfRecentTicks:
     """
 
-    :param tick_data: list of HistoricalTickBidAsk()
+    :param tick_data: Ticker
     :return: pd.DataFrame,['priceBid', 'priceAsk', 'sizeAsk', 'sizeBid']
     """
-    time_index = [tick_item.time for tick_item in tick_data]
-    fields = ["priceBid", "priceAsk", "sizeAsk", "sizeBid"]
+    time_index = [tick_data.time]
+    fields = {
+        "priceBid": "bid",
+        "priceAsk": "ask",
+        "sizeAsk": "askSize",
+        "sizeBid": "bidSize"
+    }
 
     value_dict = {}
-    for field_name in fields:
-        field_values = [getattr(tick_item, field_name)
-                        for tick_item in tick_data]
+    for field_name in fields.keys():
+        field_values = [getattr(tick_data, fields.get(field_name))]
         value_dict[field_name] = field_values
 
     output = dataFrameOfRecentTicks(value_dict, time_index)
@@ -295,7 +299,7 @@ class ibFuturesContractPriceData(brokerFuturesContractPriceData):
         tick_data = self.ib_client.ib_get_recent_bid_ask_tick_data(
             contract_object_with_ib_data)
 
-        if tick_data is missing_contract or not tick_data:
+        if tick_data is missing_contract:
             return missing_data
 
         tick_data_as_df = from_ib_bid_ask_tick_data_to_dataframe(tick_data)
