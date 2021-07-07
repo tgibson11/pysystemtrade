@@ -169,5 +169,5 @@ if __name__ == "__main__":
     # process_multiple_prices_all_instruments(csv_multiple_data_path= csv_multiple_data_path,
     #                                         csv_roll_data_path = csv_roll_data_path)
 
-    for instrument in ['CAD']:
+    for instrument in ['GOLD_micro']:
         process_multiple_prices_single_instrument(instrument_code=instrument, ADD_TO_CSV=False)
