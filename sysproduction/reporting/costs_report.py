@@ -101,6 +101,11 @@ def get_average_sampled_half_spread_for_instrument(data, instrument_code, start_
 def get_costs_from_slippage(data, start_date, end_date):
     list_of_orders = get_recent_broker_orders(data, start_date, end_date)
 
+    if len(list_of_orders) == 0:
+        bid_ask_costs = pd.DataFrame({'bid_ask': pd.Series([], dtype='float')})
+        actual_trade_costs = pd.DataFrame({'total_trading': pd.Series([], dtype='float')})
+        return bid_ask_costs, actual_trade_costs
+
     raw_slippage = create_raw_slippage_df(list_of_orders)
 
     bid_ask_costs = get_average_half_spread_by_instrument_from_raw_slippage(raw_slippage, "bid_ask")
