@@ -44,7 +44,7 @@ def format_liquidity_data(liquidity_report_data: dict) -> list:
     formatted_output.append(table1)
 
     table2_df = all_liquidity_df.sort_values("risk")
-    table2 = table("Sorted by risk: Less than 3X capital of risk per day is a problem", table2_df)
+    table2 = table("Sorted by risk: Less than ~3X capital of risk per day is a problem", table2_df)
     formatted_output.append(table2)
 
 
