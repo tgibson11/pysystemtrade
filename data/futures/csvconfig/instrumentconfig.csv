@@ -11,18 +11,18 @@ GOLD,100,Metals,USD,0.0885298446,2.31,0,0,Gold
 JPY,12500000,FX,USD,4.80871993208629E-07,2.46,0,0,JPYUSD currency
 LEANHOG,400,Ags,USD,0.025,2.9,0,0,Lean hogs
 LIVECOW,400,Ags,USD,0.025,2.9,0,0,Live cattle
-MXP,500000,FX,USD,1.1567E-05,2.46,0,0,MEXUSD currency
-NASDAQ,20,Equity,USD,0.125,2.05,0,0,US equity index Nasdaq 
+MXP,500000,FX,USD,6E-06,2.46,0,0,MEXUSD currency
+NASDAQ,20,Equity,USD,0.25,2.05,0,0,US equity index Nasdaq
 NZD,100000,FX,USD,0.000107147,2.46,0,0,NZDUSD currency
-PALLAD,100,Metals,USD,0.3738801253,2.31,0,0,Palladium
-PLAT,50,Metals,USD,0.2401075437,2.31,0,0,Platinum
-SOYBEAN,50,Ags,USD,0.125,2.9,0,0,Soybean
-SP500,50,Equity,USD,0.125,2.05,0,0,US equity index S&P500 
+PALLAD,100,Metals,USD,2,2.31,0,0,Palladium
+PLAT,50,Metals,USD,0.5,2.31,0,0,Platinum
+SOYBEAN,50,Ags,USD,0.25,2.9,0,0,Soybean
+SP500,50,Equity,USD,0.125,2.05,0,0,US equity index S&P500
 US10,1000,Bond,USD,0.008,1.51,0,0,US 10 year bond note
 US2,2000,Bond,USD,0.004,1.51,0,0,US 2 year bond note
 US20,1000,Bond,USD,0.016,1.51,0,0,US 20 year bond
 US5,1000,Bond,USD,0.004,1.51,0,0,US 5 year bond note
-VIX,1000,Vol,USD,0.0255,2.2,0,0,Vol US equity VIX
+VIX,1000,Vol,USD,0.05,2.2,0,0,Vol US equity VIX
 WHEAT,50,Ags,USD,0.25,2.9,0,0,Wheat
 SOYMEAL,100,Ags,USD,0.05,1.5,0,0,Soybean Meal
 REDWHEAT,50,Ags,USD,0.25,1.5,0,0,Hard Red Winter Wheat -KCBOT-
@@ -33,7 +33,7 @@ SOYOIL,600,Ags,USD,0.015,1.5,0,0,Soybean oil
 GASOILINE,42000,OilGas,USD,0.00035,1.5,0,0,RBOB Gasoline US
 HEATOIL,42000,OilGas,USD,0.00015,1.5,0,0,Heating oil
 SILVER,1000,Metals,USD,0.0025,1.5,0,0,NYMEX Silver Index
-CAD,100000,FX,USD,2.5E-05,1.5,0,0,CADUSD currency
+CAD,100000,FX,USD,0.00015,1.5,0,0,CADUSD currency
 GOLD_micro,10,Metals,USD,0.1,0.25,0,0,Gold micro
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
 SP500_micro,5,Equity,USD,0.125,0.25,0,0,S&P 500 micro

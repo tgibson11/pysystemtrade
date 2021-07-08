@@ -1,6 +1,7 @@
 from syscore.objects import missing_data
 from sysexecution.stack_handler.stackHandlerCore import stackHandlerCore
 from sysobjects.contracts import futuresContract
+from syscore.objects import missing_data
 
 class stackHandlerAdditionalSampling(stackHandlerCore):
 
@@ -46,7 +47,7 @@ class stackHandlerAdditionalSampling(stackHandlerCore):
     def is_contract_currently_okay_to_sample(self, contract:futuresContract) -> bool:
         data_broker = self.data_broker
         okay_to_sample =\
-            data_broker.is_contract_conservatively_okay_to_trade(contract)
+            data_broker.is_contract_okay_to_trade(contract)
 
         return okay_to_sample
 
@@ -72,25 +73,3 @@ class stackHandlerAdditionalSampling(stackHandlerCore):
         update_prices = self.update_prices
 
         update_prices.add_spread_entry(instrument_code, spread=average_spread)
-
-    def mark_contract_sampled(self, contract:futuresContract):
-        key = contract.key
-        store = self.sampling_store
-
-        if key not in store:
-            store.append(key)
-
-        self.sampling_store = store
-
-    @property
-    def sampling_store(self)-> list:
-        sampling_store = getattr(self, "_sampling_store", None)
-        if sampling_store is None:
-            sampling_store = []
-            self._sampling_store = sampling_store
-
-        return sampling_store
-
-    @sampling_store.setter
-    def sampling_store(self, new_store):
-        self._sampling_store = new_store

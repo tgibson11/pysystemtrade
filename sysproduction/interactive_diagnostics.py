@@ -1,4 +1,5 @@
-from syscore.dateutils import get_datetime_input
+import datetime
+from syscore.dateutils import get_datetime_input, SECONDS_PER_HOUR
 from syscore.interactive import get_and_convert, run_interactive_menu, print_menu_of_values_and_get_response, \
     print_menu_and_get_response
 from syscore.pdutils import set_pd_print_options
@@ -38,7 +39,9 @@ from sysproduction.reporting.report_configs import (
     trade_report_config,
     reconcile_report_config,
     strategy_report_config,
-    risk_report_config
+    risk_report_config,
+liquidity_report_config,
+costs_report_config
 )
 
 
@@ -87,7 +90,9 @@ nested_menu_of_options = {0: {1: "Interactive python",
                               13: "Trade report",
                               14: "Reconcile report",
                               15: "Strategy report",
-                              16: "Risk report"
+                              16: "Risk report",
+                              17: "Costs report",
+                              18: "Liquidity report"
                               },
                           2: {20: "View stored emails",
                               21: "View errors",
@@ -110,8 +115,7 @@ nested_menu_of_options = {0: {1: "Interactive python",
                               },
                           6: {60: "View instrument configuration data",
                               61: "View contract configuration data",
-                              62: "View trading hours for all instruments",
-                              63: "View conservative trading hours for all instruments"
+                              62: "View trading hours for all instruments"
                               },
                           }
 
@@ -204,6 +208,19 @@ def risk_report(data):
     report_config = email_or_print(risk_report_config)
     run_report(report_config, data=data)
 
+def cost_report(data):
+    start_date, end_date, calendar_days = get_report_dates(data)
+    report_config = email_or_print(costs_report_config)
+    report_config.modify_kwargs(
+        calendar_days_back=calendar_days,
+        start_date=start_date,
+        end_date=end_date)
+    run_report(report_config, data=data)
+
+
+def liquidity_report(data):
+    report_config = email_or_print(liquidity_report_config)
+    run_report(liquidity_report_config, data = data)
 
 def email_or_print(report_config):
     ans = get_and_convert(
@@ -548,34 +565,45 @@ def view_contract_config(data):
 
 
 def print_trading_hours_for_all_instruments(data=arg_not_supplied):
-    _generic_print_trading_hours_for_all_instruments(data, use_conservative=False)
+    all_trading_hours = get_trading_hours_for_all_instruments(data)
+    display_a_dict_of_trading_hours(all_trading_hours)
 
-def print_conserative_trading_hours_for_all_instruments(data=arg_not_supplied):
-    _generic_print_trading_hours_for_all_instruments(data, use_conservative=True)
-
-
-def _generic_print_trading_hours_for_all_instruments(data=arg_not_supplied,
-                                            use_conservative = False):
-    all_trading_hours = get_trading_hours_for_all_instruments(data, use_conservative=use_conservative)
-    for key, value in sorted(all_trading_hours.items(), key=lambda x: x[0]):
-        print("{} : {}".format(key, value))
+def display_a_dict_of_trading_hours(all_trading_hours):
+    for key, trading_hour_entry in sorted(all_trading_hours.items(), key=lambda x: x[0]):
+        print("%s: %s" % ('{:20}'.format(key),
+                              nice_print_trading_hours(trading_hour_entry)))
 
 
+def nice_print_trading_hours(trading_hour_entry) -> str:
+    start_datetime = trading_hour_entry[0]
+    end_datetime = trading_hour_entry[1]
+    diff_time = end_datetime - start_datetime
+    hours_in_between = (diff_time.total_seconds()) / SECONDS_PER_HOUR
 
-def get_trading_hours_for_all_instruments(data=arg_not_supplied,
-                                          use_conservative = False):
+    NICE_FORMAT = "%d/%m %H:%M"
+
+    start_formatted = start_datetime.strftime(NICE_FORMAT)
+    end_formatted = end_datetime.strftime(NICE_FORMAT)
+
+    nice_string = "%s to %s (%.1f hours)" % (start_formatted,
+                                     end_formatted,
+                                     hours_in_between)
+
+    return nice_string
+
+
+def get_trading_hours_for_all_instruments(data=arg_not_supplied):
     if data is arg_not_supplied:
         data = dataBlob()
 
-    diag_prices = diagPrices()
+    diag_prices = diagPrices(data)
     list_of_instruments = diag_prices.get_list_of_instruments_with_contract_prices()
 
     all_trading_hours = {}
     for instrument_code in list_of_instruments:
-        trading_hours = get_trading_hours_for_instrument(data, instrument_code,
-                                                         use_conservative=use_conservative)
+        trading_hours = get_trading_hours_for_instrument(data, instrument_code)
 
-        ## will have several days use last one
+        ## will have several days use first one
         trading_hours_this_instrument = trading_hours[0]
         check_trading_hours(trading_hours_this_instrument,
                             instrument_code)
@@ -585,12 +613,11 @@ def get_trading_hours_for_all_instruments(data=arg_not_supplied,
 
 def check_trading_hours(trading_hours_this_instrument, instrument_code):
     if trading_hours_this_instrument[0]>trading_hours_this_instrument[1]:
-        print("%s Trading hours %s appear to be wrong" % (instrument_code,
-                                                          str(trading_hours_this_instrument)))
+        print("%s Trading hours appear to be wrong: %s" % (instrument_code,
+                                                          nice_print_trading_hours(trading_hours_this_instrument)))
 
 
-def get_trading_hours_for_instrument(data, instrument_code,
-                                          use_conservative=False):
+def get_trading_hours_for_instrument(data, instrument_code):
 
     diag_contracts = dataContracts(data)
     contract_id = diag_contracts.get_priced_contract_id(instrument_code)
@@ -598,10 +625,7 @@ def get_trading_hours_for_instrument(data, instrument_code,
     contract = futuresContract(instrument_code, contract_id)
 
     data_broker = dataBroker(data)
-    if use_conservative:
-        trading_hours = data_broker.get_conservative_trading_hours_for_contract(contract)
-    else:
-        trading_hours = data_broker.get_trading_hours_for_contract(contract)
+    trading_hours = data_broker.get_trading_hours_for_contract(contract)
 
     return trading_hours
 
@@ -618,6 +642,8 @@ dict_of_functions = {
     14: reconcile_report,
     15: strategy_report,
     16: risk_report,
+    17: cost_report,
+    18: liquidity_report,
     20: retrieve_emails,
     21: view_errors,
     22: view_logs,
@@ -636,8 +662,7 @@ dict_of_functions = {
     56: view_individual_order,
     60: view_instrument_config,
     61: view_contract_config,
-    62: print_trading_hours_for_all_instruments,
-    63: print_conserative_trading_hours_for_all_instruments,
+    62: print_trading_hours_for_all_instruments
 }
 
 if __name__ == '__main__':
