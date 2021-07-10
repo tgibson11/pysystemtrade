@@ -1,5 +1,7 @@
 
 from copy import  copy
+
+from my_system.my_system import my_system
 from sysquant.estimators.correlations import correlationEstimate
 from sysquant.optimisation.optimisers.handcraft import *
 from sysquant.estimators.estimates import Estimates, meanEstimates, stdevEstimates
@@ -12,7 +14,7 @@ notional_starting_IDM = 1.0
 minimum_instrument_weight_idm = max_instrument_weight * notional_starting_IDM
 
 def find_best_ordered_set_of_instruments(system,
-                                         capital = 500000
+                                         capital=1500000
                         ) -> list:
 
     ## 'system' can be precalculated up to the combined forecast stage to save time
@@ -215,3 +217,8 @@ def size_penalty(maximum_position):
         return 9999
 
     return 0.125 / maximum_position**2
+
+
+if __name__ == '__main__':
+    system = my_system()
+    find_best_ordered_set_of_instruments(system, capital=1500000)
