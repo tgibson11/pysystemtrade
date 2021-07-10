@@ -34,6 +34,5 @@ GASOILINE,42000,OilGas,USD,0.00035,1.5,0,0,RBOB Gasoline US
 HEATOIL,42000,OilGas,USD,0.00015,1.5,0,0,Heating oil
 SILVER,1000,Metals,USD,0.0025,1.5,0,0,NYMEX Silver Index
 CAD,100000,FX,USD,0.00015,1.5,0,0,CADUSD currency
-GOLD_micro,10,Metals,USD,0.1,0.25,0,0,Gold micro
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
 SP500_micro,5,Equity,USD,0.125,0.25,0,0,S&P 500 micro
