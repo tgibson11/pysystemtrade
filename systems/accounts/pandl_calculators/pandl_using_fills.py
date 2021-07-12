@@ -109,12 +109,9 @@ def merge_fill_prices_with_prices(prices: pd.Series,
 
 
 def unique_trades_df(trade_df: pd.DataFrame) -> pd.DataFrame:
-    trade_df["price"] = trade_df["price"].map(
-        lambda price: price if not isinstance(price, list) else price[0]
-    )
     cash_flow = trade_df.qty * trade_df.price
     trade_df["cash_flow"] = cash_flow
-    new_df = trade_df.groupby(trade_df.index).sum()
+    new_df = trade_df.groupby(trade_df.index).agg({"qty": "sum", "cash_flow": "sum"})
     # qty and cash_flow will be correct, price won't be
     new_price = new_df.cash_flow / new_df.qty
     new_df["price"] = new_price
