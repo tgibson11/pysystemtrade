@@ -11,6 +11,7 @@ from sysdata.data_blob import dataBlob
 
 from sysproduction.data.prices import diagPrices
 from sysproduction.data.contracts import dataContracts
+from sysproduction.data.positions import annonate_df_index_with_positions_held
 from sysproduction.reporting.risk_report import get_risk_data_for_instrument
 
 import pandas as pd
@@ -27,6 +28,7 @@ def liquidity_report(data: dataBlob=arg_not_supplied):
 
 def get_liquidity_report_data(data: dataBlob):
     all_liquidity_df = get_liquidity_data_df(data)
+    all_liquidity_df = annonate_df_index_with_positions_held(data, all_liquidity_df)
     liquidity_report_data = dict(all_liquidity_df = all_liquidity_df)
 
     return liquidity_report_data
@@ -39,9 +41,12 @@ def format_liquidity_data(liquidity_report_data: dict) -> list:
         header("Liquidity report produced on %s" %
                (str(datetime.datetime.now()))))
 
+    formatted_output.append(body_text("* indicates currently held position"))
+
     table1_df = all_liquidity_df.sort_values("contracts")
     table1 = table(" Sorted by contracts: Less than 100 contracts a day is a problem", table1_df)
     formatted_output.append(table1)
+
 
     table2_df = all_liquidity_df.sort_values("risk")
     table2 = table("Sorted by risk: Less than ~3X capital of risk per day is a problem", table2_df)
