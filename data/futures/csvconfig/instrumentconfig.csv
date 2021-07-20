@@ -35,5 +35,6 @@ HEATOIL,42000,OilGas,USD,0.00015,1.5,0,0,Heating oil
 SILVER,1000,Metals,USD,0.0025,1.5,0,0,NYMEX Silver Index
 CAD,100000,FX,USD,0.0001,1.5,0,0,CADUSD currency
 CHF,125000,FX,USD,5E-05,1.5,0,0,CHFUSD currency
+SP400,100,Equity,USD,0.3,1.5,0,0,E-mini S&P Midcap 400 Futures
 NASDAQ_micro,2,Equity,USD,0.25,0.25,0,0,NASDAQ micro
 SP500_micro,5,Equity,USD,0.125,0.25,0,0,S&P 500 micro
