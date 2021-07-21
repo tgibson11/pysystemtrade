@@ -245,6 +245,24 @@ def get_file_or_folder_age_in_days(full_filename_with_ext):
     return age_days
 
 
+def delete_oldest_files_with_extension_in_pathname(
+    pathname, files_to_keep=30, extension=".arch"
+):
+    """
+    Find all the files with a particular extension in a directory, and delete all but the N most recent
+
+    :param pathname: absolute eg "home/user/data" or relative inside pysystemtrade eg "data.futures"
+    :param files_to_keep: number of files to keep
+    :param extension: str
+    :return: list of files, with extensions stripped off
+    """
+
+    pathname = get_resolved_pathname(pathname)
+    list_of_files = glob.glob(pathname + "/**/*" + extension, recursive=True)
+
+    list_of_files.sort(key=os.path.getmtime, reverse=True)
+    return list_of_files[:files_to_keep]
+
 
 def html_table(file, lol: list):
   file.write('<table>')
