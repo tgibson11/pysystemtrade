@@ -71,12 +71,12 @@ def get_combined_df_of_costs(data: dataBlob,
 
 
     combined = pd.concat([bid_ask_costs,
-                          actual_trade_costs,
+                          # actual_trade_costs,
                           sampling_costs
                           ],
                                  axis=1)
 
-    combined.columns = ["bid_ask_trades", "total_trades", "bid_ask_sampled"]
+    combined.columns = ["bid_ask_trades", "bid_ask_sampled"]
 
     worst = combined.max(axis=1)
     perc_difference = (worst - configured_costs) / configured_costs
