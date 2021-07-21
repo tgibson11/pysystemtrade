@@ -254,14 +254,17 @@ def delete_oldest_files_with_extension_in_pathname(
     :param pathname: absolute eg "home/user/data" or relative inside pysystemtrade eg "data.futures"
     :param files_to_keep: number of files to keep
     :param extension: str
-    :return: list of files, with extensions stripped off
     """
 
     pathname = get_resolved_pathname(pathname)
-    list_of_files = glob.glob(pathname + "/**/*" + extension, recursive=True)
+    all_files = glob.glob(pathname + "/**/*" + extension, recursive=True)
 
-    list_of_files.sort(key=os.path.getmtime, reverse=True)
-    return list_of_files[:files_to_keep]
+    all_files.sort(key=os.path.getmtime, reverse=True)
+    files_to_delete = all_files[files_to_keep:]
+
+    for file in files_to_delete:
+        print("Deleting %s" % file)
+        os.remove(file)
 
 
 def html_table(file, lol: list):
