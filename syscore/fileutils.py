@@ -260,7 +260,10 @@ def delete_oldest_files_with_extension_in_pathname(
     all_files = glob.glob(pathname + "/**/*" + extension, recursive=True)
 
     all_files.sort(key=os.path.getmtime, reverse=True)
-    files_to_delete = all_files[files_to_keep:]
+    if len(all_files) > files_to_keep:
+        files_to_delete = all_files[files_to_keep:]
+    else:
+        files_to_delete = []
 
     for file in files_to_delete:
         print("Deleting %s" % file)
