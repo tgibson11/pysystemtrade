@@ -1,4 +1,5 @@
 from syscore.objects import arg_not_supplied
+from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 
 from sysdata.sim.db_futures_sim_data import dbFuturesSimData
 from sysdata.data_blob import dataBlob
@@ -14,7 +15,7 @@ def get_sim_data_object_for_production(data=arg_not_supplied):
         data = dataBlob()
 
     data.add_class_list([arcticFuturesAdjustedPricesData, arcticFuturesMultiplePricesData,
-                         arcticFxPricesData, mongoFuturesInstrumentData])
+                         arcticFxPricesData, mongoFuturesInstrumentData, mongoRollParametersData])
 
 
     return dbFuturesSimData(data)
