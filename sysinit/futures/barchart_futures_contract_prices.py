@@ -1,7 +1,7 @@
 
 from sysdata.csv.csv_futures_contract_prices import ConfigCsvFuturesPrices
 import os
-from syscore.fileutils import files_with_extension_in_pathname, get_resolved_pathname
+from syscore.fileutils import files_with_extension_in_resolved_pathname, get_resolved_pathname
 from syscore.dateutils import month_from_contract_letter
 
 from sysinit.futures.contract_prices_from_csv_to_arctic import init_arctic_with_csv_futures_contract_prices
@@ -9,7 +9,7 @@ from sysinit.futures.contract_prices_from_csv_to_arctic import init_arctic_with_
 def strip_file_names(pathname):
     # These won't have .csv attached
     resolved_pathname = get_resolved_pathname(pathname)
-    file_names = files_with_extension_in_pathname(resolved_pathname)
+    file_names = files_with_extension_in_resolved_pathname(resolved_pathname)
     for filename in file_names:
         identifier = filename.split("_")[0]
         yearcode = int(identifier[len(identifier)-2:])
@@ -26,7 +26,7 @@ def strip_file_names(pathname):
 
         new_file_name = "%s_%s00.csv" % (instrument, datecode)
         new_full_name = os.path.join(resolved_pathname, new_file_name)
-        old_full_name = os.path.join(resolved_pathname, filename)
+        old_full_name = os.path.join(resolved_pathname, filename+".csv")
         print("Rename %s to\n %s" % (old_full_name, new_full_name))
 
         os.rename(old_full_name, new_full_name)
