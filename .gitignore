@@ -9,7 +9,6 @@ dist
 build
 private
 restats
-venv
 
 # Coverage reports
 .coverage
@@ -25,6 +24,7 @@ venv
 
 # venv
 env/
+venv/
 
 # libreoffice
 .~lock.*
