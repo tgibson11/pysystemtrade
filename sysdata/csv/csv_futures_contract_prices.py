@@ -18,6 +18,7 @@ class ConfigCsvFuturesPrices:
     input_column_mapping: dict = None
     input_skiprows: int = 0
     input_skipfooter: int = 0
+    apply_multiplier: float = 1.0
 
 
 class csvFuturesContractPriceData(futuresContractPriceData):
@@ -121,6 +122,7 @@ class csvFuturesContractPriceData(futuresContractPriceData):
         input_column_mapping = config.input_column_mapping
         skiprows = config.input_skiprows
         skipfooter = config.input_skipfooter
+        multiplier = config.apply_multiplier
 
         try:
             instrpricedata = pd_readcsv(
@@ -137,6 +139,7 @@ class csvFuturesContractPriceData(futuresContractPriceData):
             return futuresContractPrices.create_empty()
 
         instrpricedata = instrpricedata.groupby(level=0).last()
+        instrpricedata = instrpricedata * multiplier
 
         instrpricedata = futuresContractPrices(instrpricedata)
 
