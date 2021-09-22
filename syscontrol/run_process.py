@@ -157,8 +157,6 @@ def _start_or_wait(process_to_run: processToRun) -> status:
         if not okay_to_wait:
             return failure
 
-        time.sleep(60)
-
 
 def _is_okay_to_start(process_to_run: processToRun) -> bool:
     """
