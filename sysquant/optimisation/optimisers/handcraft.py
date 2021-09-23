@@ -94,8 +94,8 @@ class handcraftPortfolio(object):
     def asset_names(self) -> list:
         return self.estimates.asset_names
 
-    def risk_weights(self, equalise_SR: bool = False, single_portfolio: bool = False) -> portfolioWeights:
-        if self.size<=FIXED_CLUSTER_SIZE or single_portfolio:
+    def risk_weights(self, equalise_SR: bool = False) -> portfolioWeights:
+        if self.size<=FIXED_CLUSTER_SIZE:
             # don't cluster one or two assets
             raw_weights = self.risk_weights_this_portfolio()
         else:
@@ -199,9 +199,7 @@ def cluster_correlation_matrix_into_two_clusters(corr_matrix: np.array) -> list:
 def cutoff_distance_to_guarantee_two_clusters(corr_matrix: np.array,
                                               L: np.array):
     N = len(corr_matrix)
-    min_dist = L[0][2]
-    max_dist = L[N-2][2]
-    return max(max_dist-0.000001, min_dist)
+    return L[N-2][2]-0.000001
 
 def arbitrary_split_of_correlation_matrix(corr_matrix: np.array) -> list:
     # split correlation of 3 or more assets
@@ -250,11 +248,10 @@ def aggregate_risk_weights_over_sub_portfolios(sub_portfolios: list) \
     # *We don't adjust for SR here*, but after we've aggregated
     # This is quicker and simpler
 
-    # assert len(sub_portfolios) == 2
-    subportfolio_weights = [1 / len(sub_portfolios)] * len(sub_portfolios)
-    single_portfolio = (len(sub_portfolios) == 1)
+    assert len(sub_portfolios)==2
+    subportfolio_weights = [.5,.5]
 
-    risk_weights_by_portfolio = [sub_portfolio.risk_weights(equalise_SR=True, single_portfolio=single_portfolio)
+    risk_weights_by_portfolio = [sub_portfolio.risk_weights(equalise_SR=True)
                                  for sub_portfolio in sub_portfolios]
 
     div_mult_by_portfolio = [sub_portfolio.div_mult(sub_weights)

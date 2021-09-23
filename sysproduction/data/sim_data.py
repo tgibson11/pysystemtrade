@@ -1,5 +1,4 @@
 from syscore.objects import arg_not_supplied
-from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 
 from sysdata.sim.db_futures_sim_data import dbFuturesSimData
 from sysdata.data_blob import dataBlob
