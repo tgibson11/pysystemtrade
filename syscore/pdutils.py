@@ -237,7 +237,7 @@ def pd_readcsv(
     :type filename: str
 
     :param date_index_name: Column name of date index
-    :type date_index_name: str
+    :type date_index_name: list of str
 
     :param date_format: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     :type date_format: str
@@ -498,6 +498,7 @@ def sumup_business_days_over_pd_series_without_double_counting_of_closing_data(p
     intraday_data_summed = intraday_data.resample("1B").sum()
     intraday_data_summed.name = "intraday"
     both_sets_of_data = pd.concat([intraday_data_summed, closing_data_summed], axis=1)
+    # The line below causes zero volume to show as NaN in roll report; zero seems more correct to me
     # both_sets_of_data[both_sets_of_data==0] = np.nan
     joint_data = both_sets_of_data.ffill(axis=1)
     joint_data = joint_data.iloc[:,1]

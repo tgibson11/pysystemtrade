@@ -1,6 +1,5 @@
 from syscore.genutils import np_convert
 import datetime
-import pandas as pd
 from copy import copy
 
 from syscore.dateutils import (
@@ -39,10 +38,7 @@ class rollCycle(object):
     def cyclestring(self):
         return self._cyclestring
 
-    def iterate_contract_date(self,
-                              direction: int,
-                              contract_date: contractDate,
-                              approx_expiry_offset: int = 0) -> contractDate:
+    def iterate_contract_date(self, direction: int, contract_date: contractDate) -> contractDate:
         year_value, month_str = contract_date.date_str_to_year_month()
         if direction==forward:
             new_year_value, new_month_str = self._next_year_month_given_tuple(year_value, month_str)
@@ -51,9 +47,7 @@ class rollCycle(object):
         else:
             raise Exception("Direction %d has to be %s or %s" % (direction, forward, backwards))
 
-        return contract_given_tuple(contract_date,
-                                    new_year_value,
-                                    new_month_str)
+        return contract_given_tuple(contract_date, new_year_value, new_month_str)
 
     def _previous_year_month_given_tuple(self, year_value: int, month_str: str)-> (int, str):
         """
@@ -274,85 +268,6 @@ class rollParameters(object):
         hold_cycle = self.hold_rollcycle
         return len(hold_cycle)
 
-    def approx_first_held_contractDate_at_date(self, reference_date):
-        """
-                ## WHERE USED
-        ## TAKE OUT CONTRACT DATE REPLACE
-
-        What contract would be holding on first_date?
-
-        Returns a contractDate object with a date after first_date, taking into account RollOffsetDays
-          as well as the held roll cycle.
-
-        :param reference_date:
-        :return: contractDate object
-        """
-        current_date_as_contract_with_roll_data = (
-            self._approx_first_contractDate_at_date(
-                reference_date, "hold_rollcycle"))
-
-        return current_date_as_contract_with_roll_data
-
-    def approx_first_priced_contractDate_at_date(self, reference_date):
-        """
-        What contract would be pricing on first_date?
-
-        Returns a contractDate object with a date after first_date, taking into account RollOffsetDays
-          as well as the priced roll cycle.
-
-        :param reference_date:
-        :return: contractDate object
-        """
-
-        current_date_as_contract_with_roll_data = (
-            self._approx_first_contractDate_at_date(
-                reference_date, "priced_rollcycle"))
-
-        return current_date_as_contract_with_roll_data
-
-    def _approx_first_contractDate_at_date(
-            self, reference_date, rollcycle_name):
-        ## WHERE USED
-        ## TAKE OUT CONTRACT DATE REPLACE
-        """
-        What contract would be pricing or holding on reference_date?
-
-        Returns a contractDate object with a date after reference_date, taking into account RollOffsetDays
-          as well as the priced roll cycle.
-
-        :param reference_date: datetime
-        :return: contractDate object
-        """
-
-        # first held contract after current date
-        roll_cycle = getattr(self, rollcycle_name)
-
-        # For example suppose the reference date is 20190101, and the expiry offset is 15
-        #    plus the roll offset is -90 (we want to roll ~ 3 months in advance of the expiry)
-        #    The contract expires on the 16th of each month
-        #    We want to roll 90 days ahead of that
-        # With thanks to https://github.com/tgibson11 for helping me get this
-        # right
-
-        adjusted_date = reference_date - pd.DateOffset(
-            days=(self.roll_offset_day + self.approx_expiry_offset)
-        )
-
-        (
-            relevant_year_int,
-            relevant_month_int,
-        ) = roll_cycle.yearmonth_inrollcycle_after_date(adjusted_date)
-
-        current_date_as_contract_with_roll_data = (
-            contractDateWithRollParameters.contract_date_from_numbers(
-                self,
-                relevant_year_int,
-                relevant_month_int,
-                approx_expiry_offset=self.approx_expiry_offset,
-            )
-        )
-
-        return current_date_as_contract_with_roll_data
 
 
 class contractDateWithRollParameters(object):
@@ -463,10 +378,8 @@ class contractDateWithRollParameters(object):
                 % (str(self.contract_date), rollcycle_name, str(rollcycle_to_use))
             )
 
-        new_contract_date = rollcycle_to_use.iterate_contract_date(
-            direction,
-            self.contract_date,
-            approx_expiry_offset=self.roll_parameters.approx_expiry_offset)
+        new_contract_date = rollcycle_to_use.iterate_contract_date(direction,
+                                                                   self.contract_date)
 
         existing_roll_parameters = self.roll_parameters
 
