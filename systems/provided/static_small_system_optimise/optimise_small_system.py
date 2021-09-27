@@ -15,7 +15,7 @@ notional_starting_IDM = 1.0
 minimum_instrument_weight_idm = max_instrument_weight * notional_starting_IDM
 
 def find_best_ordered_set_of_instruments(system,
-                                         capital=1500000
+                                         capital = 500000
                         ) -> list:
 
     ## 'system' can be precalculated up to the combined forecast stage to save time
