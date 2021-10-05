@@ -13,7 +13,7 @@ import numpy as np
 from sysdata.data_blob import dataBlob
 from sysdata.config.production_config import get_production_config
 
-from sysexecution.orders.instrument_orders import instrumentOrder, best_order_type
+from sysexecution.orders.instrument_orders import instrumentOrder, best_order_type, market_order_type
 from sysexecution.orders.list_of_orders import listOfOrders
 from sysexecution.strategies.strategy_order_handling import orderGeneratorForStrategy
 
@@ -524,12 +524,12 @@ def trade_given_optimal_and_actual_positions(
     reference_price = optimised_position_entry.reference_price
     reference_date = optimised_position_entry.reference_date
 
-    # No limit orders, just best execution
+    # Use market orders
     order_required = instrumentOrder(
         strategy_name,
         instrument_code,
         trade_required,
-        order_type=best_order_type,
+        order_type=market_order_type,
         reference_price=reference_price,
         reference_contract=reference_contract,
         reference_datetime=reference_date,
