@@ -128,7 +128,7 @@ def get_portfolio_risk_for_all_strategies(data):
         get_perc_of_capital_position_size_for_instrument_across_strategies(data, instrument_code)
         for instrument_code in instrument_list]
 
-    cmatrix = get_correlation_matrix(data, instrument_list)
+    cmatrix = get_correlation_matrix(data, instrument_list).as_pd()
     std_dev = get_list_of_annualised_stdev_of_instruments(data, instrument_list)
 
     risk = get_annualised_risk_given_inputs(std_dev, cmatrix, weights)
