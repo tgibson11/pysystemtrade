@@ -137,7 +137,7 @@ class optimalPositionWithDynamicCalculations(simpleOptimalPosition):
 
     @property
     def _name_(self):
-        return "optimalPositionWithReference"
+        return "optimalPositionWithDynamicCalculations"
 
     def verbose_repr(self):
         ref_str =     "Reference %s/%f@%s " % \
@@ -175,7 +175,7 @@ class optimalPositionWithDynamicCalculations(simpleOptimalPosition):
     def containing_data_class_name(self):
         ## FIX ME WHAT DOES THIS ACTUALLY DO??
         return (
-            "sysdata.production.optimal_positions.bufferedOptimalPositionForInstrument"
+            "sysdata.production.optimal_positions.simpleOptimalPositionForInstrument"
         )
 
     def _argument_checks(self, kwargs):
