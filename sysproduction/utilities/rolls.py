@@ -6,6 +6,7 @@ import pandas as pd
 
 from syscore.objects import failure, success
 from sysdata.data_blob import dataBlob
+from sysdata.futures.contracts import ContractNotFound
 from sysobjects.adjusted_prices import futuresAdjustedPrices
 from sysobjects.contracts import futuresContract
 from sysobjects.dict_of_named_futures_per_contract_prices import price_column_names, forward_name, carry_name, \
@@ -42,9 +43,23 @@ def get_roll_data_for_instrument(instrument_code, data):
 
     # length to expiries / length to suggested roll
 
-    price_expiry_days = c_data.days_until_price_expiry(instrument_code)
-    carry_expiry_days = c_data.days_until_carry_expiry(instrument_code)
-    when_to_roll_days = c_data.days_until_roll(instrument_code)
+    try:
+        price_expiry_days = c_data.days_until_price_expiry(instrument_code)
+    except ContractNotFound:
+        # IB doesn't have data for the contract (most likely because it's already expired)
+        price_expiry_days = 0
+
+    try:
+        carry_expiry_days = c_data.days_until_carry_expiry(instrument_code)
+    except ContractNotFound:
+        # IB doesn't have data for the contract (most likely because it's already expired)
+        carry_expiry_days = 0
+
+    try:
+        when_to_roll_days = c_data.days_until_roll(instrument_code)
+    except ContractNotFound:
+        # IB doesn't have data for the contract (most likely because it's already expired)
+        when_to_roll_days = 0
 
     # roll status
     diag_positions = diagPositions(data)
