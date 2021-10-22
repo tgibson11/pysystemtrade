@@ -13,3 +13,4 @@ quandl>=3.3.0
 statsmodels~=0.12.2
 Flask>=2.0.1
 Werkzeug>=2.0.1
+cvxpy>=1.1.15
