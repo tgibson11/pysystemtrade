@@ -120,7 +120,7 @@ def get_combined_df_of_costs(data: dataBlob,
                           ],
                                  axis=1)
 
-    combined.columns = ["bid_ask_trades", "total_trades", "bid_ask_sampled"]
+    combined.columns = ["bid_ask_trades", "bid_ask_sampled"]
 
     estimate_with_data = best_estimate_from_cost_data(bid_ask_costs=bid_ask_costs,
                                             actual_trade_costs=actual_trade_costs,
