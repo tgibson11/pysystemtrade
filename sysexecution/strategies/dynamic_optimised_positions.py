@@ -457,29 +457,29 @@ def get_optimal_position_entry_with_calcs_for_code(
     return \
         optimalPositionWithDynamicCalculations(
 
-        reference_price=data_for_objective.reference_prices[instrument_code],
-        reference_contract=data_for_objective.reference_contracts[instrument_code],
-        reference_date=data_for_objective.reference_dates[instrument_code],
-        optimal_position=data_for_objective.positions_optimal[instrument_code],
+            data_for_objective.reference_prices[instrument_code],
+            data_for_objective.reference_contracts[instrument_code],
+            data_for_objective.reference_dates[instrument_code],
+            data_for_objective.positions_optimal[instrument_code],
 
-        weight_per_contract=data_for_objective.per_contract_value[instrument_code],
-        previous_position=data_for_objective.previous_positions[instrument_code],
-        previous_weight=data_for_objective.weights_prior[instrument_code],
+            data_for_objective.per_contract_value[instrument_code],
+            data_for_objective.previous_positions[instrument_code],
+            data_for_objective.weights_prior[instrument_code],
 
-        reduce_only= instrument_code in data_for_objective.constraints.reduce_only_keys,
-        dont_trade=instrument_code in data_for_objective.constraints.no_trade_keys,
+            instrument_code in data_for_objective.constraints.reduce_only_keys,
+            instrument_code in data_for_objective.constraints.no_trade_keys,
 
-        position_limit_contracts=data_for_objective.maximum_position_contracts[instrument_code],
-        position_limit_weight=data_for_objective.maximum_position_weights[instrument_code],
-        optimum_weight=data_for_objective.weights_optimal[instrument_code],
+            data_for_objective.maximum_position_contracts[instrument_code],
+            data_for_objective.maximum_position_weights[instrument_code],
+            data_for_objective.weights_optimal[instrument_code],
 
-        minimum_weight=minima_weights[instrument_code],
-        maximum_weight=maxima_weights[instrument_code],
-        start_weight= starting_weights[instrument_code],
-        optimised_weight= optimised_position_weights[instrument_code],
-        optimised_position = optimised_positions[instrument_code]
+            minima_weights[instrument_code],
+            maxima_weights[instrument_code],
+            starting_weights[instrument_code],
+            optimised_position_weights[instrument_code],
+            int(optimised_positions[instrument_code])
 
-    )
+        )
 
 
 def write_optimised_positions_data(data: dataBlob,
