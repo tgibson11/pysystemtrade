@@ -405,7 +405,7 @@ def get_optimised_positions_data_dict_given_optimisation(data_for_objective: dat
     maxima_weights = portfolioWeights.from_weights_and_keys(list_of_keys=instrument_list,
                                                     list_of_weights=list(objective_function.maxima_as_np))
     starting_weights = portfolioWeights.from_weights_and_keys(list_of_keys=instrument_list,
-                                                              list_of_weights=list(objective_function.starting_weights_as_np()))
+                                                              list_of_weights=list(objective_function.starting_weights_as_np))
 
     data_dict = dict(
         [
