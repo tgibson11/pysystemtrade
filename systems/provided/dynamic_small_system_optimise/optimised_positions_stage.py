@@ -35,7 +35,7 @@ class optimisedPositions(SystemStage):
     @diagnostic()
     def get_optimised_position_df(self) -> pd.DataFrame:
         self.log.msg("Optimising positions for small capital: may take a while!")
-        common_index = list(self.common_index())[:-1000]
+        common_index = list(self.common_index())
         p = progressBar(len(common_index), show_timings=True, show_each_time=True)
         previous_optimal_positions = portfolioWeights.allzeros(self.instrument_list())
         position_list = []
@@ -83,7 +83,7 @@ class optimisedPositions(SystemStage):
         costs = self.get_costs_per_contract_as_proportion_of_capital_all_instruments()
         speed_control = self.get_speed_control()
 
-        obj_instance = objectiveFunctionForGreedy(log = self.log,
+        obj_instance = objectiveFunctionForGreedy(
                                                 contracts_optimal=contracts_optimal,
                                                 covariance_matrix=covariance_matrix,
                                                 per_contract_value = per_contract_value,

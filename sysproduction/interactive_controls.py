@@ -1,10 +1,16 @@
 import numpy as np
-
+import pandas as pd
 from syscore.interactive import get_and_convert, run_interactive_menu, print_menu_and_get_response
+from syscore.algos import magnitude
+from syscore.pdutils import set_pd_print_options
+from syscore.dateutils import CALENDAR_DAYS_IN_YEAR
+
+from sysdata.data_blob import dataBlob
+
 from sysobjects.production.override import override_dict, Override
 from sysobjects.production.tradeable_object import instrumentStrategy
 
-from sysdata.data_blob import dataBlob
+from sysproduction.backup_arctic_to_csv import get_data_and_create_csv_directories, backup_instrument_data
 from sysproduction.data.controls import (
     diagOverrides,
     updateOverrides,
@@ -15,13 +21,17 @@ from sysproduction.data.controls import (
 from sysproduction.data.control_process import dataControlProcess, diagControlProcess
 from sysproduction.data.prices import get_valid_instrument_code_from_user, get_list_of_instruments
 from sysproduction.data.strategies import get_valid_strategy_name_from_user
-from sysproduction.data.positions import diagPositions
-from sysproduction.utilities.risk_metrics import get_risk_data_for_instrument
+from sysproduction.data.instruments import dataInstruments
+from sysproduction.reporting.data.risk_metrics import get_risk_data_for_instrument
+
+
+from sysproduction.reporting.api import reportingApi
 
 # could get from config, but might be different by system
 MAX_VS_AVERAGE_FORECAST = 2.0
 
 def interactive_controls():
+    set_pd_print_options()
     with dataBlob(log_name="Interactive-Controls") as data:
         menu = run_interactive_menu(
             top_level_menu_of_options,
@@ -546,8 +556,114 @@ def finish_all_processes(data):
     data_control.check_if_pid_running_and_if_not_finish_all_processes()
 
 def auto_update_spread_costs(data):
-    pass
+    slippage_comparison_pd = get_slippage_data(data)
+    changes_to_make = get_list_of_changes_to_make_to_slippage(slippage_comparison_pd)
 
+    make_changes_to_slippage(data, changes_to_make)
+
+def get_slippage_data(data) -> pd.DataFrame:
+    reporting_api = reportingApi(data, calendar_days_back=CALENDAR_DAYS_IN_YEAR)
+    print("Getting data might take a while...")
+    slippage_comparison_pd = reporting_api.combined_df_costs()
+
+    return slippage_comparison_pd
+
+def get_list_of_changes_to_make_to_slippage(slippage_comparison_pd: pd.DataFrame) -> dict:
+
+    filter = get_filter_size_for_slippage()
+    changes_to_make = dict()
+    instrument_list = slippage_comparison_pd.index
+
+    for instrument_code in instrument_list:
+        pd_row = slippage_comparison_pd.loc[instrument_code]
+        difference = pd_row['% Difference']
+        configured = pd_row['Configured']
+        suggested_estimate = pd_row['estimate']
+
+        if np.isnan(suggested_estimate) or np.isnan(configured):
+            print("No data for %s" % instrument_code)
+            continue
+
+        if abs(difference)*100<filter:
+            ## do nothing
+            continue
+
+        mult_factor = calculate_mult_factor(pd_row)
+
+        if mult_factor>1:
+            print("ALL VALUES MULTIPLIED BY %f INCLUDING INPUTS!!!!" % mult_factor)
+
+        suggested_estimate_multiplied = suggested_estimate*mult_factor
+        configured_estimate_multiplied = configured*mult_factor
+
+        print(pd_row*mult_factor)
+        estimate_to_use_with_mult = \
+            get_and_convert(
+                "New configured slippage value (current %f, default is estimate %f)"
+                    % (configured_estimate_multiplied, suggested_estimate_multiplied),
+              type_expected=float,
+              allow_default=True,
+              default_value=suggested_estimate*mult_factor
+              )
+
+        if estimate_to_use_with_mult == configured_estimate_multiplied:
+            print("Same as configured, do nothing...")
+            continue
+        if estimate_to_use_with_mult!=suggested_estimate_multiplied:
+            difference = abs(estimate_to_use_with_mult/suggested_estimate_multiplied)-1.0
+            if difference>0.5:
+                ans = input("Quite a big difference from the suggested %f and yours %f, are you sure about this? (y/other)" %
+                            (suggested_estimate_multiplied, estimate_to_use_with_mult))
+                if ans!="y":
+                    continue
+
+        estimate_to_use = estimate_to_use_with_mult / mult_factor
+        changes_to_make[instrument_code] = estimate_to_use
+
+    return changes_to_make
+
+
+def get_filter_size_for_slippage() -> float:
+    filter = get_and_convert("% difference to filter on? (eg 30 means we ignore differences<30%",
+                    type_expected=float,
+                    allow_default=True,
+                    default_value=30.0)
+
+    return filter
+
+def calculate_mult_factor(pd_row) -> float:
+    configured = pd_row['Configured']
+    suggested_estimate = pd_row['estimate']
+
+    smallest = min(configured, suggested_estimate)
+    if smallest>0.01:
+        return 1
+
+    if smallest ==0:
+        return 1000000
+
+    mag = magnitude(min(suggested_estimate, configured))
+    mult_factor = 10 ** (-mag)
+
+    return mult_factor
+
+
+
+def make_changes_to_slippage(data: dataBlob, changes_to_make: dict):
+    make_changes_to_slippage_in_db(data, changes_to_make)
+    backup_instrument_data_to_csv(data)
+
+def make_changes_to_slippage_in_db(data: dataBlob, changes_to_make: dict):
+    futures_data = dataInstruments(data)
+    for instrument_code, new_slippage in changes_to_make.items():
+        futures_data.update_slippage_costs(instrument_code, new_slippage)
+
+
+def backup_instrument_data_to_csv(data: dataBlob):
+    backup_data = get_data_and_create_csv_directories("")
+    backup_data.mongo_futures_instrument = data.db_futures_instrument
+    print("Backing up database to .csv %; you will need to copy to /pysystemtrade/data/csvconfig/ for it to work in sim")
+    backup_instrument_data(backup_data)
 
 def not_defined(data):
     print("\n\nFunction not yet defined\n\n")
