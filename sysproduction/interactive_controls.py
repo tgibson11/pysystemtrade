@@ -1,12 +1,15 @@
 import numpy as np
 import pandas as pd
+
 from syscore.interactive import get_and_convert, run_interactive_menu, print_menu_and_get_response
 from syscore.algos import magnitude
 from syscore.pdutils import set_pd_print_options
 from syscore.dateutils import CALENDAR_DAYS_IN_YEAR
+from syscore.objects import missing_data
 
 from sysdata.data_blob import dataBlob
-
+from sysdata.config.production_config import get_production_config
+from sysdata.config.instruments import generate_matching_duplicate_dict
 from sysobjects.production.override import override_dict, Override
 from sysobjects.production.tradeable_object import instrumentStrategy
 
@@ -95,7 +98,9 @@ nested_menu_of_options = {
         45: "View process configuration (set in YAML, cannot change here)",
     },
     5: {
-        50: "Auto update spread cost configuration based on sampling and trades"
+        50: "Auto update spread cost configuration based on sampling and trades",
+        51: "Suggest 'bad' markets (illiquid or costly)",
+        52: "Suggest which duplicate market to use"
     }
 }
 
@@ -662,8 +667,105 @@ def make_changes_to_slippage_in_db(data: dataBlob, changes_to_make: dict):
 def backup_instrument_data_to_csv(data: dataBlob):
     backup_data = get_data_and_create_csv_directories("")
     backup_data.mongo_futures_instrument = data.db_futures_instrument
-    print("Backing up database to .csv %; you will need to copy to /pysystemtrade/data/csvconfig/ for it to work in sim")
+    print("Backing up database to .csv %s; you will need to copy to /pysystemtrade/data/csvconfig/ for it to work in sim" %
+          backup_data.csv_futures_instrument.config_file)
     backup_instrument_data(backup_data)
+
+def suggest_bad_markets(data: dataBlob):
+    max_cost, min_contracts, min_risk = get_bad_market_filter_parameters()
+    SR_costs, liquidity_data, _unused_risk_data= get_data_for_markets(data)
+    bad_markets = get_bad_market_list(SR_costs=SR_costs,
+                                      liquidity_data=liquidity_data,
+                                      min_risk=min_risk,
+                                      min_contracts=min_contracts,
+                                      max_cost=max_cost)
+    display_bad_market_info(bad_markets)
+
+def get_bad_market_filter_parameters():
+    max_cost = get_and_convert("Maximum SR cost?", type_expected=float, allow_default=True,
+                               default_value=0.01)
+    min_contracts =get_and_convert("Minimum contracts traded per day?", type_expected=int,
+                                   allow_default=True, default_value=100)
+    min_risk = get_and_convert("Min risk $m traded per day?", type_expected=float,
+                               allow_default=True, default_value=1.5)
+
+    return max_cost, min_contracts, min_risk
+
+def get_data_for_markets(data):
+    api = reportingApi(data)
+    SR_costs = api.SR_costs()
+    SR_costs = SR_costs.dropna()
+    liquidity_data = api.liquidity_data()
+    risk_data = api.instrument_risk_data_all_instruments()
+
+    return SR_costs, liquidity_data, risk_data
+
+def get_bad_market_list(SR_costs: pd.DataFrame,
+                        liquidity_data: pd.DataFrame,
+                        max_cost: float = .01,
+                        min_risk: float = 1.5,
+                        min_contracts: int = 100) -> list:
+    expensive = list(SR_costs[SR_costs.SR_cost>max_cost].index)
+
+    not_enough_contracts = list(liquidity_data[liquidity_data.contracts<min_contracts].index)
+    not_enough_risk = list(liquidity_data[liquidity_data.risk<min_risk].index)
+
+    bad_markets = list(set(expensive+not_enough_risk+not_enough_contracts))
+    bad_markets.sort()
+
+    return bad_markets
+
+def display_bad_market_info(bad_markets: list):
+    print("Add the following to yaml .config under bad_markets heading:\n")
+    print("bad_markets:")
+    __ = [print("  - %s" % instrument) for instrument in bad_markets]
+
+    production_config = get_production_config()
+
+    ## this should be a function
+    existing_bad_markets = production_config.get_element_or_missing_data("bad_markets")
+    if existing_bad_markets is missing_data:
+        existing_bad_markets = []
+    existing_bad_markets.sort()
+
+    new_bad_markets = list(set(bad_markets).difference(set(existing_bad_markets)))
+    removed_bad_markets = list(set(existing_bad_markets).difference(set(bad_markets)))
+
+    print("New bad markets %s" % new_bad_markets)
+    print("Removed bad markets %s" % removed_bad_markets)
+
+
+def suggest_duplicate_markets(data: dataBlob):
+    duplicate_dict = generate_matching_duplicate_dict()
+    mkt_data = get_data_for_markets(data)
+    __ = [suggest_duplicate_markets_for_dict_entry(mkt_data, dict_entry)
+          for dict_entry in duplicate_dict.values()]
+
+def suggest_duplicate_markets_for_dict_entry(mkt_data, dict_entry: dict):
+    included = dict_entry['included']
+    excluded = dict_entry['excluded']
+
+    all_markets = set(list(included+excluded))
+    mkt_data_for_duplicates = [
+        get_market_data_for_duplicate(mkt_data, instrument_code)
+        for instrument_code in all_markets]
+
+    mkt_data_for_duplicates = pd.DataFrame(mkt_data_for_duplicates, index = all_markets)
+    print("\n\nCurrent list of included markets %s, excluded markets %s" % (included, excluded))
+    print("Prefer: SR_cost<0.01, volume_contracts>100, volume_risk>15, contract_size: small!\n")
+    print(mkt_data_for_duplicates)
+
+def get_market_data_for_duplicate(mkt_data, instrument_code: str):
+    SR_costs, liquidity_data, risk_data = mkt_data
+    SR_cost = SR_costs.SR_cost.get(instrument_code, np.nan)
+    volume_contracts = liquidity_data.contracts.get(instrument_code, np.nan)
+    volume_risk = liquidity_data.risk.get(instrument_code, np.nan)
+    contract_size = risk_data.annual_risk_per_contract.get(instrument_code, np.nan)
+
+    return dict(SR_cost = np.round(SR_cost, 6),
+                volume_contracts=volume_contracts,
+                volume_risk=np.round(volume_risk, 2),
+                contract_size=np.round(contract_size))
 
 def not_defined(data):
     print("\n\nFunction not yet defined\n\n")
@@ -692,7 +794,9 @@ dict_of_functions = {
     43: finish_process,
     44: finish_all_processes,
     45: view_process_config,
-    50: auto_update_spread_costs
+    50: auto_update_spread_costs,
+    51: suggest_bad_markets,
+    52: suggest_duplicate_markets
 }
 
 if __name__ == '__main__':
