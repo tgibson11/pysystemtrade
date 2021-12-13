@@ -24,6 +24,7 @@ from sysexecution.orders.list_of_orders import listOfOrders
 CONTRACT_ORDER_TYPE_FOR_ROLL_ORDERS = market_order_type
 
 
+
 class stackHandlerForRolls(stackHandlerCore):
     def generate_force_roll_orders(self):
         diag_positions = diagPositions(self.data)

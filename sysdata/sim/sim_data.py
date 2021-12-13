@@ -7,8 +7,7 @@ from syscore.pdutils import prices_to_daily_prices
 from sysdata.base_data import baseData
 
 from sysobjects.spot_fx_prices import fxPrices
-from sysobjects.instruments import instrumentCosts
-
+from sysobjects.instruments import instrumentCosts, instrumentMetaData
 
 class simData(baseData):
     """
