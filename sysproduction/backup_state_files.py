@@ -1,7 +1,9 @@
 import os
 
-from sysproduction.data.directories import get_statefile_directory, \
-    get_statefile_backup_directory
+from sysproduction.data.directories import (
+    get_statefile_directory,
+    get_statefile_backup_directory,
+)
 from sysdata.data_blob import dataBlob
 
 

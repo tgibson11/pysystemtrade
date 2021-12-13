@@ -1,4 +1,4 @@
-from copy import  copy
+from copy import copy
 import datetime
 import traceback
 
@@ -56,18 +56,16 @@ def call_allocation_function(data: dataBlob) -> dict:
     strategy_allocation_config_dict = get_strategy_allocation_config_dict(data)
 
     strategy_allocation_function_str = strategy_allocation_config_dict.pop("function")
-    strategy_allocation_function = resolve_function(
-        strategy_allocation_function_str)
+    strategy_allocation_function = resolve_function(strategy_allocation_function_str)
 
-    results = strategy_allocation_function(
-        data, **strategy_allocation_config_dict)
+    results = strategy_allocation_function(data, **strategy_allocation_config_dict)
 
     return results
 
 
 def get_strategy_allocation_config_dict(data: dataBlob) -> dict:
     config = diagStrategiesConfig(data)
-    allocation_dict= config.get_strategy_allocation_config_dict()
+    allocation_dict = config.get_strategy_allocation_config_dict()
     allocation_dict_copy = copy(allocation_dict)
     return allocation_dict_copy
 
