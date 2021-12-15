@@ -9,6 +9,7 @@ from sysdata.base_data import baseData
 from sysobjects.spot_fx_prices import fxPrices
 from sysobjects.instruments import instrumentCosts, instrumentMetaData
 
+
 class simData(baseData):
     """
     Core data object - Base class for simulation
