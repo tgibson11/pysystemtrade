@@ -63,11 +63,13 @@ def update_historical_prices_for_instrument(instrument_code: str, data: dataBlob
         data.log.warn("No contracts marked for sampling for %s" % instrument_code)
         return failure
 
-    for contract_object in contract_list:
-        data.log.label(contract_date=contract_object.date_str)
-        if has_ib_market_data(contract_object.instrument_code):
+    if has_ib_market_data(instrument_code):
+        for contract_object in contract_list:
+            data.log.label(contract_date=contract_object.date_str)
             update_historical_prices_for_instrument_and_contract(contract_object, data)
-        else:
+    else:
+        for contract_object in contract_list:
+            data.log.label(contract_date=contract_object.date_str)
             update_historical_prices_for_instrument_and_contract_quandl(contract_object, data)
 
     return success
