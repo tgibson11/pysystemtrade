@@ -65,7 +65,7 @@ def update_historical_prices_for_instrument(instrument_code: str, data: dataBlob
 
     for contract_object in contract_list:
         data.log.label(contract_date=contract_object.date_str)
-        if False:   # TODO
+        if has_ib_market_data(contract_object.instrument_code):
             update_historical_prices_for_instrument_and_contract(contract_object, data)
         else:
             update_historical_prices_for_instrument_and_contract_quandl(contract_object, data)
@@ -144,6 +144,13 @@ def get_and_add_prices_for_frequency(
         % (error_or_rows_added, frequency, str(contract_object))
     )
     return success
+
+
+def has_ib_market_data(instrument_code: str):
+    from sysbrokers.IB.ib_instruments_data import get_instrument_object_from_config
+    instrument_with_ib_data = get_instrument_object_from_config(instrument_code)
+    exchange = instrument_with_ib_data.ib_data.exchange
+    return exchange in ['CMECRYPTO']
 
 
 def update_historical_prices_for_instrument_and_contract_quandl(
