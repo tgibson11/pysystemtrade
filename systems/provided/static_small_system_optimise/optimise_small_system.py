@@ -1,7 +1,4 @@
-
-from copy import  copy
-
-from my_system.my_system import my_system
+from copy import copy
 from sysquant.estimators.correlations import correlationEstimate
 from sysquant.optimisation.optimisers.handcraft import *
 from sysquant.estimators.estimates import Estimates, meanEstimates, stdevEstimates
@@ -271,9 +268,4 @@ def size_penalty(maximum_position):
     if maximum_position < 0.5:
         return 9999
 
-    return 0.125 / maximum_position**2
-
-
-if __name__ == '__main__':
-    system = my_system()
-    find_best_ordered_set_of_instruments(system, capital=1500000)
+    return 0.125 / maximum_position ** 2

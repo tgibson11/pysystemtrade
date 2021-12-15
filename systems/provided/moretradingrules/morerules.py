@@ -3,8 +3,6 @@ import numpy as np
 from sysdata.config.defaults import system_defaults
 from copy import copy
 
-from sysquant.estimators.vol import robust_vol_calc
-
 
 def breakout(price, lookback=10, smooth=None):
     """
@@ -130,55 +128,3 @@ def cross_sectional_mean_reversion(
     forecast = -outperformance_over_horizon.ewm(span=ewma_span).mean()
 
     return forecast
-
-
-def cross_sectional_momentum(
-    normalised_price_this_instrument,
-    normalised_price_for_asset_class,
-    horizon=40,
-    ewma_span=None,
-):
-    """
-    Cross sectional momentum within asset class
-
-    :param normalised_price_this_instrument: pd.Series
-    :param normalised_price_for_asset_class: pd.Series
-    :return: pd.Series
-    """
-
-    if ewma_span is None:
-        ewma_span = int(horizon / 4.0)
-
-    ewma_span = max(ewma_span, 2)
-
-    outperformance = (
-        normalised_price_this_instrument.ffill()
-        - normalised_price_for_asset_class.ffill()
-    )
-    relative_return = outperformance.diff()
-    outperformance_over_horizon = relative_return.rolling(horizon).mean()
-
-    forecast = outperformance_over_horizon.ewm(span=ewma_span).mean()
-
-    return forecast
-
-
-def factor_trading_rule(demean_factor_value, smooth=90):
-    vol = robust_vol_calc(demean_factor_value)
-    normalised_factor_value = demean_factor_value / vol
-    smoothed_normalised_factor_value = normalised_factor_value.ewm(span=smooth).mean()
-
-    return smoothed_normalised_factor_value
-
-
-def conditioned_factor_trading_rule(demean_factor_value, condition_demean_factor_value, smooth=90):
-    vol = robust_vol_calc(demean_factor_value)
-    normalised_factor_value = demean_factor_value / vol
-
-    sign_condition = condition_demean_factor_value.apply(np.sign)
-    sign_condition_resample = sign_condition.reindex(normalised_factor_value.index).ffill()
-
-    conditioned_factor = normalised_factor_value * sign_condition_resample
-    smoothed_conditioned_factor = conditioned_factor.ewm(span=smooth).mean()
-
-    return smoothed_conditioned_factor
