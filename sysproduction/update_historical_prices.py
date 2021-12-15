@@ -65,7 +65,10 @@ def update_historical_prices_for_instrument(instrument_code: str, data: dataBlob
 
     for contract_object in contract_list:
         data.log.label(contract_date=contract_object.date_str)
-        update_historical_prices_for_instrument_and_contract(contract_object, data)
+        if False:   # TODO
+            update_historical_prices_for_instrument_and_contract(contract_object, data)
+        else:
+            update_historical_prices_for_instrument_and_contract_quandl(contract_object, data)
 
     return success
 
@@ -140,6 +143,39 @@ def get_and_add_prices_for_frequency(
         "Added %d rows at frequency %s for %s"
         % (error_or_rows_added, frequency, str(contract_object))
     )
+    return success
+
+
+def update_historical_prices_for_instrument_and_contract_quandl(
+    contract_object: futuresContract, data: dataBlob
+):
+    """
+    Do a daily update for futures contract prices, using Quandl historical data
+
+    :param contract_object: futuresContract
+    :param data: data blob
+    :return: None
+    """
+
+    from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
+
+    quandl_data_source = QuandlFuturesContractPriceData()
+    db_futures_prices = updatePrices(data)
+
+    quandl_prices = quandl_data_source.get_prices_for_contract_object(contract_object)
+    if len(quandl_prices) == 0:
+        data.log.msg("No prices from broker for %s" % str(contract_object))
+        return failure
+
+    error_or_rows_added = db_futures_prices.update_prices_for_contract(
+        contract_object, quandl_prices, check_for_spike=True
+    )
+    if error_or_rows_added is spike_in_data:
+        report_price_spike(data, contract_object)
+        return failure
+
+    data.log.msg("Added %d rows for %s" % (error_or_rows_added, str(contract_object)))
+
     return success
 
 

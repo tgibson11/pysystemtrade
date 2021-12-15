@@ -3,7 +3,7 @@ import logging
 from syscontrol.run_process import processToRun
 from sysproduction.update_fx_prices import updateFxPrices
 from sysproduction.update_sampled_contracts import updateSampledContracts
-from sysproduction.update_historical_prices_quandl import updateHistoricalPricesQuandl
+from sysproduction.update_historical_prices import updateHistoricalPrices
 from sysproduction.update_multiple_adjusted_prices import updateMultipleAdjustedPrices
 
 from sysdata.data_blob import dataBlob
@@ -27,7 +27,7 @@ def get_list_of_timer_functions_for_price_update():
 
     fx_update_object = updateFxPrices(data_fx)
     contracts_update_object = updateSampledContracts(data_contracts)
-    historical_update_object = updateHistoricalPricesQuandl(data_historical)
+    historical_update_object = updateHistoricalPrices(data_historical)
     multiple_update_object = updateMultipleAdjustedPrices(data_multiple)
 
     list_of_timer_names_and_functions = [
