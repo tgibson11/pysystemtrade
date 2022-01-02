@@ -91,7 +91,20 @@ class csvFuturesInstrumentData(futuresInstrumentData):
         )
 
     def write_all_instrument_data_from_df(self, instrument_data_as_df: pd.DataFrame):
-        instrument_data_as_df.to_csv(self._config_file, index_label="Instrument")
+        instrument_data_as_df.to_csv(
+            self._config_file,
+            index_label="Instrument",
+            columns=[
+                "Pointsize",
+                "Percentage",
+                "PerBlock",
+                "PerTrade",
+                "AssetClass",
+                "Currency",
+                "Description",
+                "Slippage"
+            ]
+        )
 
 
 def get_instrument_with_meta_data_object(
