@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 
-from sysdata.futures.futures_per_contract_prices import (
-    futuresContractPriceData,
-)
+from sysdata.futures.futures_per_contract_prices import futuresContractPriceData
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from sysobjects.contracts import futuresContract, listOfFuturesContracts
 from syslogdiag.log_to_screen import logtoscreen
