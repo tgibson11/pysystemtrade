@@ -186,6 +186,7 @@ def get_time_difference(time_zone_id: str) -> int:
 
 
 def one_off_adjustments(symbol: str) -> tuple:
-    adj_dict = dict(EOE=(-9, -5), CAC40=(-9, -5))
-    one_off = adj_dict.get(symbol, NO_ADJUSTMENTS)
-    return one_off
+    ## Instrument specific - none needed any more
+    ## Leave code unless have problems again
+
+    return NO_ADJUSTMENTS
