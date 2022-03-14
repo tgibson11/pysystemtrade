@@ -252,18 +252,16 @@ You need to:
 - Read this document very thoroughly!
 - Prerequisites:
     - Install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-      - Configure SSH keys if you will want to pull from a private GitHub repo or push (to any repo)
     - Install or update [python3](https://docs.python-guide.org/starting/install3/linux/)
-      - Windows users will need [Anaconda](https://www.anaconda.com/download/) (includes python libs)
-      - Optional: install [PyCharm](https://www.jetbrains.com/pycharm/download/) or another IDE if you'll be doing development work on this machine (also makes working with git and python environments easier)
+      - Windows: install [Anaconda](https://www.anaconda.com/download/) instead
+      - Optional: install [PyCharm](https://www.jetbrains.com/pycharm/download/) IDE
     - Add the following environment variables to your `~/.profile`: (feel free to use other directories):
         - `PYSYS_CODE=$HOME/pysystemtrade`
         - `SCRIPT_PATH=$HOME/pysystemtrade/sysproduction/linux/scripts`
         - `ECHO_PATH=$HOME/echos`
-        - Note: Linux users will want to update terminal preferences to run as a login shell; doing so will set these variables automatically when a terminal window is opened
-    - Add the SCRIPT_PATH directory to your PATH
-      - `PATH="$SCRIPT_PATH:$PATH"`
-    - Create the following directories (use other directories if you like, but you must modify the .profile above)
+        - `PATH="$SCRIPT_PATH:$PATH"`
+        - Linux: update terminal preferences to run as a login shell
+    - Create the following directories (use other directories if you like, but you may need to modify the .profile above)
         - /home/user_name/echos
         - /home/user_name/data
         - /home/user_name/data/mongo_dump
@@ -272,26 +270,21 @@ You need to:
         - /home/user_name/Dropbox (optional; in my setup, this is a folder or symbolic link that syncs to the cloud)
     - Install the pysystemtrade package
       - `cd $HOME; git clone https://github.com/tgibson11/pysystemtrade.git`
-      - `cd pysystemtrade; sudo python3 setup.py install` (or do this in PyCharm)
+      - `cd pysystemtrade; sudo python3 setup.py install`
     - Install or update dependencies
-      - `sudo python3 -m pip install -r $HOME/pysystemtrade/requirements.txt` (or do this in PyCharm)
-    - Install IB Gateway (recommended for a fully automated production system) or TWS (if you want to be more "hands-on")
-      - Check "Use SSH" when logging in (not required, but more secure)
+      - `sudo python3 -m pip install -r $HOME/pysystemtrade/requirements.txt`
+    - Install IB Gateway or TWS
+      - Check "Use SSH" when logging in
       - In API settings, check "Download open orders on connect"; uncheck "Read-only"
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/)
-      - On MacOS, you'll need to increase the max # of open files. `sudo launchctl limit maxfiles 64000 100000000` will do it, but does not persist after a restart.  For a more permanent solution, see https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
-    - Create or download "private" files
-      - system definition: a config file at minimum, possibly other scripts
-      - private_config.yaml
-      - private_control_config.yaml
-      - To sync from a private GitHub repo, do something like this:
-        - `git clone ssh://git@github.com/tgibson11/private.git`
-        - `cp -r $HOME/private $HOME/pysystemtrade/private`
-      - If using TWS instead of IB Gateway, change the IB port in private_config
-      - May also want to change process start & end times, max # of executions in private_control_config.yaml
-    - [Check a mongodb server is running with the right data directory](/docs/data.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
-    - Launch an IB gateway (this could be done automatically depending on your security setup)
-- Initialize data (or restore from a MongoDB backup and skip this section)
+      - MacOS: max # of open files needs to be increased. `sudo launchctl limit maxfiles 64000 100000000` will work, but does not persist after a restart.  For a more permanent solution, see https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
+    - Download "private" files
+      - Configure SSH keys
+      - `git clone ssh://git@github.com/tgibson11/private.git`
+      - `cp -r $HOME/private $HOME/pysystemtrade/private`
+    - Start MongoDB if not already running: `mongod`
+    - Start IB gateway or TWS
+- Initialize data
   - FX data:
       - [Initialise the spot FX data in MongoDB from .csv files](/sysinit/futures/repocsv_spotfx_prices.py) (this will be out of date, but you will update it in a moment)
       - Update the FX price data in MongoDB using interactive brokers: command line:`. /home/your_user_name/pysystemtrade/sysproduction/linux/scripts/update_fx_prices`
