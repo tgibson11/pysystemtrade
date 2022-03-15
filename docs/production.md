@@ -278,7 +278,7 @@ You need to:
       - In API settings, check "Download open orders on connect"; uncheck "Read-only"
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/)
       - MacOS: max # of open files needs to be increased. `sudo launchctl limit maxfiles 64000 100000000` will work, but does not persist after a restart.  For a more permanent solution, see https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
-    - Download "private" files
+    - Download private files
       - Configure SSH keys
       - `git clone ssh://git@github.com/tgibson11/private.git`
       - `cp -r $HOME/private $HOME/pysystemtrade/private`
@@ -309,7 +309,7 @@ You need to:
 
 Before trading, and each time you restart the machine you should:
 
-- [check a mongodb server is running with the right data directory](/docs/data.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA` (the supplied crontab should do this)
+- [check a mongodb server is running](/docs/data.md#mongo-db) command line: `mongod` (the supplied crontab should do this)
 - launch an IB gateway (this could [be done automatically](https://github.com/IbcAlpha/IBC) depending on your security setup)
 - ensure all processes are [marked as 'finished'](#mark-as-finished)
 
@@ -580,7 +580,7 @@ To avoid conflicts you should [schedule](#scheduling) your backup during the 'de
 Linux:
 ```
 # dumps everything into dump directory
-# make sure a mongo-db instance is running with correct directory, but ideally without any load; command line: `mongod --dbpath $MONGO_DATA`
+# make sure a mongo-db instance is running, but ideally without any load; command line: `mongod`
 mongodump -o ~/dump/
 
 # copy dump directory to another machine or drive. This will create a directory $MONGO_BACKUP_PATH/dump/
@@ -592,7 +592,7 @@ This is done by the scheduled backup process (see [scheduling](#scheduling)), an
 Then to restore, from a linux command line:
 ```
 cp -rf $MONGO_BACKUP_PATH/dump/ ~
-# Now make sure a mongo-db instance is running with correct directory
+# Now make sure a mongo-db instance is running
 # If required delete any existing instances of the databases. If you don't do this the results may be unpredictable...
 mongo
 # This starts a mongo client
