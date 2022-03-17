@@ -285,20 +285,19 @@ You need to:
     - Start MongoDB if not already running: `mongod`
     - Start IB gateway or TWS
 - Initialize data
-  - FX data:
-      - [Initialise the spot FX data in MongoDB from .csv files](/sysinit/futures/repocsv_spotfx_prices.py) (this will be out of date, but you will update it in a moment)
-      - Update the FX price data in MongoDB using interactive brokers: command line:`. /home/your_user_name/pysystemtrade/sysproduction/linux/scripts/update_fx_prices`
   - Instrument configuration:
       - Set up futures instrument configuration using this script [instruments_csv_mongo.py](/sysinit/futures/instruments_csv_mongo.py).
   - Futures contract prices:
-      - [You must have a source of individual futures prices, then backfill them into the Arctic database](/docs/data.md#getting-historical-data-for-individual-futures-contracts).
+    - [Download recent price data from IB](/sysinit/futures/seed_price_data_from_IB.py). This will only get you data going back about a year, but that's OK. We just need this to bring the provided multiple price data up-to-date.
   - Roll calendars:
       - For *roll configuration* we need to initialise by running the code in this file [roll_parameters_csv_mongo.py](/sysinit/futures/roll_parameters_csv_mongo.py).
-      - [Create roll calendars for each instrument you are trading](/docs/data.md#roll-calendars)
-  - [Ensure you are sampling all the contracts you want to sample](#update-sampled-contracts-daily)
+      - [Generate roll calendars](/sysinit/futures/rollcalendars_from_arcticprices_to_csv.py) from the price data you just downloaded. Don't overwrite the provided roll calendars!
+  - Multiple futures prices:
+    - [Generate CSV multiple price data](/sysinit/futures/multipleprices_from_arcticprices_and_csv_calendars_to_arctic.py) from the downloaded price data and the roll calendars you just generated. Be careful not to overwrite the provided multiple price data!
+    - Append the generated multiple prices to the provided multiple price files
+    - [Load the updated CSV files to Arctic](/sysinit/futures/repocsv_multiple_prices.py)
   - Adjusted futures prices:
-      - [Create 'multiple prices' in Arctic](/docs/data.md#creating-and-storing-multiple-prices).
-      - [Create adjusted prices in Arctic](/docs/data.md#creating-and-storing-back-adjusted-prices)
+      - [Create adjusted prices in Arctic](/sysinit/futures/adjustedprices_from_mongo_multiple_to_mongo.py)
   - Use [interactive diagnostics](#interactive-diagnostics) to check all your prices are in place correctly
 - Scheduling:
     - Initialise the [supplied crontab](/sysproduction/linux/crontab). Note if you have put your code or echos somewhere else you will need to modify the directory references at the top of the crontab.
