@@ -16,6 +16,6 @@ MPLBACKEND=Agg
 0 06  * * 1-5    . $HOME/.profile; cd $SCRIPT_PATH; ./run_strategy_order_generator  >> $ECHO_PATH/run_strategy_order_generator.txt 2>&1
 0 06  * * 1-5    . $HOME/.profile; cd $SCRIPT_PATH; ./run_systems  >> $ECHO_PATH/run_systems.txt 2>&1
 #
-# Note: $MONGO_DATA must be accessible at boot; this won't work if it's in an encrypted home folder
-@reboot         . $HOME/.profile; mongod --dbpath $MONGO_DATA
+# Note: MongoDb data must be accessible at boot; this won't work if it's in an encrypted home folder
+@reboot         . $HOME/.profile; mongod
 @reboot         . $HOME/.profile; cd $SCRIPT_PATH; ./startup  >> $ECHO_PATH/startup.txt 2>&1
