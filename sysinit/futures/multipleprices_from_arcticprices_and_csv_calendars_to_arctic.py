@@ -10,6 +10,7 @@ We then store those multiple prices in: (depending on options)
 - .csv
 """
 from syscore.objects import arg_not_supplied
+from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysobjects.dict_of_futures_per_contract_prices import (
     dictFuturesContractFinalPrices,
 )
@@ -185,16 +186,27 @@ def add_phantom_row(
 
 
 if __name__ == "__main__":
-    input("Will overwrite existing prices are you sure?! CTL-C to abort")
-    # change if you want to write elsewhere
-    csv_multiple_data_path = arg_not_supplied
+    instrument_code = input("Instrument code? <return to abort, ALL for all instruments with price data> ")
+    if instrument_code == "":
+        exit()
 
-    # only change if you have written the files elsewhere
-    csv_roll_data_path = arg_not_supplied
+    csv_roll_data_path = input("Roll calendar data path?")
+    if csv_roll_data_path == "":
+        exit()
 
-    # modify flags as required
-    # process_multiple_prices_all_instruments(csv_multiple_data_path= csv_multiple_data_path,
-    #                                         csv_roll_data_path = csv_roll_data_path)
+    csv_multiple_data_path = input("Output data path?")
+    if csv_multiple_data_path == "":
+        exit()
 
-    for instrument in ['LUMBER']:
-        process_multiple_prices_single_instrument(instrument_code=instrument, ADD_TO_CSV=False)
+    if instrument_code == "ALL":
+        process_multiple_prices_all_instruments(csv_multiple_data_path=csv_multiple_data_path,
+                                                csv_roll_data_path=csv_roll_data_path,
+                                                ADD_TO_ARCTIC=False,
+                                                ADD_TO_CSV=True)
+
+    else:
+        process_multiple_prices_single_instrument(instrument_code=instrument_code,
+                                                  csv_multiple_data_path=csv_multiple_data_path,
+                                                  csv_roll_data_path=csv_roll_data_path,
+                                                  ADD_TO_ARCTIC=False,
+                                                  ADD_TO_CSV=True)

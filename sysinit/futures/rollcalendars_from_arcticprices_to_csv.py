@@ -4,6 +4,7 @@ from syscore.objects import arg_not_supplied
 from sysdata.arctic.arctic_futures_per_contract_prices import (
     arcticFuturesContractPriceData,
 )
+from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 from sysdata.mongodb.mongo_roll_data import mongoRollParametersData
 from sysobjects.roll_calendars import rollCalendar
 from sysdata.csv.csv_roll_calendars import csvRollCalendarData
@@ -118,8 +119,21 @@ def check_saved_roll_calendar(
 
 
 if __name__ == "__main__":
-    input("Will overwrite existing data are you sure?! CTL-C to abort")
-    instrument_code = get_valid_instrument_code_from_user(source='single')
-    ## MODIFY DATAPATH IF REQUIRED
-    # build_and_write_roll_calendar(instrument_code, output_datapath=arg_not_supplied)
-    build_and_write_roll_calendar(instrument_code, output_datapath='/home/todd/pysystemtrade/data/futures/roll_calendars_csv')
+    instrument_code = input("Instrument code? <return to abort, ALL for all instruments with price data> ")
+    if instrument_code == "":
+        exit()
+
+    output_datapath = input("Output data path?")
+    if output_datapath == "":
+        exit()
+
+    if instrument_code == "ALL":
+        instrument_list = arcticFuturesContractPriceData().get_list_of_instrument_codes_with_price_data()
+        print(instrument_list)
+
+        for instrument in instrument_list:
+            print(instrument)
+            build_and_write_roll_calendar(instrument, output_datapath=output_datapath)
+
+    else:
+        build_and_write_roll_calendar(instrument_code, output_datapath=output_datapath)

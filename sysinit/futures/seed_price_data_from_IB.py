@@ -7,6 +7,7 @@ from sysbrokers.IB.ib_futures_contracts_data import ibFuturesContractData
 from sysdata.arctic.arctic_futures_per_contract_prices import (
     arcticFuturesContractPriceData,
 )
+from sysdata.mongodb.mongo_futures_instruments import mongoFuturesInstrumentData
 
 
 def seed_price_data_from_IB(instrument_code):
@@ -49,8 +50,18 @@ def seed_price_data_for_contract(data: dataBlob, contract: futuresContract):
 
 if __name__ == "__main__":
     print("Get initial price data from IB")
-    instrument_code = input("Instrument code? <return to abort> ")
+    instrument_code = input("Instrument code? <return to abort, ALL for all configured instruments> ")
     if instrument_code == "":
         exit()
 
-    seed_price_data_from_IB(instrument_code)
+    if instrument_code == "ALL":
+        instrument_data = mongoFuturesInstrumentData()
+        instrument_list = instrument_data.get_list_of_instruments()
+        print(instrument_list)
+
+        for instrument in instrument_list:
+            print(instrument)
+            seed_price_data_from_IB(instrument)
+
+    else:
+        seed_price_data_from_IB(instrument_code)
