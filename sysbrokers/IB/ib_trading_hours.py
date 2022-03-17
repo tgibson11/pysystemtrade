@@ -109,13 +109,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     start_times = {
         ## US
-        "CST (Central Standard Time)": 8,
-        "US/Central": 8,
-        "CST": 8,
+        "CST (Central Standard Time)": 10,
+        "US/Central": 10,
+        "CST": 10,
 
-        "EST (Eastern Standard Time)": 7,
-        "US/Eastern": 7,
-        "EST": 7,
+        "EST (Eastern Standard Time)": 9,
+        "US/Eastern": 9,
+        "EST": 9,
 
         ## UK
         "GB-Eire": 9,
@@ -135,13 +135,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     end_times = {
         ## US
-        "CST (Central Standard Time)": 13,
-        "US/Central": 13,
-        "CST": 13,
+        "CST (Central Standard Time)": 15,
+        "US/Central": 15,
+        "CST": 15,
 
-        "EST (Eastern Standard Time)": 12,
-        "US/Eastern": 12,
-        "EST": 12,
+        "EST (Eastern Standard Time)": 14,
+        "US/Eastern": 14,
+        "EST": 14,
 
         ## UK
         "GB-Eire": 16,
@@ -170,12 +170,12 @@ def get_time_difference(time_zone_id: str) -> int:
     # after and 1 hour before
     # confusingly, IB seem to have changed their time zone codes in 2020
     time_diff_dict = {
-        "CST (Central Standard Time)": -1,
-        "EST (Eastern Standard Time)": -2,
-        "US/Eastern": -2,
-        "EST": -2,
-        "US/Central": -1,
-        "America/Belize": -1,
+        "CST (Central Standard Time)": 1,
+        "EST (Eastern Standard Time)": 0,
+        "US/Eastern": -0,
+        "EST": 0,
+        "US/Central": 1,
+        "America/Belize": 1,
         "": 0
     }
     diff_hours = time_diff_dict.get(time_zone_id, None)
