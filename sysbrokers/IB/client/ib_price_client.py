@@ -151,8 +151,10 @@ class ibPriceClient(ibContractsClient):
         #     ibcontract, recent_ib_time, "", tick_count, "BID_ASK", useRth=False
         # )
 
-        # Request delayed streaming data instead of historical, which requires subscriptions
-        self.ib.reqMarketDataType(3)  # 1=live, 3=delayed
+        # Request streaming data instead of historical
+        # (delayed streaming data is available w/o a market data subscription)
+
+        # self.ib.reqMarketDataType(3)  # 1=live, 3=delayed
         tick_data = self.ib.reqMktData(ibcontract)
         self.ib.sleep(2)
         self.ib.cancelMktData(ibcontract)

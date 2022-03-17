@@ -128,13 +128,9 @@ def get_combined_df_of_costs(
     )
     configured_costs = get_current_configured_spread_cost(data)
 
-    combined = pd.concat([bid_ask_costs,
-                          # actual_trade_costs,
-                          sampling_costs
-                          ],
-                                 axis=1)
+    combined = pd.concat([bid_ask_costs, actual_trade_costs, sampling_costs], axis=1)
 
-    combined.columns = ["bid_ask_trades", "bid_ask_sampled"]
+    combined.columns = ["bid_ask_trades", "total_trades", "bid_ask_sampled"]
 
     estimate_with_data = best_estimate_from_cost_data(
         bid_ask_costs=bid_ask_costs,
@@ -193,8 +189,6 @@ def best_estimate_from_cost_data(
     weight_on_trades = all_weights.order_count / trades_to_count_as_config
     weight_on_trades[weight_on_trades.isna()] = 0.0
     weight_on_trades[all_weights.trading.isna()] = 0.0
-    # My trade data is not usable because it's delayed, so don't use it!
-    weight_on_trades[:] = 0.0
     all_weights.trading[all_weights.trading.isna()] = 0.0
 
     weight_on_samples = all_weights.sample_count / samples_to_count_as_config
