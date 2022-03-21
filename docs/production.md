@@ -281,6 +281,7 @@ You need to:
     - Download private files
       - Configure SSH keys
       - `git clone ssh://git@github.com/tgibson11/private.git`
+      - Update email password in private_config.yaml (do not commit)
       - `cp -r $HOME/private $HOME/pysystemtrade/private`
     - Start MongoDB if not already running: `mongod`
     - Start IB gateway or TWS
