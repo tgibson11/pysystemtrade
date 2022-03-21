@@ -270,7 +270,8 @@ You need to:
         - /home/user_name/Dropbox (optional; in my setup, this is a folder or symbolic link that syncs to the cloud)
     - Install the pysystemtrade package
       - `cd $HOME; git clone https://github.com/tgibson11/pysystemtrade.git`
-      - `cd pysystemtrade; sudo python3 setup.py install`
+      - `cd pysystemtrade; git checkout bgibson`
+      - `sudo python3 setup.py install`
     - Install or update dependencies
       - `sudo python3 -m pip install -r $HOME/pysystemtrade/requirements.txt`
     - Install IB Gateway or TWS
@@ -279,6 +280,7 @@ You need to:
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/)
       - MacOS: max # of open files needs to be increased. `sudo launchctl limit maxfiles 64000 100000000` will work, but does not persist after a restart.  For a more permanent solution, see https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
     - Download private files
+      - I'll provide these initially. The following steps are how I manage mine.
       - Configure SSH keys
       - `git clone ssh://git@github.com/tgibson11/private.git`
       - `cp -r $HOME/private $HOME/pysystemtrade/private`
@@ -289,7 +291,9 @@ You need to:
       - Set up futures instrument configuration using this script [instruments_csv_mongo.py](/sysinit/futures/instruments_csv_mongo.py).
   - Futures contract prices:
     - [Download recent price data from IB](/sysinit/futures/seed_price_data_from_IB.py). This will only get you data going back about a year, but that's OK. We just need this to bring the provided multiple price data up-to-date.
+    - Alternative: maybe I'll just give you mine in a zip file
   - Roll calendars:
+      - Not needed if I provided you full historical price data
       - For *roll configuration* we need to initialise by running the code in this file [roll_parameters_csv_mongo.py](/sysinit/futures/roll_parameters_csv_mongo.py).
       - [Generate roll calendars](/sysinit/futures/rollcalendars_from_arcticprices_to_csv.py) from the price data you just downloaded. Don't overwrite the provided roll calendars!
   - Multiple futures prices:
