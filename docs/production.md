@@ -267,6 +267,7 @@ You need to:
         - /home/user_name/data/mongo_dump
         - /home/user_name/data/backups_csv
         - /home/user_name/data/backtests
+        - /home/user_name/data/reports
         - /home/user_name/Dropbox (optional; in my setup, this is a folder or symbolic link that syncs to the cloud)
     - Install the pysystemtrade package
       - `cd $HOME; git clone https://github.com/tgibson11/pysystemtrade.git`

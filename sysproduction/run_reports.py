@@ -19,7 +19,7 @@ def get_list_of_timer_functions_for_reports():
     list_of_timer_names_and_functions = []
     for report_name, report_config in all_configs.items():
         data_for_report = dataBlob(log_name=report_name)
-        email_report_config = report_config.new_config_with_modified_output("email")
+        email_report_config = report_config.new_config_with_modified_output("emailfile")
         report_object = runReport(data_for_report, email_report_config, report_name)
         report_tuple = (report_name, report_object)
         list_of_timer_names_and_functions.append(report_tuple)
@@ -36,10 +36,10 @@ class runReport(object):
         self.config = config
 
         # run process expects a method with same name as log name
-        setattr(self, report_function, self.email_trades_report)
+        setattr(self, report_function, self.run_generic_report)
 
-    def email_trades_report(self):
-
+    def run_generic_report(self):
+        ## Will be renamed
         run_report(self.config, data=self.data)
 
 
