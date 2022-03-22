@@ -15,17 +15,35 @@ from sysquant.estimators.covariance import (
     get_annualised_risk,
 )
 from sysquant.estimators.correlations import correlationEstimate
+from sysquant.estimators.clustering_correlations import assets_in_cluster_order
 from sysquant.estimators.stdev_estimator import stdevEstimates
 from sysquant.optimisation.weights import portfolioWeights
 from sysquant.fitting_dates import IN_SAMPLE
 
-from sysproduction.data.capital import dataCapital
+from sysproduction.data.capital import dataCapital, dataMargin
 from sysproduction.data.instruments import diagInstruments
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.prices import diagPrices, get_list_of_instruments
 
 DAILY_RISK_CALC_LOOKBACK = int(BUSINESS_DAYS_IN_YEAR * 2)
 
+def get_margin_usage(data) -> float:
+    capital = get_current_capital(data)
+    margin = get_current_margin(data)
+    margin_usage = margin / capital
+
+    return margin_usage
+
+def get_current_capital(data) -> float:
+    data_capital = dataCapital(data)
+    capital = data_capital.get_current_total_capital()
+    return capital
+
+def get_current_margin(data) -> float:
+    data_margin = dataMargin(data)
+    margin = data_margin.get_current_total_margin()
+
+    return margin
 
 def get_instrument_risk_table(data, only_held_instruments=True):
     ## INSTRUMENT RISK (daily %, annual %, return space daily and annual, base currency per contract daily and annual, positions)
@@ -208,7 +226,15 @@ def get_perc_of_capital_position_size_across_instruments_for_strategy(
 def get_correlation_matrix_all_instruments(data) -> correlationEstimate:
     instrument_list = get_instruments_with_positions_all_strategies(data)
     cmatrix = get_correlation_matrix_for_instrument_returns(data, instrument_list)
+
     cmatrix = cmatrix.ordered_correlation_matrix()
+
+    return cmatrix
+
+def cluster_correlation_matrix(cmatrix: correlationEstimate) -> correlationEstimate:
+    cluster_size = min(5, int(cmatrix.size/3))
+    new_order = assets_in_cluster_order(cmatrix, cluster_size=cluster_size)
+    cmatrix = cmatrix.list_in_key_order(new_order)
 
     return cmatrix
 

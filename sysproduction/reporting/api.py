@@ -34,11 +34,13 @@ from sysproduction.reporting.data.positions import (
     get_broker_positions,
     get_position_breaks,
 )
-from sysproduction.reporting.data.risk_metrics import (
+from sysproduction.reporting.data.risk import (
     get_correlation_matrix_all_instruments,
+    cluster_correlation_matrix,
     get_instrument_risk_table,
     get_portfolio_risk_for_all_strategies,
     get_portfolio_risk_across_strategies,
+    get_margin_usage
 )
 from sysproduction.reporting.data.rolls import (
     get_roll_data_for_instrument,
@@ -58,6 +60,7 @@ from sysproduction.reporting.data.status import (
 )
 from sysproduction.reporting.data.volume import get_liquidity_data_df
 
+REPORT_DATETIME_FORMAT = "%m/%d/%Y, %H:%M"
 
 class reportingApi(object):
     def __init__(
@@ -80,9 +83,9 @@ class reportingApi(object):
             "%s report produced on %s from %s to %s"
             % (
                 report_name,
-                str(datetime.datetime.now()),
-                str(start_date),
-                str(end_date),
+                datetime.datetime.now().strftime(REPORT_DATETIME_FORMAT),
+                start_date.strftime(REPORT_DATETIME_FORMAT),
+                end_date.strftime(REPORT_DATETIME_FORMAT)
             )
         )
 
@@ -310,8 +313,16 @@ class reportingApi(object):
         return list_of_instruments
 
     #### RISK REPORT ####
-    def table_of_correlations(self):
+    def body_text_margin_usage(self) -> body_text:
+        margin_usage = self.get_margin_usage()
+        perc_margin_usage = margin_usage * 100.0
+        body_text_margin_usage = body_text("Percentage of capital used for margin %.1f%%" % perc_margin_usage)
+
+        return body_text_margin_usage
+
+    def table_of_correlations(self) -> table:
         corr_data = get_correlation_matrix_all_instruments(self.data)
+        corr_data = cluster_correlation_matrix(corr_data)
         corr_data = corr_data.as_pd().round(2)
         table_corr = table("Correlations", corr_data)
 
@@ -319,8 +330,8 @@ class reportingApi(object):
 
     def table_of_instrument_risk(self):
         instrument_risk_data = self.instrument_risk_data()
-        instrument_risk_data_rounded = instrument_risk_data.round(2)
-        table_instrument_risk = table("Instrument risk", instrument_risk_data_rounded)
+        instrument_risk_data = nice_format_instrument_risk_table(instrument_risk_data)
+        table_instrument_risk = table("Instrument risk", instrument_risk_data)
         return table_instrument_risk
 
     def table_of_strategy_risk(self):
@@ -394,6 +405,9 @@ class reportingApi(object):
             "Net sum of annualised risk %% capital %.1f "
             % net_total_all_risk_annualised
         )
+
+    def get_margin_usage(self) -> float:
+        return get_margin_usage(self.data)
 
     def instrument_risk_data(self):
         instrument_risk = getattr(self, "_instrument_risk", missing_data)
@@ -574,6 +588,7 @@ class reportingApi(object):
             return body_text("No trades")
 
         vol_slippage = create_vol_norm_slippage_df(raw_slippage, self.data)
+        vol_slippage = vol_slippage.round(2)
         table_of_vol_slippage = table(
             "Slippage (normalised by annual vol, BP of annual SR)", vol_slippage
         )
@@ -604,6 +619,7 @@ class reportingApi(object):
 
     def table_of_cash_slippage(self):
         cash_slippage = self.cash_slippage
+        cash_slippage = cash_slippage.round(2)
         if len(cash_slippage) == 0:
             return body_text("No trades")
 
@@ -735,3 +751,19 @@ def get_liquidity_report_data(data: dataBlob) -> pd.DataFrame:
     return all_liquidity_df
 
 
+def nice_format_instrument_risk_table(instrument_risk_data):
+    instrument_risk_data.daily_price_stdev = instrument_risk_data.daily_price_stdev.round(3)
+    instrument_risk_data.annual_price_stdev = instrument_risk_data.annual_price_stdev.round(3)
+    instrument_risk_data.price = instrument_risk_data.price.round(2)
+    instrument_risk_data.daily_perc_stdev = instrument_risk_data.daily_perc_stdev.round(2)
+    instrument_risk_data.annual_perc_stdev = instrument_risk_data.annual_perc_stdev.round(1)
+    instrument_risk_data.point_size_base = instrument_risk_data.point_size_base.round(1)
+    instrument_risk_data.contract_exposure = instrument_risk_data.contract_exposure.round(0)
+    instrument_risk_data.daily_risk_per_contract = instrument_risk_data.daily_risk_per_contract.round(0)
+    instrument_risk_data.annual_risk_per_contract = instrument_risk_data.annual_risk_per_contract.round(0)
+    instrument_risk_data.position = instrument_risk_data.position.round(0)
+    instrument_risk_data.capital = instrument_risk_data.capital.round(0)
+    instrument_risk_data.exposure_held_perc_capital = instrument_risk_data.exposure_held_perc_capital.round(1)
+    instrument_risk_data.annual_risk_perc_capital = instrument_risk_data.annual_risk_perc_capital.round(1)
+
+    return instrument_risk_data
