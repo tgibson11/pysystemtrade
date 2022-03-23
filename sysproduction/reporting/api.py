@@ -2,12 +2,13 @@ import datetime
 
 import pandas as pd
 
-from syscore.dateutils import n_days_ago
+from syscore.dateutils import n_days_ago, SECONDS_PER_DAY
 from syscore.objects import arg_not_supplied, missing_data, body_text
 from sysdata.data_blob import dataBlob
 
 from sysproduction.data.prices import diagPrices
 from sysproduction.data.positions import annonate_df_index_with_positions_held
+from sysproduction.reporting.formatting import nice_format_instrument_risk_table, nice_format_liquidity_table, nice_format_slippage_table
 from sysproduction.reporting.reporting_functions import header, table
 
 from sysproduction.reporting.data.costs import (
@@ -60,7 +61,7 @@ from sysproduction.reporting.data.status import (
 )
 from sysproduction.reporting.data.volume import get_liquidity_data_df
 
-REPORT_DATETIME_FORMAT = "%m/%d/%Y, %H:%M"
+REPORT_DATETIME_FORMAT = "%d/%m/%Y %H:%M"
 
 class reportingApi(object):
     def __init__(
@@ -206,6 +207,15 @@ class reportingApi(object):
         process_table = table("Config for process control", process)
 
         return process_table
+
+    def table_of_delayed_methods(self):
+        method_status = get_control_data_list_for_all_methods_as_df(self.data)
+        delay_methods_table = filter_data_for_delays_and_return_table(method_status,
+                                                                      datetime_colum='last_start',
+                                                                      max_delay_in_days=3,
+                                                                      table_header='Delayed methods')
+
+        return delay_methods_table
 
     def table_of_control_status_list_for_all_processes(self):
         process2 = get_control_status_list_for_all_processes_as_df(self.data)
@@ -499,10 +509,11 @@ class reportingApi(object):
         if liquidity is missing_data:
             liquidity = self._liquidity_data = self._get_liquidity_data()
 
+        liquidity = nice_format_liquidity_table(liquidity)
         return liquidity
 
     def _get_liquidity_data(self) -> pd.DataFrame:
-        return get_liquidity_data_df(self.data)
+        return get_liquidity_report_data(self.data)
 
     ##### COSTS ######
     def table_of_sr_costs(self):
@@ -522,7 +533,7 @@ class reportingApi(object):
 
     def table_of_slippage_comparison(self):
         combined_df_costs = self.combined_df_costs()
-        combined_df_costs = combined_df_costs.round(6)
+        combined_df_costs = nice_format_slippage_table(combined_df_costs)
         combined_df_costs = annonate_df_index_with_positions_held(
             self.data, pd_df=combined_df_costs
         )
@@ -713,35 +724,6 @@ class reportingApi(object):
         return end_date
 
 
-def get_combined_df_of_costs_as_table(
-    data: dataBlob, start_date: datetime.datetime, end_date: datetime.datetime
-):
-
-    combined_df_costs = get_combined_df_of_costs(
-        data, start_date=start_date, end_date=end_date
-    )
-    combined_df_costs = combined_df_costs.round(6)
-    combined_df_costs = annonate_df_index_with_positions_held(
-        data=data, pd_df=combined_df_costs
-    )
-
-    combined_df_costs_as_formatted_table = table("Check of slippage", combined_df_costs)
-
-    return combined_df_costs_as_formatted_table
-
-
-def get_table_of_SR_costs_as_formatted_table(data):
-    table_of_SR_costs = get_table_of_SR_costs(data)
-    table_of_SR_costs = table_of_SR_costs.round(5)
-    table_of_SR_costs = annonate_df_index_with_positions_held(
-        data=data, pd_df=table_of_SR_costs
-    )
-    formatted_table = table(
-        "SR costs (using stored slippage): more than 0.01 means panic",
-        table_of_SR_costs,
-    )
-
-    return formatted_table
 
 
 def get_liquidity_report_data(data: dataBlob) -> pd.DataFrame:
@@ -751,19 +733,27 @@ def get_liquidity_report_data(data: dataBlob) -> pd.DataFrame:
     return all_liquidity_df
 
 
-def nice_format_instrument_risk_table(instrument_risk_data):
-    instrument_risk_data.daily_price_stdev = instrument_risk_data.daily_price_stdev.round(3)
-    instrument_risk_data.annual_price_stdev = instrument_risk_data.annual_price_stdev.round(3)
-    instrument_risk_data.price = instrument_risk_data.price.round(2)
-    instrument_risk_data.daily_perc_stdev = instrument_risk_data.daily_perc_stdev.round(2)
-    instrument_risk_data.annual_perc_stdev = instrument_risk_data.annual_perc_stdev.round(1)
-    instrument_risk_data.point_size_base = instrument_risk_data.point_size_base.round(1)
-    instrument_risk_data.contract_exposure = instrument_risk_data.contract_exposure.round(0)
-    instrument_risk_data.daily_risk_per_contract = instrument_risk_data.daily_risk_per_contract.round(0)
-    instrument_risk_data.annual_risk_per_contract = instrument_risk_data.annual_risk_per_contract.round(0)
-    instrument_risk_data.position = instrument_risk_data.position.round(0)
-    instrument_risk_data.capital = instrument_risk_data.capital.round(0)
-    instrument_risk_data.exposure_held_perc_capital = instrument_risk_data.exposure_held_perc_capital.round(1)
-    instrument_risk_data.annual_risk_perc_capital = instrument_risk_data.annual_risk_perc_capital.round(1)
+def filter_data_for_delays_and_return_table(data_with_datetime,
+                           datetime_colum='last_start',
+                        table_header = "Only delayed data",
+                max_delay_in_days = 3):
 
-    return instrument_risk_data
+    filtered_data = filter_data_for_delays(data_with_datetime,
+                                           datetime_colum=datetime_colum,
+                                           max_delay_in_days=max_delay_in_days)
+    if len(filtered_data)==0:
+        return body_text("%s: No delays" % table_header)
+    else:
+        return table(table_header,
+                     filtered_data)
+
+def filter_data_for_delays(data_with_datetime,
+                           datetime_colum='last_start',
+                max_delay_in_days = 3) -> pd.DataFrame:
+
+    max_delay_in_seconds = max_delay_in_days * SECONDS_PER_DAY
+    time_delays = datetime.datetime.now() -data_with_datetime[datetime_colum]
+    delayed = [time_difference.total_seconds() > max_delay_in_seconds
+               for time_difference in time_delays]
+
+    return data_with_datetime[delayed]
