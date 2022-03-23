@@ -83,12 +83,38 @@ liquidity_report_config = reportConfig(
 
 costs_report_config = reportConfig(
     title="Costs report",
-    function="sysproduction.reporting.costs_report.costs_report",
+    function="sysproduction.reporting.costs_report.costs_report"
+)
+
+slippage_report_config = reportConfig(
+    title="Slippage report",
+    function="sysproduction.reporting.slippage_report.slippage_report",
     calendar_days_back=250,
 )
 
+instrument_risk_report_config = reportConfig(title="Instrument risk report",
+    function=
+    "sysproduction.reporting.instrument_risk_report.instrument_risk_report")
+
+min_capital_report_config= reportConfig(title="Minimum capital report",
+    function=
+    "sysproduction.reporting.minimum_capital_report.minimum_capital_report")
+
+duplicate_market_report_config = reportConfig(title="Duplicate markets report",
+    function=
+    "sysproduction.reporting.duplicate_market_report.duplicate_market_report")
+
+position_limit_report_config = reportConfig(title="Position limit report",
+    function=
+    "sysproduction.reporting.position_limits_report.position_limits_report")
+
+remove_markets_report_config = reportConfig(title="Remove markets report",
+    function = "sysproduction.reporting.remove_markets_report.remove_markets_report")
+
 ## The reports will be run in this order
 all_configs = dict(
+    slippage_report_config = slippage_report_config,
+    costs_report=costs_report_config,
     roll_report=roll_report_config,
     daily_pandl_report=daily_pandl_report_config,
     reconcile_report=reconcile_report_config,
@@ -97,5 +123,9 @@ all_configs = dict(
     risk_report=risk_report_config,
     status_report=status_report_config,
     liquidity_report=liquidity_report_config,
-    costs_report=costs_report_config,
+    instrument_risk_report = instrument_risk_report_config,
+    min_capital = min_capital_report_config,
+    duplicate_market =duplicate_market_report_config,
+    position_limit_report = position_limit_report_config,
+    remove_markets_report = remove_markets_report_config
 )

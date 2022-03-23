@@ -49,6 +49,13 @@ from sysproduction.reporting.report_configs import (
     risk_report_config,
     liquidity_report_config,
     costs_report_config,
+    slippage_report_config,
+    instrument_risk_report_config,
+    min_capital_report_config,
+    duplicate_market_report_config,
+    position_limit_report_config,
+    remove_markets_report_config
+
 )
 
 
@@ -77,27 +84,22 @@ def interactive_diagnostics():
 
 top_level_menu_of_options = {
     0: "backtest objects",
-    1: "reports",
+    1: "View instrument configuration",
     2: "logs, emails, and errors",
     3: "View prices",
     4: "View capital",
     5: "View positions & orders",
-    6: "View instrument configuration",
+    6: "Reports",
 }
 
 nested_menu_of_options = {
     0: {1: "Interactive python", 2: "Plot method", 3: "Print method", 4: "HTML output"},
     1: {
-        10: "Roll report",
-        11: "P&L report",
-        12: "Status report",
-        13: "Trade report",
-        14: "Reconcile report",
-        15: "Strategy report",
-        16: "Risk report",
-        17: "Costs report",
-        18: "Liquidity report",
+        10: "View instrument configuration data",
+        11: "View contract configuration data",
+        12: "View trading hours for all instruments",
     },
+
     2: {20: "View stored emails", 21: "View errors", 22: "View logs"},
     3: {
         30: "Individual futures contract prices",
@@ -120,10 +122,23 @@ nested_menu_of_options = {
         56: "View individual order",
     },
     6: {
-        60: "View instrument configuration data",
-        61: "View contract configuration data",
-        62: "View trading hours for all instruments",
-    },
+        60: "Roll report",
+        61: "P&L report",
+        62: "Status report",
+        63: "Trade report",
+        64: "Reconcile report",
+        65: "Strategy report",
+        66: "Risk report",
+        67: "Costs report",
+        68: "Slippage report",
+        69: "Liquidity report",
+        70: "All instrument risk",
+        71: "Minimum capital required",
+        72: "Duplicate and remove markets",
+        73: "Remove markets",
+        74: "Position limits"
+    }
+
 }
 
 
@@ -216,8 +231,12 @@ def risk_report(data):
 
 
 def cost_report(data):
-    start_date, end_date, calendar_days = get_report_dates(data)
     report_config = email_or_print_or_file(costs_report_config)
+    run_report(report_config, data=data)
+
+def slippage_report(data):
+    start_date, end_date, calendar_days = get_report_dates(data)
+    report_config = email_or_print_or_file(slippage_report_config)
     report_config.modify_kwargs(
         calendar_days_back=calendar_days, start_date=start_date, end_date=end_date
     )
@@ -227,6 +246,28 @@ def cost_report(data):
 def liquidity_report(data):
     report_config = email_or_print_or_file(liquidity_report_config)
     run_report(report_config, data=data)
+
+def instrument_risk_report(data):
+    report_config = email_or_print_or_file(instrument_risk_report_config)
+    run_report(report_config, data=data)
+
+
+def min_capital_report(data):
+    report_config = email_or_print_or_file(min_capital_report_config)
+    run_report(report_config, data=data)
+
+def duplicate_market_report(data):
+    report_config = email_or_print_or_file(duplicate_market_report_config)
+    run_report(report_config, data=data)
+
+def remove_markets_report(data):
+    report_config = email_or_print_or_file(remove_markets_report_config)
+    run_report(report_config, data=data)
+
+def position_limit_report(data):
+    report_config = email_or_print_or_file(position_limit_report_config)
+    run_report(report_config, data=data)
+
 
 
 def email_or_print_or_file(report_config):
@@ -706,15 +747,11 @@ dict_of_functions = {
     2: backtest_plot,
     3: backtest_print,
     4: backtest_html,
-    10: roll_report,
-    11: pandl_report,
-    12: status_report,
-    13: trade_report,
-    14: reconcile_report,
-    15: strategy_report,
-    16: risk_report,
-    17: cost_report,
-    18: liquidity_report,
+
+    10: view_instrument_config,
+    11: view_contract_config,
+    12: print_trading_hours_for_all_instruments,
+
     20: retrieve_emails,
     21: view_errors,
     22: view_logs,
@@ -732,9 +769,23 @@ dict_of_functions = {
     54: list_of_contract_orders,
     55: list_of_broker_orders,
     56: view_individual_order,
-    60: view_instrument_config,
-    61: view_contract_config,
-    62: print_trading_hours_for_all_instruments,
+
+    60: roll_report,
+    61: pandl_report,
+    62: status_report,
+    63: trade_report,
+    64: reconcile_report,
+    65: strategy_report,
+    66: risk_report,
+    67: cost_report,
+    68: slippage_report,
+    69: liquidity_report,
+    70: instrument_risk_report,
+    71: min_capital_report,
+    72: duplicate_market_report,
+    73: remove_markets_report,
+    74: position_limit_report,
+
 }
 
 if __name__ == "__main__":
