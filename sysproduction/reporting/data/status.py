@@ -140,6 +140,8 @@ def get_control_status_list_for_all_processes_as_df(data):
 def get_control_data_list_for_all_methods_as_df(data):
     cd_list = get_control_data_list_for_all_methods(data)
     pdf = make_df_from_list_of_named_tuple(dataForMethod, cd_list)
+    missing_data_filter = pdf["last_start"] != missing_data
+    pdf = pdf[missing_data_filter]
     pdf = pdf.sort_values("last_start")
     return pdf
 
