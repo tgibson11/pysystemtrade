@@ -32,9 +32,12 @@ from sysproduction.reporting.data.trades import (
     get_broker_trades_as_terse_df,
 )
 
+
 from sysproduction.reporting.data.duplicate_remove_markets import (
     get_list_of_duplicate_market_tables,
-    text_suggest_changes_to_duplicate_markets)
+    text_suggest_changes_to_duplicate_markets,
+    get_remove_market_data,
+    RemoveMarketData)
 
 from sysproduction.reporting.data.pandl import (
     get_total_capital_pandl,
@@ -113,6 +116,55 @@ class reportingApi(object):
 
     def footer(self):
         return header("END OF REPORT")
+
+    ## MARKETS TO REMOVE
+    def body_text_existing_markets_remove(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_existing_markets_to_remove)
+
+    def body_text_removed_markets_addback(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_removed_markets_addback)
+
+    def body_text_expensive_markets(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_expensive_markets)
+
+    def body_text_markets_without_enough_volume_risk(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_markets_without_enough_volume_risk)
+
+    def body_text_markets_without_enough_volume_contracts(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_markets_without_enough_volume_contracts)
+
+    def body_text_too_safe_markets(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_too_safe_markets)
+
+    def body_text_explain_safety(self) -> body_text:
+        remove_market_data = self.remove_market_data()
+
+        return body_text(remove_market_data.str_explain_safety)
+
+    def remove_market_data(self) -> RemoveMarketData:
+        remove_market_data = getattr(self,
+                                     "_remove_market_data",
+                                     missing_data)
+        if remove_market_data is missing_data:
+            remove_market_data = self._get_remove_market_data()
+            self._remove_market_data = remove_market_data
+
+        return remove_market_data
+
+    def _get_remove_market_data(self) -> RemoveMarketData:
+        return get_remove_market_data(self.data)
 
     ## DUPLICATE MARKETS
 
@@ -583,7 +635,7 @@ class reportingApi(object):
         all_liquidity_df = self.liquidity_data()
         all_liquidity_df = all_liquidity_df.sort_values("contracts")
         table_liquidity = table(
-            " Sorted by contracts: Less than 100 contracts a day is a problem",
+            " Sorted by contracts",
             all_liquidity_df,
         )
 
@@ -592,8 +644,10 @@ class reportingApi(object):
     def table_of_liquidity_risk_sort(self) -> table:
         all_liquidity_df = self.liquidity_data()
         all_liquidity_df = all_liquidity_df.sort_values("risk")
-        table_liquidity = table("Sorted by risk: Less than ~3X capital of risk per day is a problem",
-                                all_liquidity_df)
+        table_liquidity = table(
+            "$m of annualised risk per day, sorted by risk",
+            all_liquidity_df,
+        )
 
         return table_liquidity
 
@@ -614,7 +668,7 @@ class reportingApi(object):
         SR_costs = SR_costs.round(5)
         SR_costs = annonate_df_index_with_positions_held(data=self.data, pd_df=SR_costs)
         formatted_table = table(
-            "SR costs (using stored slippage): more than 0.01 means panic", SR_costs
+            "SR costs (using stored slippage)", SR_costs
         )
 
         return formatted_table
