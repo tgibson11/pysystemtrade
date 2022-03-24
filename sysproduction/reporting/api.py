@@ -3,13 +3,18 @@ import datetime
 import pandas as pd
 
 from syscore.dateutils import n_days_ago, SECONDS_PER_DAY
-from syscore.objects import arg_not_supplied, missing_data, body_text
+from syscore.objects import arg_not_supplied, missing_data, body_text, ALL_ROLL_INSTRUMENTS
 from sysdata.data_blob import dataBlob
 
 from sysproduction.data.prices import diagPrices
 
 from sysproduction.data.positions import annonate_df_index_with_positions_held
-from sysproduction.reporting.formatting import nice_format_instrument_risk_table, nice_format_liquidity_table, nice_format_slippage_table, nice_format_roll_table
+from sysproduction.reporting.formatting import (
+    nice_format_instrument_risk_table,
+    nice_format_liquidity_table,
+    nice_format_slippage_table,
+    nice_format_roll_table,
+    nice_format_min_capital_table)
 from sysproduction.reporting.reporting_functions import header, table
 
 from sysproduction.reporting.data.costs import (
@@ -26,6 +31,11 @@ from sysproduction.reporting.data.trades import (
     get_recent_trades_from_db_as_terse_df,
     get_broker_trades_as_terse_df,
 )
+
+from sysproduction.reporting.data.duplicate_remove_markets import (
+    get_list_of_duplicate_market_tables,
+    text_suggest_changes_to_duplicate_markets)
+
 from sysproduction.reporting.data.pandl import (
     get_total_capital_pandl,
     pandlCalculateAndStore,
@@ -42,11 +52,11 @@ from sysproduction.reporting.data.risk import (
     get_instrument_risk_table,
     get_portfolio_risk_for_all_strategies,
     get_portfolio_risk_across_strategies,
-    get_margin_usage
+    get_margin_usage,
+    minimum_capital_table
 )
 from sysproduction.reporting.data.rolls import (
     get_roll_data_for_instrument,
-    ALL_ROLL_INSTRUMENTS,
 )
 from sysproduction.reporting.data.status import (
     get_all_overrides_as_df,
@@ -103,6 +113,43 @@ class reportingApi(object):
 
     def footer(self):
         return header("END OF REPORT")
+
+    ## DUPLICATE MARKETS
+
+    def body_text_suggest_changes_to_duplicate_markets(self) -> body_text:
+        list_of_duplicate_markets = self.list_of_duplicate_market_tables()
+        output_text = text_suggest_changes_to_duplicate_markets(list_of_duplicate_markets)
+        output_body_text = body_text(output_text)
+
+        return output_body_text
+
+
+    def list_of_duplicate_market_tables(self) -> list:
+        list_of_duplicate_market_tables = getattr(self,
+                                "_list_of_duplicate_market_tables",
+                                missing_data)
+        if list_of_duplicate_market_tables is missing_data:
+            list_of_duplicate_market_tables = \
+                self._get_list_of_duplicate_market_tables()
+            self._list_of_duplicate_market_tables = \
+                list_of_duplicate_market_tables
+
+        return list_of_duplicate_market_tables
+
+    def _get_list_of_duplicate_market_tables(self) -> list:
+        return get_list_of_duplicate_market_tables(self.data)
+
+    ### MINIMUM CAPITAL
+    def table_of_minimum_capital(self) -> table:
+        min_capital = minimum_capital_table(self.data)
+        min_capital = min_capital.sort_values('minimum_capital')
+
+        min_capital = nice_format_min_capital_table(min_capital)
+        min_capital_table = table("Minimum capital in base currency",
+                                             min_capital)
+
+        return min_capital_table
+
 
     #### PROFIT AND LOSS ####
     def body_text_total_capital_pandl(self):
@@ -416,7 +463,7 @@ class reportingApi(object):
                                           'point_size_base': 3,
                                           'contract_exposure': 0,
                                           'annual_risk_per_contract': 0})
-        instrument_risk_sorted_table = table("Risk of all instruments",
+        instrument_risk_sorted_table = table("Risk of all instruments with data",
                                              instrument_risk_sorted)
 
         return instrument_risk_sorted_table
