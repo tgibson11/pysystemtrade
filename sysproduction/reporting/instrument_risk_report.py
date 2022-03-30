@@ -31,13 +31,14 @@ def instrument_risk_report(
         reporting_api.terse_header("Instrument risk report"))
     formatted_output.append(HEADER_TEXT)
 
-    list_of_func_names = [
-        "table_of_risk_all_instruments"
-    ]
+    formatted_output.append(reporting_api.table_of_risk_all_instruments(sort_by='annual_perc_stdev',
+                            table_header="Risk of all instruments with data - sorted by annualised % standard deviation"))
 
-    for func_name in list_of_func_names:
-        func = getattr(reporting_api, func_name)
-        formatted_output.append(func())
+    formatted_output.append(reporting_api.table_of_risk_all_instruments(sort_by='annual_risk_per_contract',
+                            table_header ="Risk of all instruments with data - sorted by annualised currency risk per contract"))
+
+    formatted_output.append(reporting_api.table_of_risk_all_instruments(sort_by='contract_exposure',
+                            table_header ="Risk of all instruments with data - sorted by notional exposure per contract"))
 
     formatted_output.append(reporting_api.footer())
 
