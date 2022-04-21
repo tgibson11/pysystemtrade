@@ -39,6 +39,8 @@ def pandl_info(
     formatted_output = []
     formatted_output.append(reporting_api.std_header("Profit and loss report"))
     list_of_func_names = [
+        "body_text_total_capital",
+        "body_text_total_capital_pandl_currency",
         "body_text_total_capital_pandl",
         "table_pandl_for_instruments_across_strategies",
         "body_text_total_pandl_for_futures",
