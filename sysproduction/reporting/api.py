@@ -40,6 +40,8 @@ from sysproduction.reporting.data.duplicate_remove_markets import (
     RemoveMarketData)
 
 from sysproduction.reporting.data.pandl import (
+    get_total_capital,
+    get_total_capital_pandl_currency,
     get_total_capital_pandl,
     pandlCalculateAndStore,
 )
@@ -204,6 +206,12 @@ class reportingApi(object):
 
 
     #### PROFIT AND LOSS ####
+    def body_text_total_capital(self):
+        return body_text(f"Ending capital is ${self.total_capital():,.0f}")
+
+    def body_text_total_capital_pandl_currency(self):
+        return body_text(f"Total p&l is ${self.total_capital_pandl_currency():,.0f}")
+
     def body_text_total_capital_pandl(self):
         total_capital_pandl = self.total_capital_pandl()
 
@@ -254,6 +262,24 @@ class reportingApi(object):
 
         return pandl_for_instruments_across_strategies_df
 
+    def total_capital(self) -> float:
+        total_capital = getattr(self, "_total_capital", missing_data)
+        if total_capital is missing_data:
+            total_capital = (
+                self._total_capital
+            ) = self._get_total_capital()
+
+        return total_capital
+
+    def total_capital_pandl_currency(self) -> float:
+        total_capital_pandl_currency = getattr(self, "_total_capital_pandl_currency", missing_data)
+        if total_capital_pandl_currency is missing_data:
+            total_capital_pandl_currency = (
+                self._total_capital_pandl_currency
+            ) = self._get_total_capital_pandl_currency()
+
+        return total_capital_pandl_currency
+
     def total_capital_pandl(self) -> float:
         total_capital_pandl = getattr(self, "_total_capital_pandl", missing_data)
         if total_capital_pandl is missing_data:
@@ -262,6 +288,20 @@ class reportingApi(object):
             ) = self._get_total_capital_pandl()
 
         return total_capital_pandl
+
+    def _get_total_capital(self) -> float:
+        total_capital = get_total_capital(
+            self.data, end_date=self.end_date
+        )
+
+        return total_capital
+
+    def _get_total_capital_pandl_currency(self) -> float:
+        total_capital_pandl_currency = get_total_capital_pandl_currency(
+            self.data, self.start_date, end_date=self.end_date
+        )
+
+        return total_capital_pandl_currency
 
     def _get_total_capital_pandl(self) -> float:
         total_capital_pandl = get_total_capital_pandl(

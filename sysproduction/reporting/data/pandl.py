@@ -36,7 +36,7 @@ def df_to_series(x):
     return x._series[x.keys()[0]]
 
 
-def get_daily_perc_pandl(data):
+def get_daily_pandl(data):
     data_capital_object = dataCapital(data)
 
     # This is for 'non compounding' p&l
@@ -44,11 +44,40 @@ def get_daily_perc_pandl(data):
     daily_pandl_series = total_pandl_series.ffill().diff()
     daily_pandl_series = df_to_series(daily_pandl_series)
 
+    return daily_pandl_series
+
+
+def get_daily_perc_pandl(data):
+    daily_pandl_series = get_daily_pandl(data)
+
     all_capital = get_total_capital_series(data)
 
     perc_pandl_series = daily_pandl_series / all_capital
 
     return perc_pandl_series * 100
+
+
+def get_total_capital(data, end_date=arg_not_supplied):
+
+    if end_date is arg_not_supplied:
+        end_date = datetime.datetime.now()
+    total_capital_series = get_total_capital_series(data)
+
+    total_capital_on_end_date = total_capital_series[:end_date][-1]
+
+    return total_capital_on_end_date
+
+
+def get_total_capital_pandl_currency(data, start_date, end_date=arg_not_supplied):
+
+    if end_date is arg_not_supplied:
+        end_date = datetime.datetime.now()
+    pandl_series = get_daily_pandl(data)
+
+    relevant_pandl = pandl_series[start_date:end_date]
+    pandl_in_period = relevant_pandl.sum()
+
+    return pandl_in_period
 
 
 def get_total_capital_pandl(data, start_date, end_date=arg_not_supplied):
