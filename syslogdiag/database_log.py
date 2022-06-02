@@ -8,6 +8,7 @@ from syslogdiag.log_entry import INVERSE_MAP, LEVEL_ID, logEntry
 from syslogdiag.log_to_screen import logtoscreen
 
 from syslogdiag.email_via_db_interface import send_production_mail_msg
+from syslogdiag.system_notification import notify
 
 LOG_COLLECTION_NAME = "Logs"
 EMAIL_ON_LOG_LEVEL = [4]
@@ -60,9 +61,10 @@ class logToDb(logger):
             str(log_entry.text)
 
         log_entry_text = str(log_entry)
-        send_production_mail_msg(data,
-                                 log_entry_text,
-                                 "*CRITICAL* ERROR: %s" % subject_line)
+        # send_production_mail_msg(data,
+        #                          log_entry_text,
+        #                          "*CRITICAL* ERROR: %s" % subject_line)
+        notify("*CRITICAL* ERROR: %s" % subject_line, log_entry_text)
 
 
 class logData(baseData):
