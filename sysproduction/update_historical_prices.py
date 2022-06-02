@@ -6,6 +6,7 @@ from syscore.objects import success, failure
 from syscore.merge_data import spike_in_data
 
 from syscore.dateutils import DAILY_PRICE_FREQ, Frequency
+from syslogdiag.system_notification import notify
 
 from sysobjects.contracts import futuresContract
 
@@ -197,9 +198,10 @@ def report_price_spike(data: dataBlob, contract_object: futuresContract):
     )
     data.log.warn(msg)
     try:
-        send_production_mail_msg(
-            data, msg, "Price Spike %s" % contract_object.instrument_code
-        )
+        # send_production_mail_msg(
+        #     data, msg, "Price Spike %s" % contract_object.instrument_code
+        # )
+        notify("Price Spike %s" % contract_object.instrument_code, msg)
     except BaseException:
         data.log.warn(
             "Couldn't send email about price spike for %s" % str(contract_object)
