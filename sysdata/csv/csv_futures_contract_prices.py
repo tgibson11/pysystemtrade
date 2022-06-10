@@ -147,7 +147,6 @@ class csvFuturesContractPriceData(futuresContractPriceData):
             if inverse:
                 column_series = 1 / column_series
             column_series *= multiplier
-            instrpricedata[col_name] = column_series.round(2)
 
         instrpricedata = futuresContractPrices(instrpricedata)
 
