@@ -2,12 +2,14 @@
 Get data from quandl for futures
 
 """
-
+from syscore.objects import arg_not_supplied, failure
+from sysdata.data_blob import dataBlob
 from sysobjects.contracts import futuresContract, listOfFuturesContracts
 from syscore.dateutils import adjust_timestamp_to_include_notional_close_and_time_offset
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
 )
+from sysdata.tools.cleaner import apply_price_cleaning
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 from syscore.fileutils import get_filename_for_package
 from sysdata.quandl.quandl_utils import load_private_key
@@ -170,12 +172,24 @@ class QuandlFuturesContractPriceData(futuresContractPriceData):
     def __repr__(self):
         return self.name
 
-    def get_prices_for_contract_object(self, contract_object):
-        """
-        We do this because we have no way of checking if QUANDL has something without actually trying to get it
-        """
-        return self._get_prices_for_contract_object_no_checking(
-            contract_object)
+    def get_cleaned_prices_for_contract_object(
+        self, contract_object: futuresContract, data: dataBlob, cleaning_config=arg_not_supplied
+    ) -> futuresContractPrices:
+
+        broker_prices_raw = self.get_prices_for_contract_object(
+            contract_object=contract_object,
+            return_empty=False  # return a failure if no prices available
+        )
+
+        broker_prices = apply_price_cleaning(data=data,
+                                             broker_prices_raw=broker_prices_raw,
+                                             cleaning_config=cleaning_config)
+
+        return broker_prices
+
+    def get_prices_for_contract_object(self, contract_object,
+                                       return_empty: bool = True):
+        return self._get_prices_for_contract_object_no_checking(contract_object)
 
     def _get_prices_for_contract_object_no_checking(
             self, futures_contract_object):
