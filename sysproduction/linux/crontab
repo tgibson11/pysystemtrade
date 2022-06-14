@@ -1,6 +1,11 @@
 # So matplotlib doesn't try to connect to an X11 server
 MPLBACKEND=Agg
 
+# For desktop notifications
+DISPLAY=":0.0"
+XAUTHORITY="/home/todd/.Xauthority"
+XDG_RUNTIME_DIR="/run/user/1000"
+
 # Use this for stuff to run on startup
 #
 # @reboot
