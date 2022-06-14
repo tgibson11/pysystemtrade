@@ -80,12 +80,15 @@ def update_historical_prices_for_instrument(instrument_code: str,
     if has_ib_market_data(instrument_code):
         for contract_object in contract_list:
             data.log.label(contract_date=contract_object.date_str)
-            update_historical_prices_for_instrument_and_contract(contract_object, data, cleaning_config=cleaning_config,
+            update_historical_prices_for_instrument_and_contract(contract_object, data,
+                                                                 cleaning_config=cleaning_config,
                                                                  interactive_mode=interactive_mode)
     else:
         for contract_object in contract_list:
             data.log.label(contract_date=contract_object.date_str)
-            update_historical_prices_for_instrument_and_contract_quandl(contract_object, data)
+            update_historical_prices_for_instrument_and_contract_quandl(contract_object, data,
+                                                                        cleaning_config=cleaning_config,
+                                                                        interactive_mode=interactive_mode)
 
     return success
 
@@ -187,36 +190,55 @@ def has_ib_market_data(instrument_code: str):
 
 
 def update_historical_prices_for_instrument_and_contract_quandl(
-    contract_object: futuresContract, data: dataBlob
+    contract_object: futuresContract, data: dataBlob,
+    cleaning_config: priceFilterConfig = arg_not_supplied,
+    interactive_mode: bool = False
 ):
-    """
-    Do a daily update for futures contract prices, using Quandl historical data
-
-    :param contract_object: futuresContract
-    :param data: data blob
-    :return: None
-    """
-
     from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
 
     quandl_data_source = QuandlFuturesContractPriceData()
-    db_futures_prices = updatePrices(data)
 
-    quandl_prices = quandl_data_source.get_prices_for_contract_object(contract_object)
-    if len(quandl_prices) == 0:
-        data.log.msg("No prices from broker for %s" % str(contract_object))
+    quandl_prices = quandl_data_source.get_cleaned_prices_for_contract_object(
+        contract_object, data=data, cleaning_config=cleaning_config
+    )
+
+    if quandl_prices is failure:
+        print("Something went wrong with getting prices for %s to check" % str(contract_object))
         return failure
 
-    error_or_rows_added = db_futures_prices.update_prices_for_contract(
-        contract_object, quandl_prices, check_for_spike=True
-    )
-    if error_or_rows_added is spike_in_data:
-        report_price_spike(data, contract_object)
+    if len(quandl_prices) == 0:
+        print("No Quandl prices found for %s nothing to check" % str(contract_object))
+        return success
+
+    if interactive_mode:
+        print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
+        price_data = diagPrices(data)
+        old_prices = price_data.get_prices_for_contract_object(contract_object)
+        new_prices_checked = manual_price_checker(
+            old_prices,
+            quandl_prices,
+            column_to_check="FINAL",
+            delta_columns=["OPEN", "HIGH", "LOW"],
+            type_new_data=futuresContractPrices,
+        )
+        check_for_spike = False
+    else:
+        new_prices_checked = copy(quandl_prices)
+        check_for_spike = True
+
+    error_or_rows_added = price_updating_or_errors(data = data,
+                                                   contract_object=contract_object,
+                                                   new_prices_checked = new_prices_checked,
+                                                   check_for_spike=check_for_spike,
+                                                   cleaning_config=cleaning_config
+                                                   )
+    if error_or_rows_added is failure:
         return failure
 
     data.log.msg("Added %d rows for %s" % (error_or_rows_added, str(contract_object)))
 
     return success
+
 
 def price_updating_or_errors(data: dataBlob,
                              contract_object: futuresContract,
