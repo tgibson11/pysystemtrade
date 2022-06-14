@@ -6,6 +6,7 @@ NOTE: this does not update the roll calendar .csv files stored elsewhere. Under 
 """
 from dataclasses import dataclass
 import numpy as np
+import pandas as pd
 
 from syscore.interactive import print_menu_of_values_and_get_response, get_and_convert, true_if_answer_is_yes
 from syscore.objects import success, failure, status, named_object
@@ -307,6 +308,16 @@ def auto_selected_roll_state_instrument(
     no_position_held = roll_data.position_priced_contract == 0
 
     if no_position_held:
+        run_roll_report(data, roll_data.instrument_code)
+
+        print(landing_strip(80))
+        print("Current State: %s" % roll_data.original_roll_status)
+        print(
+            "Current position in priced contract %d (if zero can Roll Adjusted prices)"
+            % roll_data.position_priced_contract
+        )
+        print("")
+
         print_with_landing_strips_around(
             "No position held, auto rolling adjusted price for %s"
             % roll_data.instrument_code
@@ -623,5 +634,7 @@ def _get_roll_adjusted_multiple_prices_object_ffill_option(data: dataBlob,
 
 
 if __name__ == '__main__':
+    # Show all columns when printing roll report Data
+    pd.options.display.width = 0
     interactive_update_roll_status()
 
