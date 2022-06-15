@@ -219,6 +219,11 @@ def update_historical_prices_for_instrument_and_contract_quandl(
 
     if interactive_mode:
         print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
+        if cleaning_config is arg_not_supplied:
+            max_price_spike = NO_SPIKE_CHECKING
+        else:
+            max_price_spike = cleaning_config.max_price_spike
+
         price_data = diagPrices(data)
         old_prices = price_data.get_prices_for_contract_object(contract_object)
         new_prices_checked = manual_price_checker(
@@ -227,6 +232,7 @@ def update_historical_prices_for_instrument_and_contract_quandl(
             column_to_check="FINAL",
             delta_columns=["OPEN", "HIGH", "LOW"],
             type_new_data=futuresContractPrices,
+            max_price_spike=max_price_spike
         )
         check_for_spike = False
     else:
