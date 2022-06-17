@@ -5,7 +5,7 @@ Get data from quandl for futures
 from syscore.objects import arg_not_supplied, failure
 from sysdata.data_blob import dataBlob
 from sysobjects.contracts import futuresContract, listOfFuturesContracts
-from syscore.dateutils import adjust_timestamp_to_include_notional_close_and_time_offset
+from syscore.dateutils import adjust_timestamp_to_include_notional_close_and_time_offset, DAILY_PRICE_FREQ
 from sysdata.futures.futures_per_contract_prices import (
     futuresContractPriceData,
 )
@@ -182,6 +182,8 @@ class QuandlFuturesContractPriceData(futuresContractPriceData):
         )
 
         broker_prices = apply_price_cleaning(data=data,
+
+                                             frequency=DAILY_PRICE_FREQ,
                                              broker_prices_raw=broker_prices_raw,
                                              cleaning_config=cleaning_config)
 
