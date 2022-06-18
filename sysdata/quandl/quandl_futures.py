@@ -176,18 +176,17 @@ class QuandlFuturesContractPriceData(futuresContractPriceData):
         self, contract_object: futuresContract, data: dataBlob, cleaning_config=arg_not_supplied
     ) -> futuresContractPrices:
 
-        broker_prices_raw = self.get_prices_for_contract_object(
+        quandl_prices_raw = self.get_prices_for_contract_object(
             contract_object=contract_object,
             return_empty=False  # return a failure if no prices available
         )
 
-        broker_prices = apply_price_cleaning(data=data,
+        quandl_prices = apply_price_cleaning(data=data,
+                                             broker_prices_raw=quandl_prices_raw,
+                                             cleaning_config=cleaning_config,
+                                             daily_data=True)
 
-                                             frequency=DAILY_PRICE_FREQ,
-                                             broker_prices_raw=broker_prices_raw,
-                                             cleaning_config=cleaning_config)
-
-        return broker_prices
+        return quandl_prices
 
     def get_prices_for_contract_object(self, contract_object,
                                        return_empty: bool = True):
