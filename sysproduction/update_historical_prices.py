@@ -193,7 +193,7 @@ def has_ib_market_data(instrument_code: str):
     from sysbrokers.IB.ib_instruments_data import get_instrument_object_from_config
     instrument_with_ib_data = get_instrument_object_from_config(instrument_code)
     exchange = instrument_with_ib_data.ib_data.exchange
-    return exchange in ['CMECRYPTO']
+    return exchange in ['GLOBEX', 'CMECRYPTO']
 
 
 def update_historical_prices_for_instrument_and_contract_quandl(
