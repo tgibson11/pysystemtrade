@@ -171,12 +171,19 @@ def get_time_difference(time_zone_id: str) -> int:
     # confusingly, IB seem to have changed their time zone codes in 2020
     time_diff_dict = {
         "CST (Central Standard Time)": -1,
+        "MET (Middle Europe Time)": -8,
         "EST (Eastern Standard Time)": -2,
+        "JST (Japan Standard Time)": -15,
         "US/Eastern": -2,
+        "MET": -8,
         "EST": -2,
+        "JST": -15,
+        "Japan": -15,
         "US/Central": -1,
+        "GB-Eire": -7,
+        "Hongkong": -14,
         "America/Belize": -1,
-        "": 0
+        "": -7,
     }
     diff_hours = time_diff_dict.get(time_zone_id, None)
     if diff_hours is None:

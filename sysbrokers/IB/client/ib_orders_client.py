@@ -1,5 +1,10 @@
 from ib_insync import TagValue
-from ib_insync.order import MarketOrder as ibMarketOrder, LimitOrder as ibLimitOrder, Trade as ibTrade, Order as ibOrder
+from ib_insync.order import (
+    MarketOrder as ibMarketOrder,
+    LimitOrder as ibLimitOrder,
+    Trade as ibTrade,
+    Order as ibOrder,
+)
 from syscore.objects import arg_not_supplied, missing_order, missing_contract
 from sysbrokers.IB.client.ib_contracts_client import ibContractsClient
 from sysbrokers.IB.ib_translate_broker_order_objects import (
