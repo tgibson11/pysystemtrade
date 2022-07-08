@@ -40,9 +40,14 @@ def from_ib_positions_to_dict(
     :return: dict of positions as dataframes
     """
     resolved_positions_dict = dict()
-    position_methods = dict(STK = resolve_ib_stock_position, FUT = resolve_ib_future_position,
-                            CASH = resolve_ib_cash_position, BOND=resolve_ib_bond_position,
-                            BILL=resolve_ib_bill_position, CRYPTO=resolve_ib_crypto_position)
+    position_methods = dict(
+        STK=resolve_ib_stock_position,
+        FUT=resolve_ib_future_position,
+        CASH=resolve_ib_cash_position,
+        BOND=resolve_ib_cash_position,
+        BILL=resolve_ib_cash_position,
+        CRYPTO=resolve_ib_cash_position
+    )
     for position in raw_positions:
         if account_id is not arg_not_supplied:
             if position.account != account_id:
@@ -90,27 +95,14 @@ def resolve_ib_future_position(position):
 
 def resolve_ib_cash_position(position):
 
-    return dict(account = position.account, symbol = position.contract.localSymbol,
-                expiry = "", multiplier = 1.0,
-                currency = position.contract.currency, position = position.position)
-
-
-def resolve_ib_bond_position(position):
-    return dict(account=position.account, symbol=position.contract.localSymbol,
-                expiry="", multiplier=1.0,
-                currency=position.contract.currency, position=position.position)
-
-
-def resolve_ib_bill_position(position):
-    return dict(account=position.account, symbol=position.contract.localSymbol,
-                expiry="", multiplier=1.0,
-                currency=position.contract.currency, position=position.position)
-
-
-def resolve_ib_crypto_position(position):
-    return dict(account=position.account, symbol=position.contract.localSymbol,
-                expiry="", multiplier=1.0,
-                currency=position.contract.currency, position=position.position)
+    return dict(
+        account=position.account,
+        symbol=position.contract.localSymbol,
+        expiry="",
+        multiplier=1.0,
+        currency=position.contract.currency,
+        position=position.position,
+    )
 
 
 def resolveBS_for_list(trade_list: tradeQuantity):
