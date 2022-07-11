@@ -64,7 +64,7 @@ class csvFuturesContractPriceData(futuresContractPriceData):
         """
 
         return (
-            str(futures_contract_object.instrument.instrument_code)
+            str(futures_contract_object.instrument)
             + "_"
             + str(futures_contract_object.date_str)
         )
@@ -98,10 +98,9 @@ class csvFuturesContractPriceData(futuresContractPriceData):
             assert len(keyname_as_list) == 2
         except BaseException:
             self.log.error(
-                "Keyname (filename) %s in wrong format should be instrument_contractid" %
-                keyname)
-            raise
-
+                "Keyname (filename) %s in wrong format should be instrument_contractid"
+                % keyname
+            )
         instrument_code, contract_date = tuple(keyname_as_list)
 
         return instrument_code, contract_date
