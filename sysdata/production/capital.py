@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 
 from syscore.objects import arg_not_supplied, failure, missing_data
+from syscore.pdutils import uniquets
 from sysdata.production.timed_storage import (
     listOfEntriesData,
 )
@@ -117,7 +118,7 @@ class capitalData(listOfEntriesData):
     def update_broker_account_value(
         self, new_capital_value: float,
             date: datetime.datetime = arg_not_supplied,
-            propagate_other_values: bool = True
+
     ):
         ## Update account value but also propogate
         if date is arg_not_supplied:
@@ -127,13 +128,6 @@ class capitalData(listOfEntriesData):
             BROKER_ACCOUNT_VALUE, new_capital_value, date=date
         )
 
-        if propagate_other_values:
-            current_total_capital = self.get_current_total_capital()
-            self.update_total_capital(current_total_capital, date)
-            current_max_capital = self.get_current_maximum_account_value()
-            self.update_maximum_capital(current_max_capital, date)
-            current_pandl = self.get_current_pandl_account()
-            self.update_profit_and_loss_account(current_pandl, date)
 
     def update_profit_and_loss_account(
         self, new_capital_value: float, date: datetime.datetime = arg_not_supplied
@@ -327,17 +321,17 @@ class totalCapitalCalculationData(object):
     def get_current_total_capital(self):
         return self.capital_data.get_current_total_capital()
 
-    def get_total_capital(self) -> pd.DataFrame:
-        return self.capital_data.get_total_capital_pd_df()
+    def get_total_capital(self) -> pd.Series:
+        return uniquets(self.capital_data.get_total_capital_pd_df()).squeeze()
 
-    def get_profit_and_loss_account(self) -> pd.DataFrame():
-        return self.capital_data.get_profit_and_loss_account_pd_df()
+    def get_profit_and_loss_account(self) -> pd.Series():
+        return uniquets(self.capital_data.get_profit_and_loss_account_pd_df()).squeeze()
 
-    def get_broker_account(self) -> pd.DataFrame:
-        return self.capital_data.get_broker_account_value_pd_df()
+    def get_broker_account(self) -> pd.Series:
+        return uniquets(self.capital_data.get_broker_account_value_pd_df()).squeeze()
 
-    def get_maximum_account(self) -> pd.DataFrame:
-        return self.capital_data.get_maximum_account_value_pd_df()
+    def get_maximum_account(self) -> pd.Series:
+        return uniquets(self.capital_data.get_maximum_account_value_pd_df()).squeeze()
 
     def get_all_capital_calcs(self) -> pd.DataFrame:
         total_capital = self.get_total_capital()
@@ -442,7 +436,7 @@ class totalCapitalCalculationData(object):
             new_broker_account_value, date=date
         )
 
-        self._update_pandl(profit_and_loss, date)
+        self._update_pandl(profit_and_loss, date=date)
 
     def _update_pandl(self, profit_and_loss: float, date: datetime.datetime):
 
@@ -471,7 +465,10 @@ class totalCapitalCalculationData(object):
         broker_account_value = prev_broker_account_value + delta_value
 
         # Update broker account value
-        self.capital_data.update_broker_account_value(broker_account_value)
+        self.modify_account_values(broker_account_value = broker_account_value,
+                                   propagate=True, are_you_sure=True)
+
+
 
     def modify_account_values(
         self,
@@ -481,6 +478,7 @@ class totalCapitalCalculationData(object):
         acc_pandl: float = arg_not_supplied,
         date: datetime.datetime = arg_not_supplied,
         are_you_sure: bool = False,
+        propagate: bool = True
     ):
         """
         Allow any account valuation to be modified
@@ -498,15 +496,41 @@ class totalCapitalCalculationData(object):
             self.capital_data.update_broker_account_value(
                 broker_account_value, date=date
             )
+        elif propagate:
+            self.propagate_broker_account(date)
 
         if total_capital is not arg_not_supplied:
             self.capital_data.update_total_capital(total_capital, date=date)
+        elif propagate:
+            self.propagate_total_capital(date)
 
         if maximum_capital is not arg_not_supplied:
             self.capital_data.update_maximum_capital(maximum_capital, date=date)
+        elif propagate:
+            self.propagate_maximum_account_value(date)
 
         if acc_pandl is not arg_not_supplied:
             self.capital_data.update_profit_and_loss_account(acc_pandl, date=date)
+        elif propagate:
+            self.propagate_current_pandl(date)
+
+    def propagate_total_capital(self, date):
+        current_total_capital = self.get_current_total_capital()
+        self.capital_data.update_total_capital(current_total_capital, date)
+
+    def propagate_maximum_account_value(self, date):
+        current_max_capital = self.capital_data.get_current_maximum_account_value()
+        self.capital_data.update_maximum_capital(current_max_capital, date)
+
+    def propagate_current_pandl(self, date):
+        current_pandl = self.capital_data.get_current_pandl_account()
+        self.capital_data.update_profit_and_loss_account(current_pandl, date)
+
+    def propagate_broker_account(self, date):
+        broker_account_value = self.capital_data.get_broker_account_value()
+        self.capital_data.update_broker_account_value(
+            broker_account_value, date=date
+        )
 
     def create_initial_capital(
         self,
