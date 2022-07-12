@@ -25,10 +25,11 @@ class contractOrderType(orderType):
     def allowed_types(self):
         return ["best", "market", "limit", "balance_trade", "", "panic"]
 
-best_order_type  = contractOrderType('best')
+
+best_order_type = contractOrderType("best")
+balance_order_type = contractOrderType("balance_trade")
+panic_order_type = contractOrderType("panic")
 market_order_type = contractOrderType('market')
-balance_order_type = contractOrderType('balance_trade')
-panic_order_type = contractOrderType('panic')
 
 NO_CONTROLLING_ALGO = None
 

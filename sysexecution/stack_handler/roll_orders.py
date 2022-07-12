@@ -15,7 +15,12 @@ from sysproduction.data.positions import diagPositions
 from sysproduction.data.contracts import dataContracts
 from sysproduction.data.prices import diagPrices
 
-from sysexecution.stack_handler.stackHandlerCore import stackHandlerCore, put_children_on_stack, rollback_parents_and_children_and_handle_exceptions, log_successful_adding
+from sysexecution.stack_handler.stackHandlerCore import (
+    stackHandlerCore,
+    put_children_on_stack,
+    rollback_parents_and_children_and_handle_exceptions,
+    log_successful_adding,
+)
 from sysexecution.orders.contract_orders import contractOrder, best_order_type, market_order_type
 from sysexecution.orders.instrument_orders import zero_roll_order_type
 
