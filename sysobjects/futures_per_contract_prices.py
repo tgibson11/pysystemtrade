@@ -41,7 +41,7 @@ class futuresContractPrices(pd.DataFrame):
         Our graceful fail is to return an empty, but valid, dataframe
         """
 
-        data = pd.DataFrame(columns=PRICE_DATA_COLUMNS, dtype=float)
+        data = pd.DataFrame(columns=PRICE_DATA_COLUMNS)
 
         futures_contract_prices = futuresContractPrices(data)
 

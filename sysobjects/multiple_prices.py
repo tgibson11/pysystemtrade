@@ -105,7 +105,7 @@ class futuresMultiplePrices(pd.DataFrame):
         Our graceful fail is to return an empty, but valid, dataframe
         """
 
-        data = pd.DataFrame(columns=multiple_data_columns, dtype=float)
+        data = pd.DataFrame(columns=multiple_data_columns)
 
         multiple_prices = futuresMultiplePrices(data)
 
