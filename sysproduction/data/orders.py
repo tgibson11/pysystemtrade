@@ -215,7 +215,8 @@ class dataOrders(object):
         self, order_id: int
     ) -> instrumentOrder:
         contract_order = self.get_parent_contract_order_for_historic_broker_order_id(
-            order_id)
+            order_id
+        )
         if contract_order is missing_order:
             return missing_order
 
