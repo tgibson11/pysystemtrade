@@ -707,10 +707,6 @@ def get_trading_hours_for_all_instruments(data=arg_not_supplied):
             print("*** NO EXPIRY FOR %s ***" % instrument_code)
             continue
 
-        if not trading_hours:
-            print("*** NO TRADING HOURS FOR %s ***" % instrument_code)
-            continue
-
         ## will have several days use first one
         check_trading_hours(trading_hours, instrument_code)
         all_trading_hours[instrument_code] = trading_hours

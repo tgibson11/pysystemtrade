@@ -6,7 +6,6 @@ from copy import copy
 from syscore.objects import success, failure, arg_not_supplied
 from syscore.merge_data import spike_in_data
 from syscore.dateutils import DAILY_PRICE_FREQ, Frequency
-from syslogdiag.system_notification import notify
 
 from sysdata.data_blob import dataBlob
 from sysdata.tools.manual_price_checker import manual_price_checker
@@ -77,18 +76,10 @@ def update_historical_prices_for_instrument(instrument_code: str,
         data.log.warn("No contracts marked for sampling for %s" % instrument_code)
         return failure
 
-    if has_ib_market_data(instrument_code):
-        for contract_object in contract_list:
-            data.update_log(contract_object.specific_log(data.log))
-            update_historical_prices_for_instrument_and_contract(contract_object, data,
-                                                                 cleaning_config=cleaning_config,
-                                                                 interactive_mode=interactive_mode)
-    else:
-        for contract_object in contract_list:
-            data.update_log(contract_object.specific_log(data.log))
-            update_historical_prices_for_instrument_and_contract_quandl(contract_object, data,
-                                                                        cleaning_config=cleaning_config,
-                                                                        interactive_mode=interactive_mode)
+    for contract_object in contract_list:
+        data.update_log(contract_object.specific_log(data.log))
+        update_historical_prices_for_instrument_and_contract(contract_object, data, cleaning_config = cleaning_config,
+                                                             interactive_mode=interactive_mode)
 
     return success
 
@@ -188,71 +179,6 @@ def get_and_add_prices_for_frequency(
     )
     return success
 
-
-def has_ib_market_data(instrument_code: str):
-    from sysbrokers.IB.ib_instruments_data import get_instrument_object_from_config
-    instrument_with_ib_data = get_instrument_object_from_config(instrument_code)
-    exchange = instrument_with_ib_data.ib_data.exchange
-    return exchange in ['GLOBEX', 'CMECRYPTO', 'ECBOT', 'NYMEX', 'CFE']
-
-
-def update_historical_prices_for_instrument_and_contract_quandl(
-    contract_object: futuresContract, data: dataBlob,
-    cleaning_config: priceFilterConfig = arg_not_supplied,
-    interactive_mode: bool = False
-):
-    from sysdata.quandl.quandl_futures import QuandlFuturesContractPriceData
-
-    quandl_data_source = QuandlFuturesContractPriceData()
-
-    quandl_prices = quandl_data_source.get_cleaned_prices_for_contract_object(
-        contract_object, data=data, cleaning_config=cleaning_config
-    )
-
-    if quandl_prices is failure:
-        print("Something went wrong with getting prices for %s to check" % str(contract_object))
-        return failure
-
-    if len(quandl_prices) == 0:
-        print("No Quandl prices found for %s nothing to check" % str(contract_object))
-        return success
-
-    if interactive_mode:
-        print("\n\n Manually checking prices for %s \n\n" % str(contract_object))
-        if cleaning_config is arg_not_supplied:
-            max_price_spike = NO_SPIKE_CHECKING
-        else:
-            max_price_spike = cleaning_config.max_price_spike
-
-        price_data = diagPrices(data)
-        old_prices = price_data.get_prices_for_contract_object(contract_object)
-        new_prices_checked = manual_price_checker(
-            old_prices,
-            quandl_prices,
-            column_to_check="FINAL",
-            delta_columns=["OPEN", "HIGH", "LOW"],
-            type_new_data=futuresContractPrices,
-            max_price_spike=max_price_spike
-        )
-        check_for_spike = False
-    else:
-        new_prices_checked = copy(quandl_prices)
-        check_for_spike = True
-
-    error_or_rows_added = price_updating_or_errors(data = data,
-                                                   contract_object=contract_object,
-                                                   new_prices_checked = new_prices_checked,
-                                                   check_for_spike=check_for_spike,
-                                                   cleaning_config=cleaning_config
-                                                   )
-    if error_or_rows_added is failure:
-        return failure
-
-    data.log.msg("Added %d rows for %s" % (error_or_rows_added, str(contract_object)))
-
-    return success
-
-
 def price_updating_or_errors(data: dataBlob,
                              contract_object: futuresContract,
                              new_prices_checked: futuresContractPrices,
@@ -286,10 +212,9 @@ def report_price_spike(data: dataBlob, contract_object: futuresContract):
     )
     data.log.warn(msg)
     try:
-        # send_production_mail_msg(
-        #     data, msg, "Price Spike %s" % contract_object.instrument_code
-        # )
-        notify("Price Spike %s" % contract_object.instrument_code, msg)
+        send_production_mail_msg(
+            data, msg, "Price Spike %s" % contract_object.instrument_code
+        )
     except BaseException:
         data.log.warn(
             "Couldn't send email about price spike for %s" % str(contract_object)
