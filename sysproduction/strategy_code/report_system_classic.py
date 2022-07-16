@@ -193,8 +193,7 @@ def get_forecast_matrix(
             value = method(instrument_code, rule_name).ffill()[:datetime_cutoff][-1]
             value_dict[rule_name].append(value)
 
-    value_df = pd.DataFrame(value_dict, index = instrument_codes)
-    value_df = value_df.transpose()
+    value_df = pd.DataFrame(value_dict, index=instrument_codes)
 
     return value_df
 
@@ -219,7 +218,7 @@ def get_forecast_matrix_over_code(
         value_dict[instrument_code] = values_by_rule
 
     value_df = pd.DataFrame(value_dict, index=trading_rule_names)
-    # value_df = value_df.transpose()
+    value_df = value_df.transpose()
 
     return value_df
 
