@@ -261,7 +261,6 @@ class systemDiag(object):
                 output_dict[config_item] = dict_value
             except BaseException:
                 print("Couldn't get %s will exclude from output" % config_item)
-                raise
 
         return output_dict
 
