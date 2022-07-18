@@ -48,20 +48,15 @@ class ibTickerObject(tickerObject):
 def from_ib_bid_ask_tick_data_to_dataframe(tick_data) -> dataFrameOfRecentTicks:
     """
 
-    :param tick_data: Ticker
+    :param tick_data: list of HistoricalTickBidAsk()
     :return: pd.DataFrame,['priceBid', 'priceAsk', 'sizeAsk', 'sizeBid']
     """
-    time_index = [tick_data.time]
-    fields = {
-        "priceBid": "bid",
-        "priceAsk": "ask",
-        "sizeAsk": "askSize",
-        "sizeBid": "bidSize"
-    }
+    time_index = [tick_item.time for tick_item in tick_data]
+    fields = ["priceBid", "priceAsk", "sizeAsk", "sizeBid"]
 
     value_dict = {}
-    for field_name in fields.keys():
-        field_values = [getattr(tick_data, fields.get(field_name))]
+    for field_name in fields:
+        field_values = [getattr(tick_item, field_name) for tick_item in tick_data]
         value_dict[field_name] = field_values
 
     output = dataFrameOfRecentTicks(value_dict, time_index)
