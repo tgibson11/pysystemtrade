@@ -572,7 +572,7 @@ To avoid conflicts you should [schedule](#scheduling) your backup during the 'de
 Linux:
 ```
 # dumps everything into dump directory
-# make sure a mongo-db instance is running, but ideally without any load; command line: `mongod`
+# make sure a mongo-db instance is running with correct directory, but ideally without any load; command line: `mongod --dbpath $MONGO_DATA`
 mongodump -o ~/dump/
 
 # copy dump directory to another machine or drive. This will create a directory $MONGO_BACKUP_PATH/dump/
@@ -584,7 +584,7 @@ This is done by the scheduled backup process (see [scheduling](#scheduling)), an
 Then to restore, from a linux command line:
 ```
 cp -rf $MONGO_BACKUP_PATH/dump/ ~
-# Now make sure a mongo-db instance is running
+# Now make sure a mongo-db instance is running with correct directory
 # If required delete any existing instances of the databases. If you don't do this the results may be unpredictable...
 mongo
 # This starts a mongo client
@@ -2450,7 +2450,7 @@ The scheduler built into pysystemtrade does not launch processes (this is still 
 
 Processes still need to be launched every day, since the pysystemtrade scheduler doesn't do that. However their start time isn't critical, since separate start times can be configured in .yaml files (more of that below).
 
-Because I use cron myself, there are is a [cron tab included in pysystemtrade](/sysproduction/linux/crontab).
+Because I use cron myself, there are is a [cron tab included in pysystemtrade](https://github.com/robcarver17/pysystemtrade/blob/master/sysproduction/linux/crontab).
 
 Useful things to note about the crontab:
 
