@@ -294,6 +294,7 @@ def auto_selected_roll_state_instrument(
 ) -> RollState:
 
     if roll_data.relative_volume < auto_parameters.min_volume:
+
         run_roll_report(data, roll_data.instrument_code)
         print_with_landing_strips_around(
             "For %s relative volume of %f is less than minimum of %s : NOT AUTO ROLLING"
