@@ -44,9 +44,6 @@ def from_ib_positions_to_dict(
         STK=resolve_ib_stock_position,
         FUT=resolve_ib_future_position,
         CASH=resolve_ib_cash_position,
-        BOND=resolve_ib_cash_position,
-        BILL=resolve_ib_cash_position,
-        CRYPTO=resolve_ib_cash_position
     )
     for position in raw_positions:
         if account_id is not arg_not_supplied:
@@ -56,7 +53,9 @@ def from_ib_positions_to_dict(
         asset_class = position.contract.secType
         method = position_methods.get(asset_class, None)
         if method is None:
-            raise Exception("Can't find asset class %s in methods dict" % asset_class)
+            # Resolve unexpected asset classes like cash rather than failing
+            method = resolve_ib_cash_position
+            # raise Exception("Can't find asset class %s in methods dict" % asset_class)
 
         resolved_position = method(position)
         asset_class_list = resolved_positions_dict.get(asset_class, [])
