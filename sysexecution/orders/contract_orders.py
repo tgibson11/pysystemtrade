@@ -29,7 +29,6 @@ class contractOrderType(orderType):
 best_order_type = contractOrderType("best")
 balance_order_type = contractOrderType("balance_trade")
 panic_order_type = contractOrderType("panic")
-market_order_type = contractOrderType('market')
 
 NO_CONTROLLING_ALGO = None
 

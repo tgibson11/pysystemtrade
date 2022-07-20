@@ -21,13 +21,12 @@ from sysexecution.stack_handler.stackHandlerCore import (
     rollback_parents_and_children_and_handle_exceptions,
     log_successful_adding,
 )
-from sysexecution.orders.contract_orders import contractOrder, best_order_type, market_order_type
+from sysexecution.orders.contract_orders import contractOrder, best_order_type
 from sysexecution.orders.instrument_orders import zero_roll_order_type
 
 from sysexecution.orders.list_of_orders import listOfOrders
 
-CONTRACT_ORDER_TYPE_FOR_ROLL_ORDERS = market_order_type
-
+CONTRACT_ORDER_TYPE_FOR_ROLL_ORDERS = best_order_type
 
 
 class stackHandlerForRolls(stackHandlerCore):

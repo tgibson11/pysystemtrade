@@ -285,7 +285,6 @@ def get_file_or_folder_age_in_days(full_filename_with_ext):
     age_days = age_seconds / SECONDS_PER_DAY
     return age_days
 
-
 def delete_oldest_files_with_extension_in_pathname(
     pathname, files_to_keep=30, extension=".arch"
 ):

@@ -103,12 +103,12 @@ class algoMarket(Algo):
                 log.msg("Trade completed")
                 break
 
-            # Adaptive orders can take longer to execute: don't timeout
-            # if is_order_timeout:
-            #     log.msg("Run out of time to execute: cancelling")
-            #     broker_order_with_controls = cancel_order(
-            #         self.data, broker_order_with_controls)
-            #     break
+            if is_order_timeout:
+                log.msg("Run out of time to execute: cancelling")
+                broker_order_with_controls = cancel_order(
+                    self.data, broker_order_with_controls
+                )
+                break
 
             if is_order_cancelled:
                 log.warn("Order has been cancelled apparently by broker: not by algo!")

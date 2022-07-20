@@ -100,17 +100,7 @@ class Algo(object):
         )
         if collected_prices is missing_data:
             # no data available, no can do
-            # return missing_order
-
-            # au contraire!
-            side_price = None
-            mid_price = None
-            offside_price = None
-
-        else:
-            side_price = collected_prices.side_price
-            mid_price = collected_prices.mid_price
-            offside_price = collected_prices.offside_price
+            return missing_order
 
         ## We want to preserve these otherwise there is a danger they will dynamically change
         collected_prices = copy(collected_prices)
@@ -133,9 +123,9 @@ class Algo(object):
         broker_order = create_new_broker_order_from_contract_order(
             contract_order,
             order_type=order_type,
-            side_price=side_price,
-            mid_price=mid_price,
-            offside_price=offside_price,
+            side_price=collected_prices.side_price,
+            mid_price=collected_prices.mid_price,
+            offside_price=collected_prices.offside_price,
             broker=broker,
             broker_account=broker_account,
             broker_clientid=broker_clientid,

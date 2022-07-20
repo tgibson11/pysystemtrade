@@ -134,12 +134,9 @@ class stackHandlerCreateBrokerOrders(stackHandlerForFills):
             remaining_contract_order
         )
 
-        contract_order_to_trade = contract_order_after_trade_limits
-        # This code prevents orders from being submitted when IB market data is not available
-        # Uncomment if using IB market data
-        # contract_order_to_trade  = self.liquidity_size_contract_order(
-        #     contract_order_after_trade_limits
-        # )
+        contract_order_to_trade = self.liquidity_size_contract_order(
+            contract_order_after_trade_limits
+        )
 
         if contract_order_to_trade is missing_order:
             return missing_order
