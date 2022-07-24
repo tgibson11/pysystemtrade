@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from syscore.objects import missing_data, named_object
 from sysdata.config.instruments import generate_matching_duplicate_dict
 from sysdata.config.production_config import get_production_config
+from sysproduction.data.capital import dataCapital
 from sysproduction.reporting.data.constants import MAX_SR_COST, MIN_VOLUME_CONTRACTS_DAILY, MIN_VOLUME_RISK_DAILY, BAD_THRESHOLD
 
 from sysproduction.reporting.reporting_functions import table
@@ -212,7 +213,7 @@ def get_remove_market_data(data) -> RemoveMarketData:
     existing_bad_markets = get_existing_bad_markets(data)
 
     max_cost, min_volume_contracts, min_volume_risk, \
-             = get_bad_market_filter_parameters()
+             = get_bad_market_filter_parameters(data)
 
     auto_parameters = get_auto_population_parameters()
     SR_costs, liquidity_data, risk_data = get_data_for_markets(data)
@@ -233,7 +234,7 @@ def get_remove_market_data(data) -> RemoveMarketData:
         )
 
 def get_list_of_duplicate_market_tables(data):
-    filters = get_bad_market_filter_parameters()
+    filters = get_bad_market_filter_parameters(data)
     duplicate_dict = generate_matching_duplicate_dict(config=data.config)
     mkt_data = get_data_for_markets(data)
     duplicates = [
@@ -398,10 +399,12 @@ def get_market_data_for_duplicate(mkt_data, instrument_code: str):
 
 
 
-def get_bad_market_filter_parameters():
+def get_bad_market_filter_parameters(data):
     max_cost = MAX_SR_COST
     min_contracts = MIN_VOLUME_CONTRACTS_DAILY
-    min_risk = MIN_VOLUME_RISK_DAILY
+
+    capital_data = dataCapital(data)
+    min_risk = 3.0 * capital_data.get_current_total_capital() / 1000000
 
     return max_cost, min_contracts, min_risk
 
