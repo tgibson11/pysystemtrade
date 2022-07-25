@@ -29,9 +29,7 @@ def backup_state_files_with_data_object(data):
     source_path = get_statefile_directory()
     destination_path = get_statefile_backup_directory()
     data.log.msg("Copy from %s to %s" % (source_path, destination_path))
-    # State files are large, and I have limited storage, so I want to delete old ones
-    # Consider removing the --del option when I have more storage available
-    os.system("rsync -av --del %s %s" % (source_path, destination_path))
+    os.system("rsync -av %s %s" % (source_path, destination_path))
 
 
 if __name__ == '__main__':

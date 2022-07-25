@@ -1,5 +1,4 @@
-from syscore.fileutils import delete_old_files_with_extension_in_pathname, \
-    delete_oldest_files_with_extension_in_pathname
+from syscore.fileutils import delete_old_files_with_extension_in_pathname
 from sysproduction.data.backtest import get_directory_store_backtests
 from sysdata.data_blob import dataBlob
 
@@ -22,11 +21,11 @@ class cleanTruncateBacktestStates:
             "Deleting old .pck and .yaml backtest state files in directory %s"
             % directory_to_use
         )
-        delete_oldest_files_with_extension_in_pathname(
-            directory_to_use, files_to_keep=1, extension=".pck"
+        delete_old_files_with_extension_in_pathname(
+            directory_to_use, days_old=1, extension=".pck"
         )
-        delete_oldest_files_with_extension_in_pathname(
-            directory_to_use, files_to_keep=1, extension=".yaml"
+        delete_old_files_with_extension_in_pathname(
+            directory_to_use, days_old=30, extension=".yaml"
         )
 
 
