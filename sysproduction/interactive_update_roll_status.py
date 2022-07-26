@@ -6,7 +6,6 @@ NOTE: this does not update the roll calendar .csv files stored elsewhere. Under 
 """
 from dataclasses import dataclass
 import numpy as np
-import pandas as pd
 
 from syscore.interactive import print_menu_of_values_and_get_response, get_and_convert, true_if_answer_is_yes
 from syscore.objects import success, failure, status, named_object
@@ -626,7 +625,5 @@ def _get_roll_adjusted_multiple_prices_object_ffill_option(data: dataBlob,
 
 
 if __name__ == '__main__':
-    # Show all columns when printing roll report Data
-    pd.options.display.width = 0
     interactive_update_roll_status()
 
