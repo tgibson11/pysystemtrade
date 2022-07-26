@@ -8,7 +8,7 @@ from sysproduction.update_multiple_adjusted_prices import updateMultipleAdjusted
 
 from sysdata.data_blob import dataBlob
 
-logging.getLogger("arctic").setLevel(logging.ERROR)
+# logging.getLogger("arctic").setLevel(logging.ERROR)
 
 
 def run_daily_price_updates():
