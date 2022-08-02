@@ -149,6 +149,14 @@ class BcConnection(object):
             self.log.error(f"Problem getting historical data: {ex}")
             return missing_data
 
+    def get_barchart_id(self, futures_contract: futuresContract) -> str:
+        instr_code = futures_contract.instrument_code
+        bc_instr_code = self.barchart_futures_instrument_data.get_brokers_instrument_code(instr_code)
+        letter_month = futures_contract.contract_date.letter_month()
+        two_digit_year_str = futures_contract.date_str[2, 4]
+        barchart_id = bc_instr_code + letter_month + two_digit_year_str
+        return barchart_id
+
     @staticmethod
     def _raw_barchart_data_to_df(
         price_data_raw: pd.DataFrame, log: logger, bar_freq: Frequency = Frequency.Day
