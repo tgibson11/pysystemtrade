@@ -153,7 +153,7 @@ class BcConnection(object):
         instr_code = futures_contract.instrument_code
         bc_instr_code = self.barchart_futures_instrument_data.get_brokers_instrument_code(instr_code)
         letter_month = futures_contract.contract_date.letter_month()
-        two_digit_year_str = futures_contract.date_str[2, 4]
+        two_digit_year_str = futures_contract.date_str[2:4]
         barchart_id = bc_instr_code + letter_month + two_digit_year_str
         return barchart_id
 
