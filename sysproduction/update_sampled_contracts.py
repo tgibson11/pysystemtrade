@@ -106,12 +106,24 @@ def update_active_contracts_for_instrument(instrument_code: str, data: dataBlob)
 
 
 def get_contract_chain(data: dataBlob, instrument_code: str) -> listOfFuturesContracts:
+    """
 
-    furthest_out_contract = get_furthest_out_contract_with_roll_parameters(
-        data, instrument_code
-    )
-    contract_object_chain = create_contract_object_chain(
-        furthest_out_contract, instrument_code
+    Sample only current, carry & forward contracts: Barchart limits the # of daily downloads
+
+    """
+    diag_prices = diagPrices(data)
+
+    # Get the contracts currently being used
+    multiple_prices = diag_prices.get_multiple_prices(instrument_code)
+    current_contract_dict = multiple_prices.current_contract_dict()
+
+    # Get the set of unique contracts (forward & carry contracts could be the same)
+    current_contract_set = set(current_contract_dict.values())
+
+    contract_date_chain = [contractDate(date_str) for date_str in current_contract_set]
+
+    contract_object_chain = create_contract_object_chain_from_contract_date_chain(
+        instrument_code, contract_date_chain
     )
 
     return contract_object_chain
