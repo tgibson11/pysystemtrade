@@ -1,9 +1,6 @@
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
 from syscore.objects import missing_data, missing_instrument
-from sysdata.arctic.arctic_futures_per_contract_prices import (
-    arcticFuturesContractPriceData,
-)
 from sysdata.barchart.bc_connection import BcConnection
 from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
 from sysexecution.orders.broker_orders import brokerOrder
@@ -27,7 +24,6 @@ class BarchartFuturesContractPriceData(brokerFuturesContractPriceData):
     def __init__(self, log=logtoscreen("barchartFuturesContractPriceData")):
         super().__init__(log=log)
         self._barchart = BcConnection()
-        self._arctic = arcticFuturesContractPriceData()
 
     def __repr__(self):
         return f"Barchart Futures per contract price data {str(self._barchart)}"

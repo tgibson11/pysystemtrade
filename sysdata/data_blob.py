@@ -106,10 +106,7 @@ class dataBlob(object):
 
         method_to_add_with = class_dict.get(prefix, None)
         if method_to_add_with is None:
-            error_msg = "Don't know how to handle object named %s" % get_class_name(
-                class_object
-            )
-            self._raise_and_log_error(error_msg)
+            method_to_add_with = self._add_other_class
 
         return method_to_add_with
 
@@ -177,6 +174,23 @@ class dataBlob(object):
             class_name = get_class_name(class_object)
             msg = (
                 "Error %s couldn't evaluate %s(datapath = datapath, log = self.log.setup(component = %s)) \
+                        This might be because import is missing\
+                         or arguments don't follow pattern"
+                % (str(e), class_name, class_name)
+            )
+            self._raise_and_log_error(msg)
+
+        return resolved_instance
+
+    def _add_other_class(self, class_object):
+        log = self._get_specific_logger(class_object)
+
+        try:
+            resolved_instance = class_object(log=log)
+        except Exception as e:
+            class_name = get_class_name(class_object)
+            msg = (
+                "Error %s couldn't evaluate %s(log = self.log.setup(component = %s)) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name, class_name)
@@ -345,7 +359,7 @@ class dataBlob(object):
         return log_name
 
 
-source_dict = dict(arctic="db", mongo="db", csv="db", ib="broker")
+source_dict = dict(arctic="db", mongo="db", csv="db", ib="broker", barchart="broker")
 
 
 def identifying_name(split_up_name: list, keep_original_prefix=False) -> str:
