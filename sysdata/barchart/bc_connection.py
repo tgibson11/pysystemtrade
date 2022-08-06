@@ -1,3 +1,4 @@
+import datetime
 import io
 import time
 import urllib.parse
@@ -179,6 +180,12 @@ class BcConnection(object):
             price_data_as_df["index"], format=date_format
         )
         price_data_as_df.set_index("index", inplace=True)
+
+        # Convert barchart data from CT to local timezone
+        local_tz = datetime.datetime.now().astimezone().tzinfo
+        price_data_as_df.index = price_data_as_df.index.tz_localize(tz="US/Central").tz_convert(local_tz)
+        # Remove the TZ info
+        price_data_as_df.index = price_data_as_df.index.tz_localize(tz=None)
 
         return price_data_as_df
 
