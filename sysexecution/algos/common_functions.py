@@ -109,8 +109,10 @@ def check_current_limit_price_at_inside_spread(
 def file_log_report_market_order(log, broker_order_with_controls: orderWithControls):
 
     ticker_object = broker_order_with_controls.ticker
-    current_tick = str(ticker_object.current_tick())
 
-    log_report = "Market order execution current tick %s" % current_tick
+    if ticker_object:
+        current_tick = str(ticker_object.current_tick())
 
-    log.msg(log_report)
+        log_report = "Market order execution current tick %s" % current_tick
+
+        log.msg(log_report)
