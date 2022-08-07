@@ -3,6 +3,7 @@ from copy import copy
 from sysbrokers.IB.ib_connection import connectionIB
 from syscore.objects import arg_not_supplied, get_class_name
 from syscore.text import camel_case_split
+from sysdata.barchart.bc_connection import bcConnection
 from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.mongodb.mongo_log import logToMongod
@@ -18,6 +19,7 @@ class dataBlob(object):
         log_name: str = "",
         csv_data_paths: dict = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
+        bc_conn: bcConnection = arg_not_supplied,
         mongo_db: mongoDb = arg_not_supplied,
         log: logger = arg_not_supplied,
         keep_original_prefix: bool = False,
@@ -60,6 +62,7 @@ class dataBlob(object):
 
         self._mongo_db = mongo_db
         self._ib_conn = ib_conn
+        self._bc_conn = bc_conn
         self._log = log
         self._log_name = log_name
         self._csv_data_paths = csv_data_paths
@@ -102,11 +105,15 @@ class dataBlob(object):
             csv=self._add_csv_class,
             arctic=self._add_arctic_class,
             mongo=self._add_mongo_class,
+            bc=self._add_bc_class
         )
 
         method_to_add_with = class_dict.get(prefix, None)
         if method_to_add_with is None:
-            method_to_add_with = self._add_other_class
+            error_msg = "Don't know how to handle object named %s" % get_class_name(
+                class_object
+            )
+            self._raise_and_log_error(error_msg)
 
         return method_to_add_with
 
@@ -182,17 +189,16 @@ class dataBlob(object):
 
         return resolved_instance
 
-    def _add_other_class(self, class_object):
+    def _add_bc_class(self, class_object):
         log = self._get_specific_logger(class_object)
 
         try:
-            resolved_instance = class_object(log=log)
+            resolved_instance = class_object(self.bc_conn, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error %s couldn't evaluate %s(log = self.log.setup(component = %s)) \
-                        This might be because import is missing\
-                         or arguments don't follow pattern"
+                "Error %s couldn't evaluate %s(self.bc_conn, log = self.log.setup(component = %s)) "
+                "This might be because (a) import is missing or (b) arguments don't follow pattern"
                 % (str(e), class_name, class_name)
             )
             self._raise_and_log_error(msg)
@@ -290,6 +296,15 @@ class dataBlob(object):
 
         return ib_conn
 
+    @property
+    def bc_conn(self) -> bcConnection:
+        bc_conn = getattr(self, "_bc_conn", arg_not_supplied)
+        if bc_conn is arg_not_supplied:
+            bc_conn = self._get_new_bc_connection()
+            self._bc_conn = bc_conn
+
+        return bc_conn
+
     def _get_new_ib_connection(self) -> connectionIB:
         # Try this 5 times...
         attempts = 0
@@ -309,6 +324,10 @@ class dataBlob(object):
                     for id in failed_ids:
                         self.db_ib_broker_client_id.release_clientid(id)
                     raise e
+
+    def _get_new_bc_connection(self) -> bcConnection:
+        bc_conn = bcConnection(log=self.log)
+        return bc_conn
 
     def _get_next_client_id_for_ib(self) -> int:
         ## default to tracking ID through mongo change if required
@@ -359,7 +378,7 @@ class dataBlob(object):
         return log_name
 
 
-source_dict = dict(arctic="db", mongo="db", csv="db", ib="broker", barchart="broker")
+source_dict = dict(arctic="db", mongo="db", csv="db", ib="broker", bc="broker")
 
 
 def identifying_name(split_up_name: list, keep_original_prefix=False) -> str:
