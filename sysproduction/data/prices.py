@@ -64,13 +64,14 @@ class diagPrices(productionDataLayerGeneric):
             intraday_frequency_as_str
         )
 
-        if intraday_frequency is missing_data:
-            error_msg = (
-                "Intraday frequency of %s is not recognised as a valid frequency"
-                % str(intraday_frequency)
-            )
-            self.log.critical(error_msg)
-            raise Exception(error_msg)
+        # Interpret missing_data as "do not collect intraday prices"
+        # if intraday_frequency is missing_data:
+        #     error_msg = (
+        #         "Intraday frequency of %s is not recognised as a valid frequency"
+        #         % str(intraday_frequency)
+        #     )
+        #     self.log.critical(error_msg)
+        #     raise Exception(error_msg)
 
         return intraday_frequency
 

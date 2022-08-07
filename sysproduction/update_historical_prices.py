@@ -3,7 +3,7 @@ Update historical data per contract from interactive brokers data, dump into mon
 """
 
 from copy import copy
-from syscore.objects import success, failure, arg_not_supplied
+from syscore.objects import success, failure, arg_not_supplied, missing_data
 from syscore.merge_data import spike_in_data
 from syscore.dateutils import DAILY_PRICE_FREQ, Frequency
 
@@ -94,14 +94,17 @@ def update_historical_prices_for_instrument_and_contract(
     intraday_frequency = diag_prices.get_intraday_frequency_for_historical_download()
     daily_frequency = DAILY_PRICE_FREQ
 
-    # Get *intraday* data (defaults to hourly)
-    result = get_and_add_prices_for_frequency(
-        data,
-        contract_object,
-        frequency=intraday_frequency,
-        cleaning_config=cleaning_config,
-        interactive_mode = interactive_mode
-    )
+    if intraday_frequency is missing_data:
+        result = success
+    else:
+        # Get *intraday* data (defaults to hourly)
+        result = get_and_add_prices_for_frequency(
+            data,
+            contract_object,
+            frequency=intraday_frequency,
+            cleaning_config=cleaning_config,
+            interactive_mode = interactive_mode
+        )
     if result is failure:
         # Skip daily data if intraday not working
         if cleaning_config.dont_sample_daily_if_intraday_fails:
