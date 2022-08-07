@@ -12,7 +12,7 @@ from collections import namedtuple
 
 from sysdata.data_blob import dataBlob
 
-from sysexecution.orders.instrument_orders import instrumentOrder, best_order_type
+from sysexecution.orders.instrument_orders import instrumentOrder, best_order_type, market_order_type
 from sysexecution.orders.list_of_orders import listOfOrders
 from sysexecution.strategies.strategy_order_handling import orderGeneratorForStrategy
 
@@ -168,12 +168,12 @@ def trade_given_optimal_and_actual_positions(
 
     ref_date = optimal_positions.ref_dates[instrument_code]
 
-    # No limit orders, just best execution
+    # Use market orders
     order_required = instrumentOrder(
         strategy_name,
         instrument_code,
         trade_required,
-        order_type=best_order_type,
+        order_type=market_order_type,
         reference_price=reference_price,
         reference_contract=reference_contract,
         reference_datetime=ref_date,

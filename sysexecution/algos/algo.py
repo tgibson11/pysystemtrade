@@ -99,8 +99,16 @@ class Algo(object):
             ticker_object, contract_order
         )
         if collected_prices is missing_data:
-            # no data available, no can do
-            return missing_order
+            if order_type == market_order_type:
+                # Allow market orders to be submitted without market data
+                collected_prices = benchmarkPriceCollection(
+                    offside_price=None,
+                    side_price=None,
+                    mid_price=None,
+                )
+            else:
+                # no data available, no can do
+                return missing_order
 
         ## We want to preserve these otherwise there is a danger they will dynamically change
         collected_prices = copy(collected_prices)
