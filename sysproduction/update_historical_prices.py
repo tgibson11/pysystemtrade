@@ -108,10 +108,10 @@ def update_historical_prices_for_instrument_and_contract(
     if result is failure:
         # Skip daily data if intraday not working
         if cleaning_config.dont_sample_daily_if_intraday_fails:
-            data.log.msg("Had a problem samping intraday, skipping daily to avoid price gaps")
+            data.log.msg("Had a problem sampling intraday, skipping daily to avoid price gaps")
             return failure
         else:
-            data.log.warn("Had a problem samping intraday, but **NOT** skipping daily - may be price gaps")
+            data.log.warn("Had a problem sampling intraday, but **NOT** skipping daily - may be price gaps")
 
     # Get daily data
     # we don't care about the result flag for this
