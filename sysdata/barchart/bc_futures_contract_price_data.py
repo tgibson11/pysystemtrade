@@ -1,5 +1,6 @@
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
+from syscore.objects import missing_data, failure
 from sysdata.barchart.bc_connection import bcConnection
 from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
@@ -25,6 +26,10 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
     def __repr__(self):
         return "Barchart futures per contract price data"
 
+    @property
+    def barchart(self):
+        return self._bc_connection
+
     def has_data_for_contract(self, futures_contract: futuresContract) -> bool:
         """
         Does Barchart have data for a given contract?
@@ -34,7 +39,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         :param futures_contract:
         :return: bool
         """
-        return self._bc_connection.has_data_for_contract(futures_contract)
+        return self.barchart.has_data_for_contract(futures_contract)
 
     def get_contracts_with_price_data(self) -> listOfFuturesContracts:
         raise NotImplementedError("Do not use get_contracts_with_price_data with Barchart")
@@ -46,13 +51,44 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         return price_data
 
     def _get_prices_for_contract_object_no_checking(self, contract_object: futuresContract) -> futuresContractPrices:
-        # TODO
-        pass
+        price_series = self._get_prices_at_frequency_for_contract_object_no_checking(
+            contract_object, freq=DAILY_PRICE_FREQ
+        )
+
+        return price_series
 
     def _get_prices_at_frequency_for_contract_object_no_checking(self, contract_object: futuresContract,
                                                                  freq: Frequency) -> futuresContractPrices:
-        # TODO
-        return futuresContractPrices.create_empty()
+        """
+        Get historical prices at a particular frequency
+
+        :param contract_object:  futuresContract
+        :param freq: Frequency; one of D, H, 15M, 5M, M, 10S, S
+        :return: data
+        """
+
+        new_log = contract_object.log(self.log)
+
+        price_data = self.barchart.get_historical_futures_data_for_contract(
+            contract_object,
+            freq=freq
+        )
+
+        if price_data is missing_data:
+            new_log.warn(
+                "Something went wrong getting Barchart price data for %s"
+                % str(contract_object)
+            )
+            return failure
+
+        if len(price_data) == 0:
+            new_log.warn(
+                "No Barchart price data found for %s"
+                % str(contract_object)
+            )
+            return futuresContractPrices.create_empty()
+
+        return futuresContractPrices(price_data)
 
     def get_ticker_object_for_order(self, order: contractOrder) -> tickerObject:
         return None

@@ -14,3 +14,4 @@ statsmodels==0.12.2
 PyPDF2>=2.5.0
 
 requests~=2.25.1
+beautifulsoup4~=4.11.1
