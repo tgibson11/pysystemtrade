@@ -1,5 +1,6 @@
-import io
-import urllib.parse
+import calendar
+import traceback
+from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
@@ -10,6 +11,7 @@ from syscore.objects import missing_data
 from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
 from sysdata.config.production_config import get_production_config
 from syslogdiag.log_to_screen import logtoscreen
+from syslogdiag.logger import logger
 from sysobjects.contracts import futuresContract
 
 BARCHART_URL = "https://www.barchart.com/"
@@ -71,39 +73,95 @@ class bcConnection(object):
     def get_historical_futures_data_for_contract(
         self,
         contract_object: futuresContract,
-        freq: Frequency = DAILY_PRICE_FREQ,
+        bar_freq: Frequency = DAILY_PRICE_FREQ
     ) -> pd.DataFrame:
         """
         Get historical daily data
-        :param contract_object: internal contract identifier
-        :type contract_object: futuresContract
-        :param freq: frequency of price data requested
-        :type freq: Frequency, one of 'Day', 'Hour', 'Minutes_15', 'Minutes_5', 'Minute', 'Seconds_10'
-        :return: df
-        :rtype: pandas DataFrame
+
+        :param contract_object: futuresContract
+        :param bar_freq: Frequency; one of D, H, 5M, M, 10S, S
+        :return: futuresContractPriceData
         """
+
+        specific_log = contract_object.specific_log(self.log)
+
+        price_data = self._get_generic_data_for_contract(contract_object, log=specific_log, bar_freq=bar_freq)
+
+        return price_data
+
+    def _get_generic_data_for_contract(
+        self,
+        contract: futuresContract,
+        log: logger = None,
+        bar_freq: Frequency = DAILY_PRICE_FREQ
+    ) -> pd.DataFrame:
+        """
+        Get historical daily data
+
+        :param contract: futuresContract
+        :param bar_freq: Frequency; one of D, H, 5M, M, 10S, S
+        :return: futuresContractPriceData
+        """
+        if log is None:
+            log = self.log
+
+        price_data_raw = self._get_prices_for_contract(
+            contract,
+            bar_freq=bar_freq,
+            log=log,
+            # TODO uncomment
+            dry_run=True
+        )
+
+        price_data_as_df = self._raw_ib_data_to_df(
+            price_data_raw=price_data_raw, log=log
+        )
+
+        return price_data_as_df
+
+    def _get_prices_for_contract(
+            self,
+            contract: futuresContract,
+            bar_freq: Frequency = DAILY_PRICE_FREQ,
+            days: int = 120,
+            log: logger = None,
+            dry_run: bool = False):
+
+        now = datetime.now()
+        low_data = False
+
+        year = contract.contract_date.year()
+        month = contract.contract_date.month()
+
+        # we need to work out a date range for which we want the prices
+
+        # for expired contracts the end date would be the expiry date;
+        # for KISS sake, lets assume expiry is last date of contract month
+        end_date = datetime(year, month, calendar.monthrange(year, month)[1])
+
+        # but, if that end_date is in the future, then we may as well make it today...
+        if now.date() < end_date.date():
+            end_date = now
+
+        # assumption no.2: lets set start date at <day_count> days before end date
+        day_count = timedelta(days=days)
+        start_date = end_date - day_count
+
+        log.msg(f"getting historic {bar_freq} prices for contract '{contract}', "
+                     f"from {start_date.strftime('%Y-%m-%d')} "
+                     f"to {end_date.strftime('%Y-%m-%d')}")
 
         try:
 
-            if freq == Frequency.Second or freq == Frequency.Seconds_10:
-                raise NotImplementedError(
-                    f"Barchart supported data frequencies: {self._valid_freqs()}"
-                )
-
-            if contract_object is None:
-                self.log.warn(f"get_historical_futures_data_for_contract() contract_object is required")
-                return missing_data
-
-            contract = self.get_barchart_id(contract_object)
-
             # open historic data download page for required contract
             url = f"{BARCHART_URL}futures/quotes/{contract}/historical-download"
-            hist_resp = self.session.get(url)
-            self.log.msg(f"GET {url}, status {hist_resp.status_code}")
+            hist_resp = session.get(url)
+            logging.info(f"GET {url}, status {hist_resp.status_code}")
 
             if hist_resp.status_code != 200:
-                self.log.msg(f"No downloadable data found for contract '{contract}'\n")
-                return missing_data
+                logging.info(f"No downloadable data found for contract '{contract}'\n")
+                return HistoricalDataResult.NONE
+
             xsrf = urllib.parse.unquote(hist_resp.cookies['XSRF-TOKEN'])
 
             # scrape page for csrf_token
@@ -128,7 +186,7 @@ class bcConnection(object):
 
             if allowance['success']:
 
-                self.log.info(f"POST {BARCHART_URL + 'my/download'}, "
+                logging.info(f"POST {BARCHART_URL + 'my/download'}, "
                              f"status: {resp.status_code}, "
                              f"allowance success: {allowance['success']}, "
                              f"allowance count: {allowance['count']}")
@@ -198,20 +256,10 @@ class bcConnection(object):
 
                 logging.info(f"Finished getting Barchart historic prices for {contract}\n")
 
-            # read response into dataframe
-            iostr = io.StringIO(prices_resp.text)
-            df = pd.read_csv(iostr, header=None)
+            return HistoricalDataResult.LOW if low_data else HistoricalDataResult.OK
 
-            # convert to expected format
-            # TODO see IB price client
-            price_data_as_df = self._raw_barchart_data_to_df(df, bar_freq=freq, log=self.log)
-            self.log.msg(f"Latest price {price_data_as_df.index[-1]} with {bar_freq}")
-
-            return price_data_as_df
-
-        except Exception as ex:
-            self.log.error(f"Problem getting historical data: {ex}")
-            return missing_data
+        except Exception as e:
+            logging.error(f"Error {e}")
 
     def _get_overview(self, contract_id):
         """
