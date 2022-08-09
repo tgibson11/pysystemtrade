@@ -1,12 +1,16 @@
 import calendar
-import traceback
+import io
+import json
+import urllib.parse
 from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from dateutil.tz import tz
 
-from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
+from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, HOURLY_FREQ, strip_timezone_fromdatetime, \
+    adjust_timestamp_to_include_notional_close_and_time_offset
 from syscore.objects import missing_data
 from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
 from sysdata.config.production_config import get_production_config
@@ -105,17 +109,9 @@ class bcConnection(object):
         if log is None:
             log = self.log
 
-        price_data_raw = self._get_prices_for_contract(
-            contract,
-            bar_freq=bar_freq,
-            log=log,
-            # TODO uncomment
-            dry_run=True
-        )
+        price_data_raw = self._get_prices_for_contract(contract, bar_freq=bar_freq, log=log)
 
-        price_data_as_df = self._raw_ib_data_to_df(
-            price_data_raw=price_data_raw, log=log
-        )
+        price_data_as_df = self._raw_bc_data_to_df(price_data_raw=price_data_raw, log=log)
 
         return price_data_as_df
 
@@ -128,10 +124,10 @@ class bcConnection(object):
             dry_run: bool = False):
 
         now = datetime.now()
-        low_data = False
 
         year = contract.contract_date.year()
         month = contract.contract_date.month()
+        bc_contract_id = self.get_barchart_id(contract)
 
         # we need to work out a date range for which we want the prices
 
@@ -147,119 +143,151 @@ class bcConnection(object):
         day_count = timedelta(days=days)
         start_date = end_date - day_count
 
-        log.msg(f"getting historic {bar_freq} prices for contract '{contract}', "
-                     f"from {start_date.strftime('%Y-%m-%d')} "
-                     f"to {end_date.strftime('%Y-%m-%d')}")
+        log.msg(f"getting historic {bar_freq} prices for contract '{bc_contract_id}', "
+                f"from {start_date.strftime('%Y-%m-%d')} "
+                f"to {end_date.strftime('%Y-%m-%d')}")
 
-        try:
+        # open historic data download page for required contract
+        url = f"{BARCHART_URL}futures/quotes/{bc_contract_id}/historical-download"
+        hist_resp = self.session.get(url)
+        log.msg(f"GET {url}, status {hist_resp.status_code}")
 
-            # open historic data download page for required contract
-            url = f"{BARCHART_URL}futures/quotes/{contract}/historical-download"
-            hist_resp = session.get(url)
-            logging.info(f"GET {url}, status {hist_resp.status_code}")
+        if hist_resp.status_code != 200:
+            log.msg(f"No downloadable data found for contract '{bc_contract_id}'\n")
+            return None
 
-            if hist_resp.status_code != 200:
-                logging.info(f"No downloadable data found for contract '{contract}'\n")
-                return HistoricalDataResult.NONE
+        xsrf = urllib.parse.unquote(hist_resp.cookies['XSRF-TOKEN'])
 
-            xsrf = urllib.parse.unquote(hist_resp.cookies['XSRF-TOKEN'])
+        # scrape page for csrf_token
+        hist_soup = BeautifulSoup(hist_resp.text, 'html.parser')
+        hist_tag = hist_soup.find(name='meta', attrs={'name': 'csrf-token'})
+        hist_csrf_token = hist_tag.attrs['content']
 
-            # scrape page for csrf_token
-            hist_soup = BeautifulSoup(hist_resp.text, 'html.parser')
-            hist_tag = hist_soup.find(name='meta', attrs={'name': 'csrf-token'})
-            hist_csrf_token = hist_tag.attrs['content']
+        # check allowance
+        payload = {'onlyCheckPermissions': 'true'}
+        headers = {
+            'content-type': 'application/x-www-form-urlencoded',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Referer': url,
+            'x-xsrf-token': xsrf
+        }
+        resp = self.session.post(BARCHART_URL + 'my/download', headers=headers, data=payload)
 
-            # check allowance
-            payload = {'onlyCheckPermissions': 'true'}
+        allowance = json.loads(resp.text)
+
+        if allowance.get('error') is not None:
+            log.warn("Barchart daily download allowance exceeded")
+            return None
+
+        raw_bc_data = None
+
+        if allowance['success']:
+
+            log.msg(f"POST {BARCHART_URL + 'my/download'}, "
+                    f"status: {resp.status_code}, "
+                    f"allowance success: {allowance['success']}, "
+                    f"allowance count: {allowance['count']}")
+
+            # download data
+            xsrf = urllib.parse.unquote(resp.cookies['XSRF-TOKEN'])
             headers = {
                 'content-type': 'application/x-www-form-urlencoded',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Referer': url,
                 'x-xsrf-token': xsrf
             }
-            resp = session.post(BARCHART_URL + 'my/download', headers=headers, data=payload)
 
-            allowance = json.loads(resp.text)
+            payload = {'_token': hist_csrf_token,
+                       'fileName': bc_contract_id + '_Daily_Historical Data',
+                       'symbol': bc_contract_id,
+                       'fields': 'tradeTime.format(Y-m-d),openPrice,highPrice,lowPrice,lastPrice,volume',
+                       'startDate': start_date.strftime("%Y-%m-%d"),
+                       'endDate': end_date.strftime("%Y-%m-%d"),
+                       'orderBy': 'tradeTime',
+                       'orderDir': 'asc',
+                       'method': 'historical',
+                       'limit': '10000',
+                       'customView': 'true',
+                       'pageTitle': 'Historical Data'}
 
-            if allowance.get('error') is not None:
-                return HistoricalDataResult.EXCEED
+            if bar_freq == DAILY_PRICE_FREQ:
+                payload['type'] = 'eod'
+                payload['period'] = 'daily'
 
-            if allowance['success']:
+            if bar_freq == HOURLY_FREQ:
+                payload['type'] = 'minutes'
+                payload['interval'] = 60
 
-                logging.info(f"POST {BARCHART_URL + 'my/download'}, "
-                             f"status: {resp.status_code}, "
-                             f"allowance success: {allowance['success']}, "
-                             f"allowance count: {allowance['count']}")
+            if not dry_run:
+                resp = self.session.post(BARCHART_URL + 'my/download', headers=headers, data=payload)
+                log.msg(f"POST {BARCHART_URL + 'my/download'}, "
+                        f"status: {resp.status_code}, "
+                        f"data length: {len(resp.content)}")
+                if resp.status_code == 200:
 
-                # download data
-                xsrf = urllib.parse.unquote(resp.cookies['XSRF-TOKEN'])
-                headers = {
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Referer': url,
-                    'x-xsrf-token': xsrf
-                }
+                    if 'Error retrieving data' not in resp.text:
 
-                payload = {'_token': hist_csrf_token,
-                           'fileName': contract + '_Daily_Historical Data',
-                           'symbol': contract,
-                           'fields': 'tradeTime.format(Y-m-d),openPrice,highPrice,lowPrice,lastPrice,volume',
-                           'startDate': start_date.strftime("%Y-%m-%d"),
-                           'endDate': end_date.strftime("%Y-%m-%d"),
-                           'orderBy': 'tradeTime',
-                           'orderDir': 'asc',
-                           'method': 'historical',
-                           'limit': '10000',
-                           'customView': 'true',
-                           'pageTitle': 'Historical Data'}
+                        raw_bc_data = resp.text
 
-                if period == 'daily':
-                    payload['type'] = 'eod'
-                    payload['period'] = 'daily'
-                    dateformat = '%Y-%m-%d'
+                    else:
+                        log.msg(f"Barchart data problem for '{bc_contract_id}', not writing")
 
-                if period == 'hourly':
-                    payload['type'] = 'minutes'
-                    payload['interval'] = 60
-                    dateformat = '%m/%d/%Y %H:%M'
+            else:
+                log.msg(f"Not POSTing to {BARCHART_URL + 'my/download'}, dry_run")
 
-                if not dry_run:
-                    resp = session.post(BARCHART_URL + 'my/download', headers=headers, data=payload)
-                    logging.info(f"POST {BARCHART_URL + 'my/download'}, "
-                                 f"status: {resp.status_code}, "
-                                 f"data length: {len(resp.content)}")
-                    if resp.status_code == 200:
+            log.msg(f"Finished getting Barchart historic prices for {bc_contract_id}\n")
 
-                        if 'Error retrieving data' not in resp.text:
+        return raw_bc_data
 
-                            iostr = io.StringIO(resp.text)
-                            df = pd.read_csv(iostr, skipfooter=1, engine='python')
-                            df['Time'] = pd.to_datetime(df['Time'], format=dateformat)
-                            df.set_index('Time', inplace=True)
-                            df.index = df.index.tz_localize(tz='US/Central').tz_convert('UTC')
-                            df = df.rename(columns={"Last": "Close"})
+    def _raw_bc_data_to_df(self, price_data_raw: str, log: logger) -> pd.DataFrame:
 
-                            if len(df) < 3:
-                                low_data = True
+        if price_data_raw is None:
+            log.warn("No price data from IB")
+            return missing_data
 
-                            filename = f"{instrument}_{datecode}00.csv"
-                            full_path = f"{path}/{filename}"
-                            logging.info(f"writing to: {full_path}")
+        iostr = io.StringIO(price_data_raw)
+        price_data_as_df = pd.read_csv(iostr, skipfooter=1, engine='python')
 
-                            df.to_csv(full_path, date_format='%Y-%m-%dT%H:%M:%S%z')
+        price_data_as_df.columns = ["date", "OPEN", "HIGH", "LOW", "FINAL", "VOLUME"]
 
-                        else:
-                            logging.info(f"Barchart data problem for '{instrument}_{datecode}00', not writing")
+        date_index = [
+            self._bc_timestamp_to_datetime(price_row)
+            for price_row in price_data_as_df["date"]
+        ]
 
-                else:
-                    logging.info(f"Not POSTing to {BARCHART_URL + 'my/download'}, dry_run")
+        price_data_as_df.index = date_index
+        price_data_as_df.drop('date', axis=1, inplace=True)
 
-                logging.info(f"Finished getting Barchart historic prices for {contract}\n")
+        return price_data_as_df
 
-            return HistoricalDataResult.LOW if low_data else HistoricalDataResult.OK
+    def _bc_timestamp_to_datetime(self, timestamp_bc) -> datetime:
+        """
+        Converts Barchart time (CT) to local, and adjusts yyyymm to closing vector
 
-        except Exception as e:
-            logging.error(f"Error {e}")
+        :param timestamp_bc: datetime.datetime
+        :return: pd.datetime
+        """
+
+        local_timestamp_bc = self._adjust_bc_time_to_local(timestamp_bc)
+        timestamp = pd.to_datetime(local_timestamp_bc)
+
+        adjusted_ts = adjust_timestamp_to_include_notional_close_and_time_offset(timestamp)
+
+        return adjusted_ts
+
+    @staticmethod
+    def _adjust_bc_time_to_local(timestamp_bc) -> datetime:
+
+        if getattr(timestamp_bc, "tz_localize", None) is None:
+            # daily, nothing to do
+            return timestamp_bc
+
+        # Barchart timestamp already includes tz
+        timestamp_bc_with_tz = timestamp_bc
+        local_timestamp_bc_with_tz = timestamp_bc_with_tz.astimezone(tz.tzlocal())
+        local_timestamp_bc = strip_timezone_fromdatetime(local_timestamp_bc_with_tz)
+
+        return local_timestamp_bc
 
     def _get_overview(self, contract_id):
         """
@@ -270,7 +298,7 @@ class bcConnection(object):
         :rtype: HTTP response object
         """
         url = BARCHART_URL + "futures/quotes/%s/overview" % contract_id
-        resp = self._session.get(url)
+        resp = self.session.get(url)
         self.log.msg(f"GET {url}, response {resp.status_code}")
         return resp
 

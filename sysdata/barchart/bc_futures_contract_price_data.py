@@ -71,7 +71,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
         price_data = self.barchart.get_historical_futures_data_for_contract(
             contract_object,
-            freq=freq
+            bar_freq=freq
         )
 
         if price_data is missing_data:
