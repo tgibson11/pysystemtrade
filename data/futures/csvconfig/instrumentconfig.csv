@@ -18,6 +18,7 @@ BB3M,2500,,,,Bond,USD,Three-Month Bloomberg Short-Term Bank Yield,
 BBCOMM,100,0,1.5,0,Ags,USD,Bloomberg Commodity Index,0.1
 BEL20,10,0,4.5,0,Equity,EUR,BEL 20 Index (BFX@),3.25
 BITCOIN,0.1,0,5,0,Metals,USD,Micro Bitcoin,25
+BITCOIN_large,5,0,5,0,Metals,USD,Bitcoin full size,25
 BITCOIN-BAKKT,1,,,,Metals,USD,Bakkt Bitcoin,
 BOBL,1000,0,2,0,Bond,EUR,German 5 year bond Bobl,0.005
 BONO,1000,0,2,0,Bond,EUR,ES 10 year bonds,0.035
