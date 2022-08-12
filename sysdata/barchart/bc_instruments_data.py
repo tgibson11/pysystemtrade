@@ -131,10 +131,11 @@ def get_instrument_object_from_config(
 
     config_row = config[config.Instrument == instr_code]
     symbol = config_row.Symbol.values[0]
+    multiplier = config_row.BcPriceMultiplier.values[0]
 
     # We use the flexibility of futuresInstrument to add additional arguments
     instrument = futuresInstrument(instr_code)
-    bc_data = BcInstrumentConfigData(symbol)
+    bc_data = BcInstrumentConfigData(symbol=symbol, price_multiplier=multiplier)
 
     futures_instrument_with_bc_data = BcFuturesInstrument(instrument, bc_data)
 

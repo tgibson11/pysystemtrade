@@ -57,13 +57,15 @@ class bcConnection(object):
         :return: whether Barchart knows about the contract
         :rtype: bool
         """
+        specific_log = futures_contract.specific_log(self.log)
+
         try:
             contract_id = self.get_barchart_id(futures_contract)
-            resp = self._get_overview(contract_id)
+            resp = self._get_overview(contract_id, log=specific_log)
             return resp.status_code == 200
 
         except Exception as e:
-            self.log.error("Error: %s" % e)
+            specific_log.error("Error: %s" % e)
             return False
 
     def get_barchart_id(self, futures_contract: futuresContract) -> str:
@@ -113,7 +115,12 @@ class bcConnection(object):
 
         price_data_as_df = self._raw_bc_data_to_df(price_data_raw=price_data_raw, log=log)
 
-        return price_data_as_df
+        instr_code = contract.instrument_code
+        bc_futures_instrument = self.barchart_futures_instrument_data.get_bc_futures_instrument(instr_code)
+        bc_price_multiplier = bc_futures_instrument.bc_price_multiplier
+        adj_price_data_as_df = self._apply_bc_price_multiplier(price_data_as_df, bc_price_multiplier)
+
+        return adj_price_data_as_df
 
     def _get_prices_for_contract(
             self,
@@ -289,7 +296,13 @@ class bcConnection(object):
 
         return local_timestamp_bc
 
-    def _get_overview(self, contract_id):
+    @staticmethod
+    def _apply_bc_price_multiplier(price_data: pd.DataFrame, bc_price_multiplier: float):
+        price_data[["OPEN", "HIGH", "LOW", "FINAL"]] = \
+            price_data[["OPEN", "HIGH", "LOW", "FINAL"]] * bc_price_multiplier
+        return price_data
+
+    def _get_overview(self, contract_id, log: logger):
         """
         GET the futures overview page, eg https://www.barchart.com/futures/quotes/B6M21/overview
         :param contract_id: contract identifier
@@ -299,7 +312,7 @@ class bcConnection(object):
         """
         url = BARCHART_URL + "futures/quotes/%s/overview" % contract_id
         resp = self.session.get(url)
-        self.log.msg(f"GET {url}, response {resp.status_code}")
+        log.msg(f"GET {url}, response {resp.status_code}")
         return resp
 
     def _create_bc_session(self):
