@@ -130,6 +130,10 @@ class bcConnection(object):
             log: logger = None,
             dry_run: bool = False):
 
+        if bar_freq != DAILY_PRICE_FREQ:
+            log.warn("Barchart intra-day prices have not been tested! "
+                     "In particular, the conversion from US/Central to local time may not work correctly.")
+
         now = datetime.now()
 
         year = contract.contract_date.year()
