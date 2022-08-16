@@ -110,13 +110,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     start_times = {
         ## US
-        "CST (Central Standard Time)": 15,
-        "US/Central": 15,
-        "CST": 15,
+        "CST (Central Standard Time)": 8,
+        "US/Central": 8,
+        "CST": 8,
 
-        "EST (Eastern Standard Time)": 14,
-        "US/Eastern": 14,
-        "EST": 14,
+        "EST (Eastern Standard Time)": 7,
+        "US/Eastern": 7,
+        "EST": 7,
 
         ## UK
         "GB-Eire": 9,
@@ -136,13 +136,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     end_times = {
         ## US
-        "CST (Central Standard Time)": 20,
-        "US/Central": 20,
-        "CST": 20,
+        "CST (Central Standard Time)": 13,
+        "US/Central": 13,
+        "CST": 13,
 
-        "EST (Eastern Standard Time)": 19,
-        "US/Eastern": 19,
-        "EST": 19,
+        "EST (Eastern Standard Time)": 12,
+        "US/Eastern": 12,
+        "EST": 12,
 
         ## UK
         "GB-Eire": 16,
@@ -158,12 +158,6 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
         "Japan": 6,
         "Hongkong": 6,
     }
-
-    GMT_offset_hours = get_GMT_offset_hours()
-    for k, v in start_times.items():
-        start_times[k] = v + GMT_offset_hours
-    for k, v in end_times.items():
-        end_times[k] = v + GMT_offset_hours
 
     conservative_start_time = datetime.time(start_times[time_zone_id])
     conservative_end_time = datetime.time(end_times[time_zone_id])
