@@ -110,13 +110,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     start_times = {
         ## US
-        "CST (Central Standard Time)": 8,
-        "US/Central": 8,
-        "CST": 8,
+        "CST (Central Standard Time)": 15,
+        "US/Central": 15,
+        "CST": 15,
 
-        "EST (Eastern Standard Time)": 7,
-        "US/Eastern": 7,
-        "EST": 7,
+        "EST (Eastern Standard Time)": 14,
+        "US/Eastern": 14,
+        "EST": 14,
 
         ## UK
         "GB-Eire": 9,
@@ -136,13 +136,13 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
 
     end_times = {
         ## US
-        "CST (Central Standard Time)": 13,
-        "US/Central": 13,
-        "CST": 13,
+        "CST (Central Standard Time)": 20,
+        "US/Central": 20,
+        "CST": 20,
 
-        "EST (Eastern Standard Time)": 12,
-        "US/Eastern": 12,
-        "EST": 12,
+        "EST (Eastern Standard Time)": 19,
+        "US/Eastern": 19,
+        "EST": 19,
 
         ## UK
         "GB-Eire": 16,
@@ -158,6 +158,12 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
         "Japan": 6,
         "Hongkong": 6,
     }
+
+    GMT_offset_hours = get_GMT_offset_hours()
+    for k, v in start_times.items():
+        start_times[k] = v + GMT_offset_hours
+    for k, v in end_times.items():
+        end_times[k] = v + GMT_offset_hours
 
     conservative_start_time = datetime.time(start_times[time_zone_id])
     conservative_end_time = datetime.time(end_times[time_zone_id])
@@ -180,22 +186,21 @@ def get_time_difference(time_zone_id: str) -> int:
     # after and 1 hour before
     # confusingly, IB seem to have changed their time zone codes in 2020
     time_diff_dict = {
-        "CST (Central Standard Time)": -1,
-        "MET (Middle Europe Time)": -8,
-        "EST (Eastern Standard Time)": -2,
-        "JST (Japan Standard Time)": -15,
-        "US/Eastern": -2,
-        "MET": -8,
-        "EST": -2,
-        "JST": -15,
-        "Japan": -15,
-        "US/Central": -1,
-        "GB-Eire": -7,
-        "Hongkong": -14,
-        "America/Belize": -1,
-        "": -7,
+        "CST (Central Standard Time)": 6,
+        "MET (Middle Europe Time)": -1,
+        "EST (Eastern Standard Time)": 5,
+        "JST (Japan Standard Time)": -8,
+        "US/Eastern": 5,
+        "MET": -1,
+        "EST": 5,
+        "JST": -8,
+        "Japan": -8,
+        "US/Central": 6,
+        "GB-Eire": 0,
+        "Hongkong": -7,
+        "": 0,
     }
-    GMT_offset_hours = GMT_offset_hours
+    GMT_offset_hours = get_GMT_offset_hours()
     for k, v in time_diff_dict.items():
         time_diff_dict[k] = v + GMT_offset_hours
     diff_hours = time_diff_dict.get(time_zone_id, None)
