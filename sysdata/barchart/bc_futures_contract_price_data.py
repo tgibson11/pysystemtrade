@@ -30,7 +30,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
     def barchart(self):
         return self._bc_connection
 
-    def has_data_for_contract(self, futures_contract: futuresContract) -> bool:
+    def has_merged_price_data_for_contract(self, futures_contract: futuresContract) -> bool:
         """
         Does Barchart have data for a given contract?
 
@@ -41,8 +41,8 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         """
         return self.barchart.has_data_for_contract(futures_contract)
 
-    def get_contracts_with_price_data(self) -> listOfFuturesContracts:
-        raise NotImplementedError("Do not use get_contracts_with_price_data with Barchart")
+    def get_contracts_with_merged_price_data(self) -> listOfFuturesContracts:
+        raise NotImplementedError("Do not use get_contracts_with_merged_price_data with Barchart")
 
     def get_prices_at_frequency_for_potentially_expired_contract_object(
             self, contract: futuresContract, freq: Frequency = DAILY_PRICE_FREQ) -> futuresContractPrices:
@@ -50,7 +50,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         price_data = self._get_prices_at_frequency_for_contract_object_no_checking(contract, freq=freq)
         return price_data
 
-    def _get_prices_for_contract_object_no_checking(self, contract_object: futuresContract) -> futuresContractPrices:
+    def _get_merged_prices_for_contract_object_no_checking(self, contract_object: futuresContract) -> futuresContractPrices:
         price_series = self._get_prices_at_frequency_for_contract_object_no_checking(
             contract_object, freq=DAILY_PRICE_FREQ
         )
@@ -100,11 +100,12 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
                                                          contract_object: futuresContract) -> dataFrameOfRecentTicks:
         return dataFrameOfRecentTicks.create_empty()
 
-    def _write_prices_for_contract_object_no_checking(self, *args, **kwargs):
+    def _write_merged_prices_for_contract_object_no_checking(self, *args, **kwargs):
         raise NotImplementedError("Barchart is a read only source of prices")
 
-    def delete_prices_for_contract_object(self, *args, **kwargs):
+    def delete_merged_prices_for_contract_object(self, *args, **kwargs):
         raise NotImplementedError("Barchart is a read only source of prices")
 
-    def _delete_prices_for_contract_object_with_no_checks_be_careful(self, futures_contract_object: futuresContract):
+    def _delete_merged_prices_for_contract_object_with_no_checks_be_careful(self,
+                                                                            futures_contract_object: futuresContract):
         raise NotImplementedError("Barchart is a read only source of prices")
