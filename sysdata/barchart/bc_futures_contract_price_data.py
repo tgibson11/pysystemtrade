@@ -44,26 +44,30 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
     def get_contracts_with_merged_price_data(self) -> listOfFuturesContracts:
         raise NotImplementedError("Do not use get_contracts_with_merged_price_data with Barchart")
 
+    def get_contracts_with_price_data_for_frequency(self, frequency: Frequency) -> listOfFuturesContracts:
+        raise NotImplementedError("Do not use get_contracts_with_price_data_for_frequency with Barchart")
+
     def get_prices_at_frequency_for_potentially_expired_contract_object(
             self, contract: futuresContract, freq: Frequency = DAILY_PRICE_FREQ) -> futuresContractPrices:
 
-        price_data = self._get_prices_at_frequency_for_contract_object_no_checking(contract, freq=freq)
+        price_data = self._get_prices_at_frequency_for_contract_object_no_checking(contract, frequency=freq)
         return price_data
 
-    def _get_merged_prices_for_contract_object_no_checking(self, contract_object: futuresContract) -> futuresContractPrices:
+    def _get_merged_prices_for_contract_object_no_checking(
+            self, contract_object: futuresContract) -> futuresContractPrices:
         price_series = self._get_prices_at_frequency_for_contract_object_no_checking(
-            contract_object, freq=DAILY_PRICE_FREQ
+            contract_object, frequency=DAILY_PRICE_FREQ
         )
 
         return price_series
 
     def _get_prices_at_frequency_for_contract_object_no_checking(self, contract_object: futuresContract,
-                                                                 freq: Frequency) -> futuresContractPrices:
+                                                                 frequency: Frequency) -> futuresContractPrices:
         """
         Get historical prices at a particular frequency
 
         :param contract_object:  futuresContract
-        :param freq: Frequency; one of D, H, 15M, 5M, M, 10S, S
+        :param frequency: Frequency; one of D, H, 15M, 5M, M, 10S, S
         :return: data
         """
 
@@ -71,7 +75,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
         price_data = self.barchart.get_historical_futures_data_for_contract(
             contract_object,
-            bar_freq=freq
+            bar_freq=frequency
         )
 
         if price_data is missing_data:
@@ -103,9 +107,18 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
     def _write_merged_prices_for_contract_object_no_checking(self, *args, **kwargs):
         raise NotImplementedError("Barchart is a read only source of prices")
 
+    def _write_prices_at_frequency_for_contract_object_no_checking(self, futures_contract_object: futuresContract,
+                                                                   futures_price_data: futuresContractPrices,
+                                                                   frequency: Frequency = DAILY_PRICE_FREQ):
+        raise NotImplementedError("Barchart is a read only source of prices")
+
     def delete_merged_prices_for_contract_object(self, *args, **kwargs):
         raise NotImplementedError("Barchart is a read only source of prices")
 
     def _delete_merged_prices_for_contract_object_with_no_checks_be_careful(self,
                                                                             futures_contract_object: futuresContract):
+        raise NotImplementedError("Barchart is a read only source of prices")
+
+    def _delete_prices_at_frequency_for_contract_object_with_no_checks_be_careful(
+            self, futures_contract_object: futuresContract, frequency: Frequency = DAILY_PRICE_FREQ):
         raise NotImplementedError("Barchart is a read only source of prices")
