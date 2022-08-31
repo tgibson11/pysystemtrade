@@ -438,7 +438,7 @@ class futuresContractPriceData(baseData):
             )
         else:
             log = futures_contract_object.log(self.log)
-            log.warn(f"Tried to delete non existent contract at frequency {frequency}", )
+            log.warn("Tried to delete non existent contract at frequency %s" % frequency)
 
 
     def delete_merged_prices_for_instrument_code(
