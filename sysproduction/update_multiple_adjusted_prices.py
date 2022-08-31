@@ -9,6 +9,7 @@ Two types of services:
 - the
 
 """
+import traceback
 
 from syscore.objects import success
 
@@ -92,6 +93,7 @@ def update_multiple_adjusted_prices_with_data(
         try:
             update_multiple_adjusted_prices_for_instrument(instrument_code, data)
         except Exception as e:
+            data.log.error(traceback.format_exc())
             data.log.critical(
                 "Something went wrong with adjusted prices for %s! [%s]"
                 % (instrument_code, str(e))
