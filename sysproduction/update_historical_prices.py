@@ -34,7 +34,7 @@ def update_historical_prices():
         update_historical_price_object = updateHistoricalPrices(data)
 
         instrument_code = get_valid_instrument_code_from_user(
-            all_code=ALL_INSTRUMENTS, allow_all=True
+            all_code=ALL_INSTRUMENTS, allow_all=True, source="single"
         )
 
         if instrument_code is ALL_INSTRUMENTS:
@@ -42,12 +42,14 @@ def update_historical_prices():
             return success
 
         cleaning_config = get_config_for_price_filtering(data)
+        update_historical_prices_for_instrument(instrument_code, data, cleaning_config=cleaning_config)
+
         do_another = True
 
         while do_another:
             exit_code = "EXIT"
             instrument_code = get_valid_instrument_code_from_user(
-                allow_exit=True, exit_code=exit_code
+                allow_exit=True, exit_code=exit_code, source="single"
             )
             if instrument_code == exit_code:
                 do_another = False
