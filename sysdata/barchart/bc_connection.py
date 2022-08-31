@@ -253,7 +253,7 @@ class bcConnection(object):
     def _raw_bc_data_to_df(self, price_data_raw: str, log: logger) -> pd.DataFrame:
 
         if price_data_raw is None:
-            log.warn("No price data from IB")
+            log.warn("No price data from Barchart")
             return missing_data
 
         iostr = io.StringIO(price_data_raw)
@@ -266,8 +266,11 @@ class bcConnection(object):
             for price_row in price_data_as_df["date"]
         ]
 
-        price_data_as_df.index = date_index
+        price_data_as_df.set_index(date_index, inplace=True)
         price_data_as_df.drop('date', axis=1, inplace=True)
+        
+        # Drop rows with duplicate index values (keeping the first one)
+        price_data_as_df = price_data_as_df[~price_data_as_df.index.duplicated(keep="first")]
 
         return price_data_as_df
 
