@@ -266,9 +266,9 @@ class bcConnection(object):
             for price_row in price_data_as_df["date"]
         ]
 
-        price_data_as_df.set_index(date_index, inplace=True)
+        price_data_as_df.set_index(pd.Index(date_index), inplace=True)
         price_data_as_df.drop('date', axis=1, inplace=True)
-        
+
         # Drop rows with duplicate index values (keeping the first one)
         price_data_as_df = price_data_as_df[~price_data_as_df.index.duplicated(keep="first")]
 

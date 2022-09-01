@@ -41,6 +41,19 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         """
         return self.barchart.has_data_for_contract(futures_contract)
 
+    def has_price_data_for_contract_at_frequency(self, contract_object: futuresContract, frequency: Frequency) -> bool:
+        """
+        Does Barchart have data for a given contract?
+
+        Overridden because the parent implementation is to check a list of all available contracts,
+        which we can't get from Barchart
+        :param contract_object:
+        :param frequency
+        :return: bool
+        """
+        # This check isn't for a specific frequency though
+        return self.barchart.has_data_for_contract(contract_object)
+
     def get_contracts_with_merged_price_data(self) -> listOfFuturesContracts:
         raise NotImplementedError("Do not use get_contracts_with_merged_price_data with Barchart")
 
