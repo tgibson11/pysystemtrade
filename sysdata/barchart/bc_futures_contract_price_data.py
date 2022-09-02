@@ -1,6 +1,6 @@
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
-from syscore.objects import missing_data, failure
+from syscore.objects import missing_data
 from sysdata.barchart.bc_connection import bcConnection
 from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
@@ -96,7 +96,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
                 "Something went wrong getting Barchart price data for %s"
                 % str(contract_object)
             )
-            return failure
+            return missing_data
 
         if len(price_data) == 0:
             new_log.warn(
