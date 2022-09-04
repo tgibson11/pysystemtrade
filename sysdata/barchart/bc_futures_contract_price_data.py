@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
 from syscore.objects import missing_data
@@ -107,7 +109,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
         return futuresContractPrices(price_data)
 
-    def get_ticker_object_for_order(self, order: contractOrder) -> tickerObject:
+    def get_ticker_object_for_order(self, order: contractOrder) -> Optional[tickerObject]:
         return None
 
     def cancel_market_data_for_order(self, order: brokerOrder):
