@@ -48,7 +48,12 @@ from syscore.objects import arg_not_supplied
 
 from sysobjects.contracts import futuresContract
 
-def interactive_order_stack(ib_conn: connectionIB = arg_not_supplied):
+def interactive_order_stack():
+    # Avoids pressing enter when running from script
+    ib_conn = arg_not_supplied
+    interactive_order_stack_with_ib_conn(ib_conn)
+
+def interactive_order_stack_with_ib_conn(ib_conn: connectionIB = arg_not_supplied):
     with dataBlob(log_name="Interactive-Order-Stack", ib_conn=ib_conn) as data:
 
         menu = run_interactive_menu(
@@ -248,7 +253,8 @@ def create_balance_trade(data):
 
 def default_price_for_contract(data: dataBlob, futures_contract: futuresContract):
     diag_prices = diagPrices(data)
-    default_price = diag_prices.get_prices_at_frequency_for_contract_object(futures_contract)
+    default_prices = diag_prices.get_merged_prices_for_contract_object(futures_contract)
+    default_price = default_prices.return_final_prices().values[-1]
 
     return default_price
 
