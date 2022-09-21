@@ -231,7 +231,7 @@ def days_until_earliest_expiry(data: dataBlob, instrument_code: str) -> int:
     try:
         carry_days = data_contracts.days_until_carry_expiry(instrument_code)
     except ContractNotFound:
-        carry_expiry_days = 999
+        carry_days = 999
 
     roll_days = data_contracts.days_until_roll(instrument_code)
     price_days = data_contracts.days_until_price_expiry(instrument_code)
