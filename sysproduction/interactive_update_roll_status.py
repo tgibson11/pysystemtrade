@@ -12,6 +12,7 @@ from syscore.objects import success, failure, status, named_object
 from syscore.text import landing_strip, print_with_landing_strips_around
 
 from sysdata.data_blob import dataBlob
+from sysdata.futures.contracts import ContractNotFound
 
 from sysobjects.contracts import futuresContract
 from sysobjects.production.roll_state import (
@@ -225,7 +226,13 @@ def include_instrument_in_auto_cycle(
 def days_until_earliest_expiry(data: dataBlob, instrument_code: str) -> int:
 
     data_contracts = dataContracts(data)
-    carry_days = data_contracts.days_until_carry_expiry(instrument_code)
+
+    # Don't blow up the report just because we don't have data for a carry contract
+    try:
+        carry_days = data_contracts.days_until_carry_expiry(instrument_code)
+    except ContractNotFound:
+        carry_expiry_days = 999
+
     roll_days = data_contracts.days_until_roll(instrument_code)
     price_days = data_contracts.days_until_price_expiry(instrument_code)
 
