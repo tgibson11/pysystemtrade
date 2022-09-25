@@ -2992,11 +2992,10 @@ Volumes are shown in relative terms to make interpretation easier."
 ```
 
 ### P&L report
-
+    
 The p&l report shows you profit and loss (duh!).  On a daily basis it is run for the previous 24 hours. On an ad hoc basis, it can be run for any time period (recent or in the past).
 
 Here is an example, with annotations added in quotes (""):
-
 
 ```
 
@@ -3870,4 +3869,10 @@ via email, to saving the report as a file Files would be stored in according to 
     output: "file"
     calendar_days_back: 250
 
+```
+The available reports can be found by interogating the `dataReports` object,
+e.g.:
+```python
+from sysproduction.data.reports import dataReports
+print(dataReports().get_default_reporting_config_dict().keys())
 ```
