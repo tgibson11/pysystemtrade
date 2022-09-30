@@ -257,6 +257,7 @@ You need to:
         - PYSYS_CODE=/home/user_name/pysystemtrade
         - SCRIPT_PATH=/home/user_name/pysystemtrade/sysproduction/linux/scripts
         - ECHO_PATH=/home/user_name/echos
+        - Note: export variables that are used in Python (e.g., private config dir)
     - Add the SCRIPT_PATH directory to your PATH
     - Linux: update terminal preferences to run as a login shell
     - Create the following directories (again use other directories if you like, but you must modify the .profile above)
@@ -271,7 +272,7 @@ You need to:
       - In API settings: check "Download open orders on connect", uncheck "Read-only"
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/). Latest v4 is recommended, as [Arctic doesn't support 5](https://github.com/man-group/arctic#requirements) yet
     - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a ['private_control_config.yaml' file in the same directory](#process-configuration) See [here for more details](#system-defaults--private-config)
-       - Update email password in private_config.yaml (do not commit)
+       - Update email & Barchart passwords in private_config.yaml (do not commit)
          - `cp -r $HOME/private $HOME/pysystemtrade/private`
     - [check a mongodb server is running with the right data directory](/docs/data.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
     - launch an IB gateway (this could be done automatically depending on your security setup)
