@@ -261,7 +261,6 @@ You need to:
     - Linux: update terminal preferences to run as a login shell
     - Create the following directories (again use other directories if you like, but you must modify the .profile above)
         - '/home/user_name/echos/'
-        - '/home/user_name/data'
         - '/home/user_name/data/mongo_dump'
         - '/home/user_name/data/backups_csv'
         - '/home/user_name/data/backtests'
@@ -270,7 +269,7 @@ You need to:
     - Install the pysystemtrade package, and install or update, any dependencies in directory $PYSYS_CODE (it's possible to put it elsewhere, but you will need to modify the environment variables listed above). If using git clone from your home directory this should create the directory '/home/user_name/pysystemtrade/'
     - [Set up interactive brokers](/docs/IB.md), download and install their python code, and get a gateway running.
       - In API settings: check "Download open orders on connect", uncheck "Read-only"
-    - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/)
+    - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/). Latest v4 is recommended, as [Arctic doesn't support 5](https://github.com/man-group/arctic#requirements) yet
     - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a ['private_control_config.yaml' file in the same directory](#process-configuration) See [here for more details](#system-defaults--private-config)
        - Update email password in private_config.yaml (do not commit)
          - `cp -r $HOME/private $HOME/pysystemtrade/private`
