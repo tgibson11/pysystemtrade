@@ -255,6 +255,7 @@ You need to:
     - Install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), install or update [python3](https://docs.python-guide.org/starting/install3/linux/). You may also find a simple text editor (like emacs) is useful for fine tuning, and if you are using a headless server then [x11vnc](http://www.karlrunge.com/x11vnc/) is helpful.
     - Add the following environment variables to your `~/.profile`: (feel free to use other directories):
         - PYSYS_CODE=/home/user_name/pysystemtrade
+        - PYSYS_PRIVATE_CONFIG_DIR=/home/user_name/private
         - SCRIPT_PATH=/home/user_name/pysystemtrade/sysproduction/linux/scripts
         - ECHO_PATH=/home/user_name/echos
         - Note: export variables that are used in Python (e.g., private config dir)
@@ -273,7 +274,6 @@ You need to:
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/). Latest v4 is recommended, as [Arctic doesn't support 5](https://github.com/man-group/arctic#requirements) yet
     - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a ['private_control_config.yaml' file in the same directory](#process-configuration) See [here for more details](#system-defaults--private-config)
        - Update email & Barchart passwords in private_config.yaml (do not commit)
-         - `cp -r $HOME/private $HOME/pysystemtrade/private`
     - [check a mongodb server is running with the right data directory](/docs/data.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
     - launch an IB gateway (this could be done automatically depending on your security setup)
 - FX data:
