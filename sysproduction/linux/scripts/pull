@@ -1,12 +1,10 @@
 # git pull within git controlled private directory copy
 cd ~/private/
-# stash local changes (email password in private_config.yaml)
+# stash local changes (passwords in private_config.yaml)
 git stash
 git pull
 # restore local changes from stash
 git stash pop
-# copy the updated contents of the private directory to pysystemtrade private directory
-rsync -av ~/private/ ~/pysystemtrade/private --exclude .git
 # git pull from main pysystemtrade github repo
 cd ~/pysystemtrade/
 git pull
