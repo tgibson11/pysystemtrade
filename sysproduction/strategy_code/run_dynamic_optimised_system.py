@@ -19,6 +19,7 @@ from sysproduction.data.backtest import store_backtest_state
 from syslogdiag.log_to_screen import logtoscreen
 
 from systems.basesystem import System
+from systems.provided.rob_system.run_system import futures_system
 
 
 class runSystemCarryTrendDynamic(runSystemClassic):
@@ -65,48 +66,10 @@ def dynamic_system(
     if base_currency is not arg_not_supplied:
         config.base_currency = base_currency
 
-    system = futures_system(data=sim_data, config=config)
+    system = futures_system(sim_data=sim_data, config_filename=config_filename)
     system._log = log
 
     system.set_logging_level(log_level)
-
-    return system
-
-
-from systems.forecasting import Rules
-from systems.basesystem import System
-from systems.forecast_combine import ForecastCombine
-from systems.forecast_scale_cap import ForecastScaleCap
-from systems.rawdata import RawData
-from systems.positionsizing import PositionSizing
-from systems.portfolio import Portfolios
-from systems.provided.dynamic_small_system_optimise.optimised_positions_stage import (
-    optimisedPositions,
-)
-from systems.risk import Risk
-from systems.provided.dynamic_small_system_optimise.accounts_stage import (
-    accountForOptimisedStage,
-)
-
-
-def futures_system(data, config):
-
-    system = System(
-        [
-            Risk(),
-            accountForOptimisedStage(),
-            optimisedPositions(),
-            Portfolios(),
-            PositionSizing(),
-            RawData(),
-            ForecastCombine(),
-            ForecastScaleCap(),
-            Rules(),
-        ],
-        data,
-        config,
-    )
-    system.set_logging_level("on")
 
     return system
 
