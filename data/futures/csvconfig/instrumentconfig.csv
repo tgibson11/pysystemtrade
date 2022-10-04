@@ -1,6 +1,6 @@
 Instrument,Pointsize,Percentage,PerBlock,PerTrade,AssetClass,Currency,Description,Slippage
 AEX,200,0,2,0,Equity,EUR,Netherlands equity index AEX,0.1
-AEX_mini,20,,,,Equity,EUR,AEX mini,
+AEX_mini,20,,0.2,,Equity,EUR,AEX mini,0.1
 ALUMINIUM,25,0,1.5,0,Metals,USD,NYMEX Aluminum Index,8.5
 ALUMINIUM_LME,25,,,,Metals,USD,High-Grade Primary Aluminium,
 ASX,25,,,,Equity,AUD,Australian equity index ASX200,
@@ -35,7 +35,7 @@ BUTTER,200,0,0.85,0,Ags,USD,CME Cash-Settled Butter Futures,1.89375
 BUXL,1000,0,2,0,Bond,EUR,German Buxl 15 to 30 year bond,0.013
 CAC,10,0,2,0,Equity,EUR,French equity index CAC40,0.25
 CAD,100000,0,1.5,0,FX,USD,CADUSD currency,3.4E-05
-CAD_micro,10000,,,,FX,USD,CADUSD_micro,
+CAD_micro,10000,,0.85,,FX,USD,CADUSD_micro,5E-05
 CAD10,1000,,,,Bond,CAD,Canadian 10 year bond,
 CAD2,1000,,,,Bond,CAD,Canadian 2 year bond,
 CAD5,1000,,,,Bond,CAD,Canadian 10 year bond,
@@ -45,7 +45,7 @@ CANOLA,20,0,2,0,Ags,CAD,Rapeseed (Canola) in CAD,2
 CH10,1000,0,4,0,Bond,CHF,Swiss Federal Long-Term Bonds,0.181353591160219
 CHEESE,20000,0,0.85,0,Ags,USD,Cheese,0.005360341151386
 CHF,125000,0,1.5,0,FX,USD,CHFUSD currency,5E-05
-CHF_micro,12500,,,,FX,USD,CHFUSD micro,
+CHF_micro,12500,,0.85,,FX,USD,CHFUSD micro,5E-05
 CHFJPY,250000,,,,FX,JPY,CHFJPY,
 CHINA120,50,,,,Equity,HKD,CES China 120 Index,
 CHINAA-CON,25,,,,Equity,USD,MSCI China A 50 Connect Index,
@@ -81,7 +81,7 @@ DIVDAX-DIVI,1000,0,2,0,Equity,EUR,DivDAX Dividend Points Index,
 DJSTX-SMALL,50,0,2,0,Equity,EUR,Dow Jones STOXX Small 200 Index,0.2
 DJUBS,250,,,,Ags,EUR,Dow Jones-UBS Commodity Index,
 DOW,0.5,0,0.25,0,Equity,USD,Micro E-Mini Dow Jones Industrial Average Index,0.72
-DOW_mini,5,,,,Equity,USD,Mini Sized Dow Jones Industrial Average $5,
+DOW_mini,5,,0.85,,Equity,USD,Mini Sized Dow Jones Industrial Average $5,0.5
 DOW_YEN,100,,,,Equity,JPY,OSE Dow Jones Industrial Average,
 DX,1000,0,2.2,0,FX,USD,US Dollar Index,0.1
 EDOLLAR,2500,0,2.11,0,Bond,USD,US STIR Eurodollar,0.0025
@@ -171,7 +171,7 @@ GASOILINE,42000,0,1.5,0,OilGas,USD,RBOB Gasoline US,0.0005
 GASOILINE_ICE,42000,,,,OilGas,USD,ICE NYH RBOB Gasoline,
 GASOILINE-mini,21000,0,0.85,0,OilGas,USD,NYMEX MINY Gasoline RBOB Index,
 GBP,62500,0,2.46,0,FX,USD,GBPUSD currency,6.61459616616592E-05
-GBP_micro,6250,,,,FX,USD,GBPUSD_micro,
+GBP_micro,6250,,0.85,,FX,USD,GBPUSD_micro,5E-05
 GBPCHF,125000,,,,FX,CHF,GBPCHF,
 GBPEUR,125000,0,1.5,0,FX,GBP,GBPEUR currency,7.5E-05
 GBPINR,1000,,,,FX,INR,GBPINR,
@@ -226,7 +226,7 @@ JGB-SGX-mini,100000,0,85,0,Bond,JPY,SGX Mini JGB Index,0.01
 JP-REALESTATE,1000,0,500,0,Sector,JPY,TSE REIT Index,13.75
 JPY,12500000,0,2.46,0,FX,USD,JPYUSD currency,2.5E-07
 JPY_micro,1250000,0,0.33,0,FX,USD,JPYUSD currency micro,4.80872E-06
-JPY_mini,6250000,,,,FX,USD,JPYUSD mini,
+JPY_mini,6250000,,0.85,,FX,USD,JPYUSD mini,4.80872E-06
 JPY-SGX,100000,0,300,0,FX,JPY,SGX US Dollar in Japanese Yen Futures (Standard),0.01
 JPY-SGX-TITAN,500000,0,360,0,FX,JPY,SGX US Dollar in Japanese Yen Futures (Titan),0.01
 JPYINR,100000,,,,FX,INR,JPYINR,
