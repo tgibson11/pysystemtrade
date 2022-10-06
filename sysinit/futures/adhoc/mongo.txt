@@ -1,0 +1,20 @@
+
+# Delete optimal positions data when deleting an instrument
+# Otherwise it will continue to show an optimal position in the reconcile report
+# It might even try to take a position if the optimal is non-zero, but I've never let it get that far
+db.optimal_positions.remove({"instrument_code": "FEEDCOW"});
+
+# Delete process control data when no longer running a sub-process daily (most likely a report)
+# Otherwise it will always show as delayed in the status report
+db.process_control.remove({process_name: "run_reports"});
+
+# Update existing position data when renaming a system
+# Otherwise orders will be generated as if there are no existing positions
+db.futures_position_by_strategy.update(
+   {"strategy_name": "my_system"},
+   { $set: {"strategy_name": "futures_system"}},
+   {
+     multi: true
+   }
+)
+
