@@ -1,6 +1,7 @@
 from syscore.dateutils import DAILY_PRICE_FREQ
 from sysobjects.contracts import futuresContract
 from sysproduction.data.broker import dataBroker
+from syscore.dateutils import DAILY_PRICE_FREQ
 
 
 if __name__ == "__main__":
@@ -13,6 +14,8 @@ if __name__ == "__main__":
 
     print("Configured as %s" % str(meta_data))
     list_of_contract_dates = data_broker.get_list_of_contract_dates_for_instrument_code(instrument_code)
+    list_of_contract_dates.sort()
+
     ## list months for roll config data
     print("Months with prices %s" % str(list_of_contract_dates))
 
