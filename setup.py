@@ -93,7 +93,7 @@ setup(
         "PyYAML>==5.4",
         "numpy>=1.19.4",
         "scipy>=1.0.0",
-        "pymongo>=3.9.0",
+        "pymongo==3.11.3",
         "arctic==1.79.4",
         "psutil==5.6.6",
         "pytest>6.2",
