@@ -1,4 +1,3 @@
-from syscore.dateutils import DAILY_PRICE_FREQ
 from sysobjects.contracts import futuresContract
 from sysproduction.data.broker import dataBroker
 from syscore.dateutils import DAILY_PRICE_FREQ

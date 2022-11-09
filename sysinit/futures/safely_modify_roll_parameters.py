@@ -182,8 +182,7 @@ def modified_roll_parameters(data: dataBlob, instrument_code) -> rollParameters:
             )
         except Exception as e:
             print("Problem parsing parameters %s" % str(e))
-            raise e
-            # continue
+            continue
 
         print("New parameters: %s " % str(new_roll_parameters))
         happy = true_if_answer_is_yes(
