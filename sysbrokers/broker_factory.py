@@ -37,20 +37,6 @@ def get_broker_class_list(data: dataBlob):
 def get_ib_class_list():
     return [
         ibFxPricesData,
-        ibFuturesContractPriceData,
-        ibFuturesContractData,
-        ibContractPositionData,
-        ibExecutionStackData,
-        ibStaticData,
-        ibCapitalData,
-        ibFuturesInstrumentData,
-        ibFxHandlingData,
-    ]
-
-
-def get_ib_bc_class_list():
-    return [
-        ibFxPricesData,
         bcFuturesContractPriceData,
         ibFuturesContractData,
         ibContractPositionData,
