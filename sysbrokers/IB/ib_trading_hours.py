@@ -103,10 +103,14 @@ def parse_phrase(phrase: str, adjustment_hours: int = 0, additional_adjust: int 
     return original_time + adjustment
 
 
-def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTimesAnyDay:
+def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> listOfOpeningTimes:
     # ALthough many things are liquid all day, we want to be conservative
     # confusingly, IB seem to have changed their time zone codes in 2020
     # times returned are in UTC
+
+    # OK to have start time > end time here
+    # That would indicate trading hours that span midnight in the user's local timezone
+    # It will be converted to 2 separate trading sessions
 
     start_times = {
         ## US
@@ -159,11 +163,48 @@ def get_conservative_trading_time_for_time_zone(time_zone_id: str) -> openingTim
         "Hongkong": 6,
     }
 
-    conservative_start_time = datetime.time(start_times[time_zone_id])
-    conservative_end_time = datetime.time(end_times[time_zone_id])
+    start_hour = start_times[time_zone_id]
+    end_hour = end_times[time_zone_id]
 
-    return openingTimesAnyDay(conservative_start_time,
-                              conservative_end_time)
+    # Apply GMT offset to convert to local timezone
+    gmt_offset = get_GMT_offset_hours()
+    local_start_hour = start_hour + gmt_offset
+    local_end_hour = end_hour + gmt_offset
+
+    # Naively adding the GMT offset may have resulted in an hour outside the range 0-23, so let's fix that
+    if local_start_hour < 0:
+        local_start_hour += 24
+    elif local_start_hour > 23:
+        local_start_hour -= 24
+
+    if local_end_hour < 0:
+        local_end_hour += 24
+    elif local_end_hour > 23:
+        local_end_hour -= 24
+
+    if local_start_hour < local_end_hour:
+        # The easy case
+        conservative_start_time = datetime.time(hour=local_start_hour)
+        conservative_end_time = datetime.time(hour=local_end_hour)
+
+        conservative_trading_hours = listOfOpeningTimes([
+            openingTimesAnyDay(conservative_start_time, conservative_end_time)
+        ])
+    else:
+        # Create 2 different trading sessions, first one starting at midnight
+        session1_start_time = datetime.time(hour=0)
+        session1_end_time = datetime.time(hour=local_end_hour)
+
+        # Second session ends just before midnight
+        session2_start_time = datetime.time(hour=local_start_hour)
+        session2_end_time = datetime.time(hour=23, minute=59)
+
+        conservative_trading_hours = listOfOpeningTimes([
+            openingTimesAnyDay(session1_start_time, session1_end_time),
+            openingTimesAnyDay(session2_start_time, session2_end_time),
+        ])
+
+    return conservative_trading_hours
 
 def get_GMT_offset_hours():
     # this needs to be in private_config.YAML

@@ -483,12 +483,13 @@ class listOfOpeningTimes(list):
 
 def adjust_trading_hours_conservatively(
     trading_hours: listOfOpeningTimes,
-        conservative_times: openingTimesAnyDay
+        conservative_times: listOfOpeningTimes
 ) -> listOfOpeningTimes:
 
     new_trading_hours = [
-        adjust_single_day_conservatively(single_days_hours, conservative_times)
+        adjust_single_day_conservatively(single_days_hours, conservative_time)
         for single_days_hours in trading_hours
+        for conservative_time in conservative_times
     ]
     new_trading_hours = listOfOpeningTimes(new_trading_hours)
     new_trading_hours_remove_zeros = new_trading_hours.remove_zero_length_from_opening_times()
