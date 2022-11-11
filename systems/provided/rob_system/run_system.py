@@ -25,13 +25,14 @@ from systems.provided.dynamic_small_system_optimise.accounts_stage import (
 
 
 def futures_system(
-    sim_data=arg_not_supplied, config_filename="systems.provided.rob_system.config.yaml"
+    sim_data=arg_not_supplied, config=arg_not_supplied
 ):
 
     if sim_data is arg_not_supplied:
         sim_data = dbFuturesSimData()
 
-    config = Config(config_filename)
+    if config is arg_not_supplied:
+        config = Config("systems.provided.rob_system.config.yaml")
 
     system = System(
         [

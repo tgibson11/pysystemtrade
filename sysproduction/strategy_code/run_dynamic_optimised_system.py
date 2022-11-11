@@ -66,7 +66,7 @@ def dynamic_system(
     if base_currency is not arg_not_supplied:
         config.base_currency = base_currency
 
-    system = futures_system(sim_data=sim_data, config_filename=config_filename)
+    system = futures_system(sim_data=sim_data, config=config)
     system._log = log
 
     system.set_logging_level(log_level)
