@@ -1,10 +1,12 @@
 import logging
 
+from sysdata.config.configdata import Config
 from systems.provided.rob_system.run_system import futures_system
 
 logging.getLogger("arctic").setLevel(logging.ERROR)
 
-system = futures_system(config_filename="/home/todd/private/system_config.yaml")
+config = Config("/home/todd/private/system_config.yaml")
+system = futures_system(config=config)
 
 system.log.msg("Sharpe Ratio: " + str(system.accounts.portfolio().sharpe()))
 
