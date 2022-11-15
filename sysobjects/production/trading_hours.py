@@ -15,7 +15,7 @@ class openingTimesAnyDay():
     opening_time: datetime.time
     closing_time: datetime.time
 
-    def add_date(self, some_date: datetime.date) -> openingTimes:
+    def add_date(self, some_date: datetime.date):
         return openingTimes(
             datetime.datetime.combine(some_date, self.opening_time),
             datetime.datetime.combine(some_date, self.closing_time)
@@ -117,9 +117,9 @@ class openingTimes():
         midnight_on_date = following_midnight_of_datetime(some_date)
         return cls(midnight_on_date, midnight_on_date)
 
-    def without_date(self) -> openingTimesAnyDay:
-        return openingTimesAnyDay(self.opening_time.time(),
-                                  self.closing_time.time())
+    # def without_date(self) -> openingTimesAnyDay:
+    #     return openingTimesAnyDay(self.opening_time.time(),
+    #                               self.closing_time.time())
 
     def not_zero_length(self):
         return not self.zero_length()
