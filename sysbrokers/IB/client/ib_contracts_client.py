@@ -90,7 +90,7 @@ class ibContractsClient(ibClient):
 
         try:
             trading_hours_from_ib = self.ib_get_raw_trading_hours(contract_object_with_ib_data)
-            saved_trading_hours = self.ib_get_saved_trading_hours_for_contract(contract_object_with_ib_data)
+            # saved_trading_hours = self.ib_get_saved_trading_hours_for_contract(contract_object_with_ib_data)
 
             ## uncomment
             #trading_hours = intersecting_trading_hours(trading_hours_from_ib,
