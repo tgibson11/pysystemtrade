@@ -15,7 +15,7 @@ class openingTimesAnyDay():
     opening_time: datetime.time
     closing_time: datetime.time
 
-    def add_date(self, some_date: datetime.date):
+    def add_date(self, some_date: datetime.date) -> 'openingTimes':
         return openingTimes(
             datetime.datetime.combine(some_date, self.opening_time),
             datetime.datetime.combine(some_date, self.closing_time)
@@ -117,9 +117,9 @@ class openingTimes():
         midnight_on_date = following_midnight_of_datetime(some_date)
         return cls(midnight_on_date, midnight_on_date)
 
-    # def without_date(self) -> openingTimesAnyDay:
-    #     return openingTimesAnyDay(self.opening_time.time(),
-    #                               self.closing_time.time())
+    def without_date(self) -> openingTimesAnyDay:
+        return openingTimesAnyDay(self.opening_time.time(),
+                                  self.closing_time.time())
 
     def not_zero_length(self):
         return not self.zero_length()
@@ -153,7 +153,8 @@ class openingTimes():
         else:
             return False
 
-    def intersect_with_list_of_open_times_any_day(self, saved_hours_for_weekday: listOfOpeningTimesAnyDay) -> 'listOfOpeningTimes':
+    def intersect_with_list_of_open_times_any_day(self,
+                            saved_hours_for_weekday: listOfOpeningTimesAnyDay) -> 'listOfOpeningTimes':
         opening_date = self.opening_time.date()
         list_of_all_hours_to_intersect = saved_hours_for_weekday.add_date(opening_date)
 
@@ -436,13 +437,14 @@ def intersected_trading_hours(opening_times: openingTimes,
             opening_times
         )
         list_of_opening_times = \
-                [intersecting_trading_hours(first_day_hours,
-                                          saved_trading_hours),
+                intersecting_trading_hours(first_day_hours,
+                                          saved_trading_hours)+   \
                 intersecting_trading_hours(second_day_hours,
-                                           saved_trading_hours)]
+                                           saved_trading_hours)
 
         return listOfOpeningTimes(list_of_opening_times)
 
+    ## We know that the hours will be on the same day now
     saved_hours_for_weekday = day_name[trading_hours_open_weekday]
     intersected_hours = opening_times.intersect_with_list_of_open_times_any_day(saved_hours_for_weekday)
 
