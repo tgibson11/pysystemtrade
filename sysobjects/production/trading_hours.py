@@ -466,9 +466,9 @@ def intersected_trading_hours(opening_times: openingTimes,
             opening_times
         )
         list_of_opening_times = \
-                intersecting_trading_hours(first_day_hours,
+                intersecting_trading_hours(listOfOpeningTimes([first_day_hours]),
                                           saved_trading_hours)+   \
-                intersecting_trading_hours(second_day_hours,
+                intersecting_trading_hours(listOfOpeningTimes([second_day_hours]),
                                            saved_trading_hours)
 
         return listOfOpeningTimes(list_of_opening_times)

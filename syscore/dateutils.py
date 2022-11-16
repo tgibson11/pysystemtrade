@@ -499,7 +499,8 @@ def preceeding_midnight_of_date(some_date: datetime.date):
 
 
 def following_midnight_of_datetime(some_datetime: datetime.datetime):
-    return preceeding_midnight_of_datetime(some_datetime + datetime.timedelta(days=1))
+    return datetime.datetime.combine(some_datetime.date(), datetime.time(23, 59))
+    # return preceeding_midnight_of_datetime(some_datetime + datetime.timedelta(days=1))
 
 
 def following_midnight_of_date(some_date: datetime.date):
