@@ -112,7 +112,6 @@ class ibContractsClient(ibClient):
         trading_hours = get_conservative_trading_hours(time_zone_id=time_zone_id,
                                                        trading_hours=trading_hours_from_ib)
 
-
         return trading_hours
 
     def ib_get_timezoneid(self, contract_object_with_ib_data: futuresContract) -> str:
