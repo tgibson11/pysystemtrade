@@ -3,7 +3,7 @@ from sysbrokers.IB.ib_instruments_data import ibFuturesInstrumentData, futuresIn
 from sysbrokers.IB.ib_connection import connectionIB
 from sysbrokers.broker_futures_contract_data import brokerFuturesContractData
 
-from syscore.objects import missing_contract, missing_instrument
+from syscore.objects import missing_instrument
 from syscore.exceptions import missingContract, missingData
 
 from sysobjects.contract_dates_and_expiries import expiryDate, listOfContractDateStr
@@ -171,13 +171,13 @@ class ibFuturesContractData(brokerFuturesContractData):
             new_log.msg("Can't resolve contract so can't find tick size")
             raise
 
-        price_magnifier = self.ib_client.ib_get_price_magnifier(
-            contract_object_with_ib_data
-        )
-
-        if price_magnifier is missing_contract:
+        try:
+            price_magnifier = self.ib_client.ib_get_price_magnifier(
+                contract_object_with_ib_data
+            )
+        except missingContract:
             new_log.msg("No contract found")
-            raise missingContract
+            raise
 
         return price_magnifier
 
