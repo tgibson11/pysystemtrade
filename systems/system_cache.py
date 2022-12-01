@@ -209,13 +209,17 @@ class systemCache(dict):
 
         filename = get_filename_for_package(relativefilename)
 
+        print("Getting items to pickle...")
         pickable_cache_refs = self._get_pickable_items()
 
+        print("Getting partial cache to pickle...")
         cache_to_pickle = self.partial_cache(pickable_cache_refs)
+        print("Converting partial cache to dict for pickling...")
         cache_to_pickle_as_dict = cache_to_pickle.as_dict()
 
         with open(filename, "wb+") as fhandle:
-            pickle.dump(cache_to_pickle_as_dict, fhandle)
+            print(f"Dumping to file {filename}")
+            pickle.dump(cache_to_pickle_as_dict, fhandle, )
 
     def as_dict(self):
         self_as_dict = {}
