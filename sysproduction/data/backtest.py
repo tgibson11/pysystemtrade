@@ -286,7 +286,7 @@ def pickle_state(data, system, backtest_filename):
 
     try:
         data.log.msg("Starting to pickle...")
-        system.cache.pickle(backtest_filename)
+        system.cache.pickle(backtest_filename, data.log)
         data.log.msg("Pickled backtest state to %s" % backtest_filename)
         return success
     except Exception as e:
