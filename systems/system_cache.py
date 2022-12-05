@@ -194,7 +194,7 @@ class systemCache(dict):
 
         return new_cache
 
-    def pickle(self, relativefilename, log):
+    def pickle(self, relativefilename):
         """
         Save everything in the cache to a pickle
 
@@ -209,17 +209,13 @@ class systemCache(dict):
 
         filename = get_filename_for_package(relativefilename)
 
-        log.msg("Getting items to pickle...")
         pickable_cache_refs = self._get_pickable_items()
 
-        log.msg("Getting partial cache to pickle...")
         cache_to_pickle = self.partial_cache(pickable_cache_refs)
-        log.msg("Converting partial cache to dict for pickling...")
         cache_to_pickle_as_dict = cache_to_pickle.as_dict()
 
         with open(filename, "wb+") as fhandle:
-            log.msg("Dumping to file...")
-            pickle.dump(cache_to_pickle_as_dict, fhandle, )
+            pickle.dump(cache_to_pickle_as_dict, fhandle)
 
     def as_dict(self):
         self_as_dict = {}
