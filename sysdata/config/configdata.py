@@ -18,6 +18,7 @@ from typing import Any
 
 import yaml
 
+from syscore.exceptions import missingData
 from syscore.fileutils import get_filename_for_package
 from syscore.objects import missing_data, arg_not_supplied
 from sysdata.config.defaults import get_system_defaults_dict
@@ -95,7 +96,10 @@ class Config(object):
                 self._elements = elements
 
     def get_element(self, element_name, default=None):
-        result = getattr(self, element_name, default)
+        if default is None:
+            result = getattr(self, element_name)
+        else:
+            result = getattr(self, element_name, default)
         return result
 
     def get_element_or_missing_data(self, element_name):
