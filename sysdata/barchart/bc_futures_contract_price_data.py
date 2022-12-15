@@ -2,7 +2,7 @@ from typing import Optional
 
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
-from syscore.objects import missing_data
+from syscore.exceptions import missingData
 from sysdata.barchart.bc_connection import bcConnection
 from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
@@ -88,17 +88,17 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
         new_log = contract_object.log(self.log)
 
-        price_data = self.barchart.get_historical_futures_data_for_contract(
-            contract_object,
-            bar_freq=frequency
-        )
-
-        if price_data is missing_data:
+        try:
+            price_data = self.barchart.get_historical_futures_data_for_contract(
+                contract_object,
+                bar_freq=frequency
+            )
+        except missingData:
             new_log.warn(
                 "Something went wrong getting Barchart price data for %s"
                 % str(contract_object)
             )
-            return missing_data
+            raise
 
         if len(price_data) == 0:
             new_log.warn(

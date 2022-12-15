@@ -11,7 +11,7 @@ from dateutil.tz import tz
 
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, HOURLY_FREQ, strip_timezone_fromdatetime, \
     adjust_timestamp_to_include_notional_close_and_time_offset
-from syscore.objects import missing_data
+from syscore.exceptions import missingData
 from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
 from sysdata.config.production_config import get_production_config
 from syslogdiag.log_to_screen import logtoscreen
@@ -254,7 +254,7 @@ class bcConnection(object):
 
         if price_data_raw is None:
             log.warn("No price data from Barchart")
-            return missing_data
+            raise missingData
 
         iostr = io.StringIO(price_data_raw)
         price_data_as_df = pd.read_csv(iostr, skipfooter=1, engine='python')
@@ -325,14 +325,13 @@ class bcConnection(object):
     def _create_bc_session(self):
 
         config = get_production_config()
-        barchart_username = config.get_element_or_missing_data("barchart_username")
-        barchart_password = config.get_element_or_missing_data("barchart_password")
+        barchart_username = config.get_element("barchart_username")
+        barchart_password = config.get_element("barchart_password")
+
 
         # start a session
         session = requests.Session()
         session.headers.update({'User-Agent': 'Mozilla/5.0'})
-        if barchart_username is missing_data or barchart_password is missing_data:
-            raise Exception('Barchart credentials are required')
 
         # GET the login page, scrape to get CSRF token
         resp = session.get(BARCHART_URL + 'login')
