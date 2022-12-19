@@ -183,7 +183,7 @@ class ibFuturesContractPriceData(brokerFuturesContractPriceData):
             if return_empty:
                 return futuresContractPrices.create_empty()
             else:
-                return missing_data
+                raise
 
         return prices
 
@@ -248,7 +248,7 @@ class ibFuturesContractPriceData(brokerFuturesContractPriceData):
                 "Something went wrong getting IB price data for %s"
                 % str(contract_object_with_ib_broker_config)
             )
-            return missing_data
+            raise
 
         if len(price_data) == 0:
             new_log.warn(
