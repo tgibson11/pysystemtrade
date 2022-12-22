@@ -34,7 +34,7 @@ def update_historical_prices():
         update_historical_price_object = updateHistoricalPrices(data)
 
         instrument_code = get_valid_instrument_code_from_user(
-            all_code=ALL_INSTRUMENTS, allow_all=True, source="single"
+            all_code=ALL_INSTRUMENTS, allow_all=True, source="multiple"
         )
 
         if instrument_code is ALL_INSTRUMENTS:
