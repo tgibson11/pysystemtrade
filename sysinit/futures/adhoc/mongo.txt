@@ -18,3 +18,7 @@ db.futures_position_by_strategy.update(
    }
 )
 
+# Manually mark a contract as sampling
+db.futures_contracts.updateOne({"contract_key": "BITCOIN/20221100"}, {$set: {"contract_params.sampling": true}})
+
+
