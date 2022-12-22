@@ -19,7 +19,7 @@ spliced_multiple_prices = os.path.join(os.sep, 'home', 'todd', 'data', 'futures'
 if not os.path.exists(spliced_multiple_prices):
     os.makedirs(spliced_multiple_prices)
 
-instrument_code = get_valid_instrument_code_from_user(source="single")
+instrument_code = get_valid_instrument_code_from_user(source="multiple")
 build_and_write_roll_calendar(instrument_code, output_datapath=roll_calendars_from_arctic)
 input("Review roll calendar, press Enter to continue")
 
