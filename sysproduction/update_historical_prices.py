@@ -116,7 +116,7 @@ def update_historical_prices_for_instrument_and_contract(
 ):
 
     diag_prices = diagPrices(data)
-    # intraday_frequency = diag_prices.get_intraday_frequency_for_historical_download()
+    intraday_frequency = diag_prices.get_intraday_frequency_for_historical_download()
     daily_frequency = DAILY_PRICE_FREQ
 
     list_of_frequencies = [daily_frequency]
