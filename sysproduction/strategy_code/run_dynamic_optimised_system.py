@@ -8,7 +8,6 @@ from sysobjects.production.tradeable_object import instrumentStrategy
 from sysproduction.data.sim_data import get_sim_data_object_for_production
 from sysproduction.strategy_code.run_system_classic import (
     runSystemClassic,
-
 )
 from sysproduction.data.contracts import dataContracts
 from sysproduction.data.positions import (
@@ -27,7 +26,9 @@ class runSystemCarryTrendDynamic(runSystemClassic):
     # DO NOT CHANGE THE NAME OF THIS FUNCTION; IT IS HARDCODED INTO CONFIGURATION FILES
     # BECAUSE IT IS ALSO USED TO LOAD BACKTESTS
     def system_method(
-        self, notional_trading_capital: float = arg_not_supplied, base_currency: str = arg_not_supplied
+        self,
+        notional_trading_capital: float = arg_not_supplied,
+        base_currency: str = arg_not_supplied,
     ) -> System:
         data = self.data
         backtest_config_filename = self.backtest_config_filename
@@ -45,6 +46,7 @@ class runSystemCarryTrendDynamic(runSystemClassic):
     @property
     def function_to_call_on_update(self):
         return updated_optimal_positions_for_dynamic_system
+
 
 def dynamic_system(
     data: dataBlob,
@@ -74,7 +76,9 @@ def dynamic_system(
     return system
 
 
-def updated_optimal_positions_for_dynamic_system(data: dataBlob, strategy_name: str, system: System):
+def updated_optimal_positions_for_dynamic_system(
+    data: dataBlob, strategy_name: str, system: System
+):
     log = data.log
 
     data_optimal_positions = dataOptimalPositions(data)
