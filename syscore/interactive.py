@@ -1,7 +1,14 @@
+"""
+
+Code used when we interact with users (displaying stuff, getting input, monitoring progress)
+
+"""
+
 import datetime
 import sys
 import time
 from copy import copy
+from typing import Union, Tuple, List
 
 from syscore.dateutils import (
     n_days_ago,
@@ -12,28 +19,32 @@ from syscore.genutils import str2Bool
 from syscore.objects import arg_not_supplied
 
 
-def get_field_names_for_named_tuple(named_tuple_instance):
-    original_tuple_as_dict = named_tuple_as_dict(named_tuple_instance)
-    for key_name in original_tuple_as_dict.keys():
-        original_tuple_entry = original_tuple_as_dict[key_name]
-        original_tuple_entry_class = original_tuple_entry.__class__
-        input_result = get_and_convert(
-            key_name,
-            default_value=original_tuple_entry,
-            type_expected=original_tuple_entry_class,
-        )
-
-        original_tuple_as_dict[key_name] = input_result
-
-    new_tuple = override_tuple_fields(named_tuple_instance, original_tuple_as_dict)
-
-    return new_tuple
-
-
-def get_and_convert(
-    prompt, type_expected=int, allow_default=True, default_value=0, default_str=None
-):
+def true_if_answer_is_yes(
+    prompt: str = "", allow_empty_to_return_none: bool = False
+) -> bool:
     invalid = True
+    while invalid:
+        x = input(prompt)
+        if x == "":
+            if allow_empty_to_return_none:
+                return None
+        else:
+            first_character = x[0].lower()
+            if first_character == "y":
+                return True
+            elif first_character == "n":
+                return False
+
+        print("Need one of yes/no, Yes/No, y/n, Y/N")
+
+
+def get_input_from_user_and_convert_to_type(
+    prompt: str,
+    type_expected=int,
+    allow_default: bool = True,
+    default_value=0,
+    default_str: str = None,
+):
     input_str = prompt + " "
     if allow_default:
         if default_str is None:
@@ -41,71 +52,185 @@ def get_and_convert(
         else:
             input_str = input_str + "<RETURN for %s> " % default_str
 
-    while invalid:
-        ans = input(input_str)
+    result = _get_input_and_check_type(
+        input_str=input_str,
+        type_expected=type_expected,
+        allow_default=allow_default,
+        default_value=default_value,
+    )
 
-        if ans == "" and allow_default:
+    return result
+
+
+def _get_input_and_check_type(
+    input_str: str, type_expected=int, allow_default: bool = True, default_value=0
+):
+    invalid = True
+    while invalid:
+        user_input = input(input_str)
+
+        if user_input == "" and allow_default:
             return default_value
         try:
-            if type_expected is bool:
-                result = str2Bool(ans)
-            else:
-                result = type_expected(ans)
+            result = _convert_type_or_throw_expection(
+                user_input=user_input, type_expected=type_expected
+            )
             return result
         except BaseException:
-            print("%s is not of expected type %s" % (ans, type_expected.__name__))
+            ## keep going
             continue
 
 
+def _convert_type_or_throw_expection(user_input: str, type_expected=int):
+    try:
+        if type_expected is bool:
+            result = str2Bool(user_input)
+        else:
+            result = type_expected(user_input)
+    except:
+        print("%s is not of expected type %s" % (user_input, type_expected.__name__))
+        raise Exception()
+
+    return result
+
+
+"""
+    
+    RUN AN INTERACTIVE MENU AND SUB-MENU SYSTEM
+
+"""
+
 TOP_LEVEL = -1
+EXIT_OPTION = -1
+TRAVERSING_MENU = -2
 
 
-class run_interactive_menu(object):
+class interactiveMenu(object):
     def __init__(
         self,
-        top_level_menu_of_options,
-        nested_menu_of_options,
-        exit_option=-1,
-        another_menu=-2,
+        top_level_menu_of_options: dict,
+        nested_menu_of_options: dict,
+        dict_of_functions: dict,
+        *args,
+        **kwargs,
     ):
         """
 
-        :param top_level_menu_of_options: A dict of top level options
-        :param nested_menu_of_options: A dict of nested dicts, top levels keys are keys in top_level
-        :return: object
+        Run an interactive menu with one sublevel
+
+        Example:
+
+        def print_add1(x):
+            print(x+1)
+
+        def print_add2(x):
+            print(x+2)
+
+        def print_add3(x):
+            print(x+3)
+
+
+        menu = interactiveMenu({1: 'first submenu', 2: 'second submenu'},
+                        {1: {11: 'submenu1, option 1', 12: 'submenu2, option2'},
+                        2: {21: 'submenu2, option1'}},
+                        {11: print_add1, 12: print_add2, 21: print_add3},
+                        10)
+
         """
 
         self._top_level = top_level_menu_of_options
         self._nested = nested_menu_of_options
-        self._location = TOP_LEVEL
-        self._exit_option = exit_option
-        self._another_menu = another_menu
+        self._dict_of_functions = dict_of_functions
+        self._args = args
+        self._kwargs = kwargs
+        self.location = TOP_LEVEL
+
+    def run_menu(self):
+        still_running = True
+        while still_running:
+            option_chosen = self.propose_options_and_get_input()
+            if option_chosen == EXIT_OPTION:
+                print("FINISHED")
+                return None
+            if option_chosen == TRAVERSING_MENU:
+                continue
+
+            method_chosen = self._dict_of_functions[option_chosen]
+            method_chosen(*self._args, **self._kwargs)
 
     def propose_options_and_get_input(self):
-        is_top_level = self._location == TOP_LEVEL
-        if is_top_level:
-            top_level_menu = self._top_level
-            result = print_menu_and_get_response(
-                top_level_menu, default_option=-1, default_str="EXIT"
-            )
-            if result == -1:
-                return self._exit_option
-            else:
-                self._location = result
-                return self._another_menu
+        if self.at_top_level:
+            option_chosen = self._propose_options_and_get_input_at_top_level()
         else:
-            sub_menu = self._nested[self._location]
-            result = print_menu_and_get_response(
-                sub_menu, default_option=-1, default_str="Back"
-            )
-            if result == -1:
-                self._location = -1
-                return self._another_menu
-            else:
-                return result
+            option_chosen = self._propose_options_and_get_input_at_sub_level()
+
+        return option_chosen
+
+    def _propose_options_and_get_input_at_top_level(self):
+        option_chosen = print_menu_and_get_desired_option(
+            self.top_level_menu, default_option=EXIT_OPTION, default_str="EXIT"
+        )
+        if option_chosen == EXIT_OPTION:
+            return EXIT_OPTION
+        else:
+            self.location = option_chosen
+            return TRAVERSING_MENU
+
+    def _propose_options_and_get_input_at_sub_level(self) -> int:
+
+        sub_menu = self.current_submenu
+        option_chosen = print_menu_and_get_desired_option(
+            sub_menu, default_option=EXIT_OPTION, default_str="Back"
+        )
+        if option_chosen == EXIT_OPTION:
+            self.location = TOP_LEVEL
+            return TRAVERSING_MENU
+        else:
+            return option_chosen
+
+    @property
+    def at_top_level(self) -> bool:
+        return self.location == TOP_LEVEL
+
+    @property
+    def location(self) -> int:
+        return self._location
+
+    @location.setter
+    def location(self, new_location: int):
+        self._location = new_location
+
+    @property
+    def current_submenu(self) -> dict:
+        if self.at_top_level:
+            return self.top_level_menu
+
+        return self.nested_menu[self.location]
+
+    @property
+    def top_level_menu(self) -> dict:
+        return self._top_level
+
+    @property
+    def nested_menu(self) -> dict:
+        return self._nested
+
+    @property
+    def dict_of_function(self) -> dict:
+        return self._dict_of_functions
+
+    @property
+    def args(self) -> tuple:
+        return self._args
+
+    @property
+    def kwargs(self) -> dict:
+        return self._kwargs
 
 
-def print_menu_of_values_and_get_response(menu_of_options_as_list, default_str=""):
+def print_menu_of_values_and_get_response(
+    menu_of_options_as_list: list, default_str=""
+):
 
     copy_menu_of_options_as_list = copy(menu_of_options_as_list)
     if default_str != "":
@@ -124,7 +249,7 @@ def print_menu_of_values_and_get_response(menu_of_options_as_list, default_str="
             for int_key, menu_value in enumerate(copy_menu_of_options_as_list)
         ]
     )
-    ans = print_menu_and_get_response(
+    ans = print_menu_and_get_desired_option(
         menu_of_options, default_option=default_option, default_str=default_str
     )
     option_chosen = copy_menu_of_options_as_list[ans]
@@ -132,7 +257,9 @@ def print_menu_of_values_and_get_response(menu_of_options_as_list, default_str="
     return option_chosen
 
 
-def print_menu_and_get_response(menu_of_options, default_option=None, default_str=""):
+def print_menu_and_get_desired_option(
+    menu_of_options: dict, default_option=None, default_str: str = ""
+) -> int:
     """
 
     :param copy_menu_of_options: A dict, keys are ints, values are str
@@ -152,7 +279,7 @@ def print_menu_and_get_response(menu_of_options, default_option=None, default_st
         menu_options_list = [default_option] + menu_options_list
 
     while computer_says_no:
-        ans = get_and_convert(
+        ans = get_input_from_user_and_convert_to_type(
             "Your choice?",
             default_value=default_option,
             type_expected=int,
@@ -169,23 +296,14 @@ def print_menu_and_get_response(menu_of_options, default_option=None, default_st
     return ans
 
 
-def true_if_answer_is_yes(prompt="", allow_empty_to_return_none=False) -> bool:
-    invalid = True
-    while invalid:
-        x = input(prompt)
-        if allow_empty_to_return_none:
-            if x == "":
-                return None
+"""
 
-        x = x.lower()
-        if len(x) > 0 and x[0] == "y":
-            return True
-        elif len(x) > 0 and x[0] == "n":
-            return False
-        print("Need one of yes/no, Yes/No, y/n, Y/N")
+    REPORTING DATES
+
+"""
 
 
-def get_report_dates():
+def get_report_dates() -> Tuple[datetime.datetime, datetime.datetime]:
 
     end_date = arg_not_supplied
     start_date = arg_not_supplied
@@ -295,6 +413,12 @@ def resolve_datetime_input_str(ans):
         raise ValueError
     return return_datetime
 
+
+"""
+
+    PROGRESS BAR
+
+"""
 
 PROGRESS_EXP_FACTOR = 0.9
 
@@ -442,6 +566,31 @@ class progressBar(object):
     def finished(self):
         self.display_bar()
         sys.stdout.write("\n")
+
+
+"""
+
+    INPUT TUPLE DATA
+
+"""
+
+
+def get_field_names_for_named_tuple(named_tuple_instance):
+    original_tuple_as_dict = named_tuple_as_dict(named_tuple_instance)
+    for key_name in original_tuple_as_dict.keys():
+        original_tuple_entry = original_tuple_as_dict[key_name]
+        original_tuple_entry_class = original_tuple_entry.__class__
+        input_result = get_input_from_user_and_convert_to_type(
+            key_name,
+            default_value=original_tuple_entry,
+            type_expected=original_tuple_entry_class,
+        )
+
+        original_tuple_as_dict[key_name] = input_result
+
+    new_tuple = override_tuple_fields(named_tuple_instance, original_tuple_as_dict)
+
+    return new_tuple
 
 
 def override_tuple_fields(original_tuple_instance, dict_of_new_fields: dict):

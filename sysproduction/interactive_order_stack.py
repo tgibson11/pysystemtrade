@@ -9,8 +9,8 @@ Do standard things to the instrument, order and broker stack (normally automated
 
 from syscore.objects import missing_order
 from syscore.interactive import (
-    get_and_convert,
-    run_interactive_menu,
+    get_input_from_user_and_convert_to_type,
+    interactiveMenu,
     print_menu_of_values_and_get_response,
     get_datetime_input,
 )
@@ -58,24 +58,9 @@ def interactive_order_stack():
 
 def interactive_order_stack_with_ib_conn(ib_conn: connectionIB = arg_not_supplied):
     with dataBlob(log_name="Interactive-Order-Stack", ib_conn=ib_conn) as data:
-
-        menu = run_interactive_menu(
-            top_level_menu_of_options,
-            nested_menu_of_options,
-            exit_option=-1,
-            another_menu=-2,
-        )
-        still_running = True
-        while still_running:
-            option_chosen = menu.propose_options_and_get_input()
-            if option_chosen == -1:
-                print("FINISHED")
-                return None
-            if option_chosen == -2:
-                continue
-            set_pd_print_options()
-            method_chosen = dict_of_functions[option_chosen]
-            method_chosen(data)
+        set_pd_print_options()
+        menu = interactiveMenu(top_level_menu_of_options, nested_menu_of_options, data)
+        menu.run_menu()
 
 
 top_level_menu_of_options = {
@@ -175,7 +160,7 @@ def spawn_contracts_from_instrument_orders(data):
     )
     print("Instrument orders:")
     view_instrument_stack(data)
-    order_id = get_and_convert(
+    order_id = get_input_from_user_and_convert_to_type(
         "Which instrument order ID",
         default_value="ALL",
         default_str="All",
@@ -214,7 +199,9 @@ def create_balance_trade(data):
         instrument_code,
         contract_date_yyyy_mm,
     ) = get_valid_instrument_code_and_contractid_from_user(data)
-    fill_qty = get_and_convert("Quantity ", type_expected=int, allow_default=False)
+    fill_qty = get_input_from_user_and_convert_to_type(
+        "Quantity ", type_expected=int, allow_default=False
+    )
 
     ## We get from database, not broker, in case contract has expired
     contract_date = data_contracts.get_actual_expiry(
@@ -224,17 +211,17 @@ def create_balance_trade(data):
     default_price = default_price_for_contract(
         data, futuresContract(instrument_code, contract_date)
     )
-    filled_price = get_and_convert(
+    filled_price = get_input_from_user_and_convert_to_type(
         "Filled price",
         type_expected=float,
         allow_default=True,
         default_value=default_price,
     )
     fill_datetime = get_datetime_input("Fill datetime", allow_default=True)
-    commission = get_and_convert(
+    commission = get_input_from_user_and_convert_to_type(
         "Commission", type_expected=float, allow_default=True, default_value=0.0
     )
-    broker_account = get_and_convert(
+    broker_account = get_input_from_user_and_convert_to_type(
         "Account ID",
         type_expected=str,
         allow_default=True,
@@ -281,10 +268,12 @@ def create_instrument_balance_trade(data):
     print("Use to fix breaks between instrument strategy and contract level positions")
     strategy_name = get_valid_strategy_name_from_user(data=data, source="positions")
     instrument_code = get_valid_instrument_code_from_user(data)
-    fill_qty = get_and_convert("Quantity ", type_expected=int, allow_default=False)
+    fill_qty = get_input_from_user_and_convert_to_type(
+        "Quantity ", type_expected=int, allow_default=False
+    )
 
     default_price = default_price_for_instrument(data, instrument_code)
-    filled_price = get_and_convert(
+    filled_price = get_input_from_user_and_convert_to_type(
         "Filled price",
         type_expected=float,
         allow_default=True,
@@ -383,12 +372,12 @@ def create_manual_trade(data):
 def enter_manual_instrument_order(data):
     strategy_name = get_valid_strategy_name_from_user(data=data, source="positions")
     instrument_code = get_valid_instrument_code_from_user(data)
-    qty = get_and_convert(
+    qty = get_input_from_user_and_convert_to_type(
         "Quantity (-ve for sell, +ve for buy?)", type_expected=int, allow_default=False
     )
     possible_order_types = market_order_type.allowed_types()
     order_type = input("Order type (one of %s)?" % str(possible_order_types))
-    limit_price = get_and_convert(
+    limit_price = get_input_from_user_and_convert_to_type(
         "Limit price? (if you put None you can still add one to the contract order)",
         type_expected=float,
         default_value=None,
@@ -422,7 +411,9 @@ def enter_manual_contract_order(data, instrument_order):
     instrument_code = instrument_order.instrument_code
     qty = instrument_order.trade
 
-    leg_count = get_and_convert("How many legs?", type_expected=int, default_value=1)
+    leg_count = get_input_from_user_and_convert_to_type(
+        "How many legs?", type_expected=int, default_value=1
+    )
     contract_id_list = []
     for leg_idx in range(leg_count):
         print("Choose contract for leg %d" % leg_idx)
@@ -433,7 +424,7 @@ def enter_manual_contract_order(data, instrument_order):
 
     trade_qty_list = []
     for trade_idx in range(leg_count):
-        trade_qty = get_and_convert(
+        trade_qty = get_input_from_user_and_convert_to_type(
             "Enter quantity for leg %d" % trade_idx,
             type_expected=int,
             allow_default=False,
@@ -454,7 +445,7 @@ def enter_manual_contract_order(data, instrument_order):
     if algo_to_use == NO_ALGO:
         algo_to_use = ""
 
-    limit_price = get_and_convert(
+    limit_price = get_input_from_user_and_convert_to_type(
         "Limit price? (will override instrument order limit price, will be ignored by some algo types",
         type_expected=float,
         default_str="None",
@@ -482,7 +473,9 @@ def enter_manual_contract_order(data, instrument_order):
 def generate_generic_manual_fill(data):
     stack = resolve_stack(data, exclude_instrument_stack=True)
     view_generic_stack(stack)
-    order_id = get_and_convert("Enter order ID", default_str="Cancel", default_value="")
+    order_id = get_input_from_user_and_convert_to_type(
+        "Enter order ID", default_str="Cancel", default_value=""
+    )
     if order_id == "":
         return None
     order = stack.get_order_with_id_from_stack(order_id)
@@ -498,7 +491,7 @@ def generate_generic_manual_fill(data):
         )
         return None
     print("Order now %s" % str(order))
-    fill_qty = get_and_convert(
+    fill_qty = get_input_from_user_and_convert_to_type(
         "Quantity to fill (must be less than or equal to %s)" % str(order.trade),
         type_expected=int,
         allow_default=True,
@@ -506,7 +499,7 @@ def generate_generic_manual_fill(data):
     )
     if isinstance(fill_qty, int):
         fill_qty = [fill_qty]
-    filled_price = get_and_convert(
+    filled_price = get_input_from_user_and_convert_to_type(
         "Filled price", type_expected=float, allow_default=False
     )
     fill_datetime = get_datetime_input("Fill datetime", allow_default=True)
@@ -537,7 +530,7 @@ def generate_ib_orders(data):
     print("This will create broker orders and submit to IB")
     print("Contract orders:")
     view_contract_stack(data)
-    contract_order_id = get_and_convert(
+    contract_order_id = get_input_from_user_and_convert_to_type(
         "Which contract order ID?",
         default_value="ALL",
         default_str="for all",
@@ -566,7 +559,7 @@ def create_fx_trade(data):
         "Remember to check how much you need for margin as you will be charged interest if insufficient"
     )
     default_account = data_broker.get_broker_account()
-    broker_account = get_and_convert(
+    broker_account = get_input_from_user_and_convert_to_type(
         "Account ID",
         type_expected=str,
         allow_default=True,
@@ -576,7 +569,7 @@ def create_fx_trade(data):
     invalid = True
     while invalid:
         print("First currency")
-        ccy1 = get_and_convert(
+        ccy1 = get_input_from_user_and_convert_to_type(
             "First currency",
             allow_default=True,
             default_value=None,
@@ -585,13 +578,13 @@ def create_fx_trade(data):
         )
         if ccy1 is None:
             return None
-        ccy2 = get_and_convert(
+        ccy2 = get_input_from_user_and_convert_to_type(
             "Second currency", default_value="USD", type_expected=str
         )
         if ccy1 == ccy2:
             print("%s==%s. Not allowed!" % (ccy1, ccy2))
             continue
-        qty = get_and_convert(
+        qty = get_input_from_user_and_convert_to_type(
             "Amount of trade in %s%s" % (ccy1, ccy2),
             type_expected=int,
             allow_default=False,
@@ -619,7 +612,7 @@ def get_fills_from_broker(data):
     print("This will get any fills from the broker, and write them to the broker stack")
     print("Broker orders: (in database)")
     view_broker_stack(data)
-    broker_order_id = get_and_convert(
+    broker_order_id = get_input_from_user_and_convert_to_type(
         "Which broker order ID?",
         default_value="ALL",
         default_str="for all",
@@ -646,7 +639,7 @@ def pass_fills_upwards_from_broker(data):
     )
     view_contract_stack(data)
 
-    contract_order_id = get_and_convert(
+    contract_order_id = get_input_from_user_and_convert_to_type(
         "Which order ID?", default_value="ALL", default_str="for all", type_expected=int
     )
     ans = input("Are you sure? (Y/other)")
@@ -669,7 +662,7 @@ def pass_fills_upwards_from_contracts(data):
         "This will process any fills applied to contract orders and pass them up to instrument orders"
     )
     view_contract_stack(data)
-    contract_order_id = get_and_convert(
+    contract_order_id = get_input_from_user_and_convert_to_type(
         "Which order ID?", default_value="ALL", default_str="for all", type_expected=int
     )
     ans = input("Are you sure? (Y/other)")
@@ -704,7 +697,7 @@ def handle_completed_orders(data):
 
     print("This will process any completed orders (all fills present)")
     view_instrument_stack(data)
-    instrument_order_id = get_and_convert(
+    instrument_order_id = get_input_from_user_and_convert_to_type(
         "Which instrument order ID?",
         default_str="All",
         default_value="ALL",
@@ -725,7 +718,9 @@ def order_view(data):
     if stack is None:
         return None
     view_generic_stack(stack)
-    order_id = get_and_convert("Order ID?", type_expected=int, allow_default=False)
+    order_id = get_input_from_user_and_convert_to_type(
+        "Order ID?", type_expected=int, allow_default=False
+    )
     order = stack.get_order_with_id_from_stack(order_id)
     print("%s" % order.full_repr())
 
@@ -737,7 +732,9 @@ def order_locking(data):
     if stack is None:
         return None
     view_generic_stack(stack)
-    order_id = get_and_convert("Order ID ", type_expected=int, allow_default=False)
+    order_id = get_input_from_user_and_convert_to_type(
+        "Order ID ", type_expected=int, allow_default=False
+    )
     order = stack.get_order_with_id_from_stack(order_id)
     print(order)
 
@@ -762,7 +759,9 @@ def clear_algo_on_order(data):
     stack_handler = stackHandler(data)
     stack = stack_handler.contract_stack
     view_generic_stack(stack)
-    order_id = get_and_convert("Order ID ", type_expected=int, allow_default=False)
+    order_id = get_input_from_user_and_convert_to_type(
+        "Order ID ", type_expected=int, allow_default=False
+    )
     order = stack.get_order_with_id_from_stack(order_id)
     print("Controlled by %s; releasing now" % str(order.reference_of_controlling_algo))
     stack.release_order_from_algo_control(order_id)
@@ -776,7 +775,7 @@ def resolve_stack(data, exclude_instrument_stack=False):
     else:
         request_str = "Broker stack [1], Contract stack [2] or instrument stack [3]?"
 
-    ans = get_and_convert(
+    ans = get_input_from_user_and_convert_to_type(
         request_str, type_expected=int, default_str="Exit", default_value=0
     )
     if ans == 1:
@@ -795,7 +794,9 @@ def delete_specific_order(data):
     if stack is None:
         return None
     view_generic_stack(stack)
-    order_id = get_and_convert("Order ID ", type_expected=int, allow_default=False)
+    order_id = get_input_from_user_and_convert_to_type(
+        "Order ID ", type_expected=int, allow_default=False
+    )
     order = stack.get_order_with_id_from_stack(order_id)
     print(order)
     print("This will delete the order from the stack!")
@@ -874,7 +875,7 @@ def cancel_broker_order(data):
     view_broker_order_list(data)
     view_broker_stack(data)
     stack_handler = stackHandler(data)
-    broker_order_id = get_and_convert(
+    broker_order_id = get_input_from_user_and_convert_to_type(
         "Which order ID?", default_value="ALL", default_str="for all", type_expected=int
     )
     ans = input("Are you sure? (Y/other)")

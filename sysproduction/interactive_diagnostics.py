@@ -4,10 +4,10 @@ from sysobjects.production.trading_hours.trading_hours import (
     listOfTradingHours,
 )
 from syscore.interactive import (
-    get_and_convert,
-    run_interactive_menu,
+    get_input_from_user_and_convert_to_type,
+    interactiveMenu,
     print_menu_of_values_and_get_response,
-    print_menu_and_get_response,
+    print_menu_and_get_desired_option,
     true_if_answer_is_yes,
     get_report_dates,
     progressBar,
@@ -74,23 +74,9 @@ def interactive_diagnostics():
     print("\n\n INTERACTIVE DIAGNOSTICS\n\n")
     set_pd_print_options()
     with dataBlob(log_name="Interactive-Diagnostics") as data:
-        menu = run_interactive_menu(
-            top_level_menu_of_options,
-            nested_menu_of_options,
-            exit_option=-1,
-            another_menu=-2,
-        )
-        still_running = True
-        while still_running:
-            option_chosen = menu.propose_options_and_get_input()
-            if option_chosen == -1:
-                print("FINISHED")
-                return None
-            if option_chosen == -2:
-                continue
-
-            method_chosen = dict_of_functions[option_chosen]
-            method_chosen(data)
+        set_pd_print_options()
+        menu = interactiveMenu(top_level_menu_of_options, nested_menu_of_options, data)
+        menu.run_menu()
 
 
 top_level_menu_of_options = {
@@ -305,7 +291,7 @@ def account_curve_report(data: dataBlob):
 
 
 def email_or_print_or_file(report_config):
-    ans = get_and_convert(
+    ans = get_input_from_user_and_convert_to_type(
         "1: Print or 2: email or 3: file or 4: email and file?",
         type_expected=int,
         allow_default=True,
@@ -336,11 +322,11 @@ def view_errors(data):
     msg_levels = diag_logs.get_possible_log_level_mapping()
     print("This will get all log messages with a given level of criticality")
     print("Use view logs to filter by log attributes")
-    lookback_days = get_and_convert(
+    lookback_days = get_input_from_user_and_convert_to_type(
         "How many days?", type_expected=int, default_value=7
     )
     print("Which level of error/message?")
-    log_level = print_menu_and_get_response(msg_levels)
+    log_level = print_menu_and_get_desired_option(msg_levels)
     log_item_list = diag_logs.get_log_items_with_level(
         log_level, attribute_dict=dict(), lookback_days=lookback_days
     )
@@ -349,7 +335,7 @@ def view_errors(data):
 
 def view_logs(data):
     diag_logs = diagLogs(data)
-    lookback_days = get_and_convert(
+    lookback_days = get_input_from_user_and_convert_to_type(
         "How many days?", type_expected=int, default_value=7
     )
     attribute_dict = build_attribute_dict(diag_logs, lookback_days)
@@ -616,7 +602,7 @@ def view_individual_order(data):
     ]
     print("Which order queue?")
     order_type = print_menu_of_values_and_get_response(list_of_order_types)
-    order_id = get_and_convert(
+    order_id = get_input_from_user_and_convert_to_type(
         "Order number?", type_expected=int, default_value=None, default_str="CANCEL"
     )
     if order_id is None:
