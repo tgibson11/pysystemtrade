@@ -110,8 +110,8 @@ def get_initial_capital_values_from_user(data: dataBlob):
     broker_account_value = get_input_from_user_and_convert_to_type(
         "Broker account value",
         type_expected=float,
-        default_str="get from IB",
         default_value=arg_not_supplied,
+        default_str="get from IB",
     )
     if broker_account_value is arg_not_supplied:
         broker_account_value = get_broker_account_value(data)

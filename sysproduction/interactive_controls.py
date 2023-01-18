@@ -563,8 +563,8 @@ def change_position_limit_for_instrument(data):
         "New position limit?",
         type_expected=int,
         allow_default=True,
-        default_str="No limit",
         default_value=-1,
+        default_str="No limit",
     )
     if new_position_limit == -1:
         data_position_limits.delete_position_limit_for_instrument(instrument_code)
