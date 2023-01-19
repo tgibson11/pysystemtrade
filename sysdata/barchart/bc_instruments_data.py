@@ -1,13 +1,13 @@
 import pandas as pd
 
 from sysbrokers.broker_instrument_data import brokerFuturesInstrumentData
-from syscore.fileutils import get_filename_for_package
+from syscore.fileutils import resolve_path_and_filename_for_package
 from syscore.objects import missing_instrument, missing_file
 from sysdata.barchart.bc_instruments import BcInstrumentConfigData, BcFuturesInstrument
 from syslogdiag.log_to_screen import logtoscreen
 from sysobjects.instruments import futuresInstrument
 
-BC_FUTURES_CONFIG_FILE = get_filename_for_package(
+BC_FUTURES_CONFIG_FILE = resolve_path_and_filename_for_package(
     "sysdata.barchart.bc_config_futures.csv"
 )
 

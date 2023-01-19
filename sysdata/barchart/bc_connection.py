@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from dateutil.tz import tz
 
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, HOURLY_FREQ, strip_timezone_fromdatetime, \
-    adjust_timestamp_to_include_notional_close_and_time_offset
+    replace_midnight_with_notional_closing_time
 from syscore.exceptions import missingData
 from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
 from sysdata.config.production_config import get_production_config
@@ -285,7 +285,7 @@ class bcConnection(object):
         local_timestamp_bc = self._adjust_bc_time_to_local(timestamp_bc)
         timestamp = pd.to_datetime(local_timestamp_bc)
 
-        adjusted_ts = adjust_timestamp_to_include_notional_close_and_time_offset(timestamp)
+        adjusted_ts = replace_midnight_with_notional_closing_time(timestamp)
 
         return adjusted_ts
 
