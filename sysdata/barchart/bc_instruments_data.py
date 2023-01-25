@@ -2,7 +2,7 @@ import pandas as pd
 
 from sysbrokers.broker_instrument_data import brokerFuturesInstrumentData
 from syscore.fileutils import resolve_path_and_filename_for_package
-from syscore.objects import missing_instrument, missing_file
+from syscore.constants import missing_instrument, missing_file
 from sysdata.barchart.bc_instruments import BcInstrumentConfigData, BcFuturesInstrument
 from syslogdiag.log_to_screen import logtoscreen
 from sysobjects.instruments import futuresInstrument
