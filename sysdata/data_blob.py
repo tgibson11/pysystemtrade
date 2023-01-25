@@ -1,7 +1,8 @@
 from copy import copy
 
 from sysbrokers.IB.ib_connection import connectionIB
-from syscore.objects import arg_not_supplied, get_class_name
+from syscore.objects import get_class_name
+from syscore.constants import arg_not_supplied
 from syscore.text import camel_case_split
 from sysdata.barchart.bc_connection import bcConnection
 from sysdata.config.production_config import get_production_config, Config
