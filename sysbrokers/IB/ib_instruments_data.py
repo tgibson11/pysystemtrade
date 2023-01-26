@@ -70,11 +70,13 @@ class ibFuturesInstrumentData(brokerFuturesInstrumentData):
 
         if len(config_row) > 1:
             ## need to resolve with multiplier
-            config_row = self.get_instrument_code_from_broker_code_with_multiplier(
+            instrument_code = self.get_instrument_code_from_broker_code_with_multiplier(
                 ib_code
             )
+        else:
+            instrument_code = config_row.iloc[0].Instrument
 
-        return config_row.iloc[0].Instrument
+        return instrument_code
 
     def get_instrument_code_from_broker_code_with_multiplier(self, ib_code: str) -> str:
 
