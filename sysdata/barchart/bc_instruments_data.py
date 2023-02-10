@@ -1,9 +1,9 @@
 import pandas as pd
 
-from sysbrokers.broker_instrument_data import brokerFuturesInstrumentData
 from syscore.fileutils import resolve_path_and_filename_for_package
 from syscore.constants import missing_instrument, missing_file
 from sysdata.barchart.bc_instruments import BcInstrumentConfigData, BcFuturesInstrument
+from sysdata.futures.instruments import futuresInstrumentData
 from syslogdiag.log_to_screen import logtoscreen
 from sysobjects.instruments import futuresInstrument
 
@@ -24,30 +24,16 @@ def read_bc_config_from_file() -> BarchartConfig:
     return BarchartConfig(df)
 
 
-class BarchartFuturesInstrumentData(brokerFuturesInstrumentData):
+class BarchartFuturesInstrumentData(futuresInstrumentData):
     def __init__(self, log=logtoscreen("bcFuturesInstrumentData")):
         super().__init__(log=log)
 
     def __repr__(self):
         return "Barchart futures instrument data"
 
-    def get_brokers_instrument_code(self, instrument_code: str) -> str:
+    def get_barchart_instrument_code(self, instrument_code: str) -> str:
         bc_futures_instrument = self.get_bc_futures_instrument(instrument_code)
         return bc_futures_instrument.bc_symbol
-
-    def get_instrument_code_from_broker_code(self, bc_code: str) -> str:
-        config = self._get_bc_config()
-        config_row = config[config.Symbol == bc_code]
-        if len(config_row) == 0:
-            msg = f"BC symbol {bc_code} not found in config"
-            self.log.critical(msg)
-            raise Exception(msg)
-
-        if len(config_row) > 1:
-            msg = f"BC symbol {bc_code} appears more than once, picking first one"
-            self.log.msg(msg)
-
-        return config_row.iloc[0].Instrument
 
     def _get_instrument_data_without_checking(self, instrument_code: str):
         return self.get_bc_futures_instrument(instrument_code)
@@ -103,7 +89,7 @@ class BarchartFuturesInstrumentData(brokerFuturesInstrumentData):
 
         try:
             config_data = read_bc_config_from_file()
-        except BaseException:
+        except:
             self.log.warn(f"Can't read file {BC_FUTURES_CONFIG_FILE}")
             config_data = missing_file
 

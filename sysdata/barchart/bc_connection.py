@@ -70,7 +70,7 @@ class bcConnection(object):
 
     def get_barchart_id(self, futures_contract: futuresContract) -> str:
         instr_code = futures_contract.instrument_code
-        bc_instr_code = self.barchart_futures_instrument_data.get_brokers_instrument_code(instr_code)
+        bc_instr_code = self.barchart_futures_instrument_data.get_barchart_instrument_code(instr_code)
         month_code = futures_contract.contract_date.letter_month()
         year = futures_contract.contract_date.year()
         barchart_id = f"{bc_instr_code}{month_code}{str(year)[len(str(year)) - 2:]}"
