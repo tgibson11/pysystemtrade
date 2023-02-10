@@ -194,7 +194,7 @@ class dataBlob(object):
         log = self._get_specific_logger(class_object)
 
         try:
-            resolved_instance = class_object(self.bc_conn, log=log)
+            resolved_instance = class_object(self.bc_conn, self, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (

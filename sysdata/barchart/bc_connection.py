@@ -12,11 +12,9 @@ from dateutil.tz import tz
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, HOURLY_FREQ, strip_timezone_fromdatetime, \
     replace_midnight_with_notional_closing_time
 from syscore.exceptions import missingData
-from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
+from sysdata.barchart.bc_futures_contract import BcFuturesContract
 from sysdata.config.production_config import get_production_config
 from syslogdiag.log_to_screen import logtoscreen
-from syslogdiag.logger import logger
-from sysobjects.contracts import futuresContract
 
 BARCHART_URL = "https://www.barchart.com/"
 
@@ -44,107 +42,81 @@ class ConnectionBC(object):
             session = self._session
         return session
 
-    @property
-    def barchart_futures_instrument_data(self) -> BarchartFuturesInstrumentData:
-        return BarchartFuturesInstrumentData(log=self.log)
-
-    def has_data_for_contract(self, futures_contract: futuresContract) -> bool:
+    def has_data_for_contract(self, bc_contract_id: str) -> bool:
         """
         Does Barchart have data for a given contract?
-        This implementation just checks for the existence of a top level info page for the given contract
-        :param futures_contract: internal contract identifier
-        :type futures_contract: futuresContract
-        :return: whether Barchart knows about the contract
-        :rtype: bool
+        This implementation just checks for the existence of a top level info page for
+        the given contract
         """
-        specific_log = futures_contract.specific_log(self.log)
 
         try:
-            contract_id = self.get_barchart_id(futures_contract)
-            resp = self._get_overview(contract_id, log=specific_log)
+            resp = self._get_overview(bc_contract_id)
             return resp.status_code == 200
 
         except Exception as e:
-            specific_log.error("Error: %s" % e)
+            self.log.error("Error: %s" % e)
             return False
-
-    def get_barchart_id(self, futures_contract: futuresContract) -> str:
-        instr_code = futures_contract.instrument_code
-        bc_instr_code = self.barchart_futures_instrument_data.get_barchart_instrument_code(instr_code)
-        month_code = futures_contract.contract_date.letter_month()
-        year = futures_contract.contract_date.year()
-        barchart_id = f"{bc_instr_code}{month_code}{str(year)[len(str(year)) - 2:]}"
-        return barchart_id
 
     def get_historical_futures_data_for_contract(
         self,
-        contract_object: futuresContract,
-        bar_freq: Frequency = DAILY_PRICE_FREQ
+        bc_futures_contract: BcFuturesContract,
+        bar_freq: Frequency = DAILY_PRICE_FREQ,
     ) -> pd.DataFrame:
-        """
-        Get historical daily data
 
-        :param contract_object: futuresContract
-        :param bar_freq: Frequency; one of D, H, 5M, M, 10S, S
-        :return: futuresContractPriceData
-        """
-
-        specific_log = contract_object.specific_log(self.log)
-
-        price_data = self._get_generic_data_for_contract(contract_object, log=specific_log, bar_freq=bar_freq)
+        price_data = self._get_generic_data_for_contract(
+            bc_futures_contract, bar_freq=bar_freq
+        )
 
         return price_data
 
     def _get_generic_data_for_contract(
         self,
-        contract: futuresContract,
-        log: logger = None,
-        bar_freq: Frequency = DAILY_PRICE_FREQ
+        bc_futures_contract: BcFuturesContract,
+        bar_freq: Frequency = DAILY_PRICE_FREQ,
     ) -> pd.DataFrame:
-        """
-        Get historical daily data
 
-        :param contract: futuresContract
-        :param bar_freq: Frequency; one of D, H, 5M, M, 10S, S
-        :return: futuresContractPriceData
-        """
-        if log is None:
-            log = self.log
+        price_data_raw = self._get_prices_for_contract(
+            bc_futures_contract=bc_futures_contract, bar_freq=bar_freq
+        )
 
-        price_data_raw = self._get_prices_for_contract(contract, bar_freq=bar_freq, log=log)
+        price_data_as_df = self._raw_bc_data_to_df(price_data_raw=price_data_raw)
 
-        price_data_as_df = self._raw_bc_data_to_df(price_data_raw=price_data_raw, log=log)
-
-        instr_code = contract.instrument_code
-        bc_futures_instrument = self.barchart_futures_instrument_data.get_bc_futures_instrument(instr_code)
-        bc_price_multiplier = bc_futures_instrument.bc_price_multiplier
-        adj_price_data_as_df = self._apply_bc_price_multiplier(price_data_as_df, bc_price_multiplier)
+        bc_price_multiplier = bc_futures_contract.bc_price_multiplier
+        adj_price_data_as_df = self._apply_bc_price_multiplier(
+            price_data_as_df, bc_price_multiplier
+        )
 
         return adj_price_data_as_df
 
     def _get_prices_for_contract(
             self,
-            contract: futuresContract,
+            bc_futures_contract: BcFuturesContract,
             bar_freq: Frequency = DAILY_PRICE_FREQ,
             days: int = 120,
-            log: logger = None,
             dry_run: bool = False):
 
         if bar_freq != DAILY_PRICE_FREQ:
-            log.warn("Barchart intra-day prices have not been tested! "
-                     "In particular, the conversion from US/Central to local time may not work correctly.")
+            self.log.warn(
+                "Barchart intra-day prices have not been tested! "
+                "In particular, the conversion from US/Central to local time may not work correctly."
+            )
 
         now = datetime.now()
 
-        year = contract.contract_date.year()
-        month = contract.contract_date.month()
-        bc_contract_id = self.get_barchart_id(contract)
-
         # we need to work out a date range for which we want the prices
+        contract_date = bc_futures_contract.contract_date
+        contract_year = contract_date.year()
+        contract_month = contract_date.month()
 
         # for expired contracts the end date would be the expiry date;
         # for KISS sake, lets assume expiry is last date of contract month
-        end_date = datetime(year, month, calendar.monthrange(year, month)[1])
+        last_day_of_month = calendar.monthrange(
+            year=contract_year, month=contract_month
+        )[1]
+
+        end_date = datetime(
+            year=contract_year, month=contract_month, day=last_day_of_month
+        )
 
         # but, if that end_date is in the future, then we may as well make it today...
         if now.date() < end_date.date():
@@ -154,17 +126,21 @@ class ConnectionBC(object):
         day_count = timedelta(days=days)
         start_date = end_date - day_count
 
-        log.msg(f"getting historic {bar_freq} prices for contract '{bc_contract_id}', "
-                f"from {start_date.strftime('%Y-%m-%d')} "
-                f"to {end_date.strftime('%Y-%m-%d')}")
+        bc_contract_id = bc_futures_contract.get_bc_contract_id()
+
+        self.log.msg(
+            f"getting historic {bar_freq} prices for contract '{bc_contract_id}', "
+            f"from {start_date.strftime('%Y-%m-%d')} "
+            f"to {end_date.strftime('%Y-%m-%d')}"
+        )
 
         # open historic data download page for required contract
         url = f"{BARCHART_URL}futures/quotes/{bc_contract_id}/historical-download"
         hist_resp = self.session.get(url)
-        log.msg(f"GET {url}, status {hist_resp.status_code}")
+        self.log.msg(f"GET {url}, status {hist_resp.status_code}")
 
         if hist_resp.status_code != 200:
-            log.msg(f"No downloadable data found for contract '{bc_contract_id}'\n")
+            self.log.msg(f"No downloadable data found for contract '{bc_contract_id}'\n")
             return None
 
         xsrf = urllib.parse.unquote(hist_resp.cookies['XSRF-TOKEN'])
@@ -187,17 +163,19 @@ class ConnectionBC(object):
         allowance = json.loads(resp.text)
 
         if allowance.get('error') is not None:
-            log.warn("Barchart daily download allowance exceeded")
+            self.log.warn("Barchart daily download allowance exceeded")
             return None
 
         raw_bc_data = None
 
         if allowance['success']:
 
-            log.msg(f"POST {BARCHART_URL + 'my/download'}, "
-                    f"status: {resp.status_code}, "
-                    f"allowance success: {allowance['success']}, "
-                    f"allowance count: {allowance['count']}")
+            self.log.msg(
+                f"POST {BARCHART_URL + 'my/download'}, "
+                f"status: {resp.status_code}, "
+                f"allowance success: {allowance['success']}, "
+                f"allowance count: {allowance['count']}"
+            )
 
             # download data
             xsrf = urllib.parse.unquote(resp.cookies['XSRF-TOKEN'])
@@ -231,9 +209,11 @@ class ConnectionBC(object):
 
             if not dry_run:
                 resp = self.session.post(BARCHART_URL + 'my/download', headers=headers, data=payload)
-                log.msg(f"POST {BARCHART_URL + 'my/download'}, "
-                        f"status: {resp.status_code}, "
-                        f"data length: {len(resp.content)}")
+                self.log.msg(
+                    f"POST {BARCHART_URL + 'my/download'}, "
+                    f"status: {resp.status_code}, "
+                    f"data length: {len(resp.content)}"
+                )
                 if resp.status_code == 200:
 
                     if 'Error retrieving data' not in resp.text:
@@ -241,19 +221,21 @@ class ConnectionBC(object):
                         raw_bc_data = resp.text
 
                     else:
-                        log.msg(f"Barchart data problem for '{bc_contract_id}', not writing")
+                        self.log.msg(
+                            f"Barchart data problem for '{bc_contract_id}', not writing"
+                        )
 
             else:
-                log.msg(f"Not POSTing to {BARCHART_URL + 'my/download'}, dry_run")
+                self.log.msg(f"Not POSTing to {BARCHART_URL + 'my/download'}, dry_run")
 
-            log.msg(f"Finished getting Barchart historic prices for {bc_contract_id}\n")
+            self.log.msg(f"Finished getting Barchart historic prices for {bc_contract_id}\n")
 
         return raw_bc_data
 
-    def _raw_bc_data_to_df(self, price_data_raw: str, log: logger) -> pd.DataFrame:
+    def _raw_bc_data_to_df(self, price_data_raw: str) -> pd.DataFrame:
 
         if price_data_raw is None:
-            log.warn("No price data from Barchart")
+            self.log.warn("No price data from Barchart")
             raise missingData
 
         iostr = io.StringIO(price_data_raw)
@@ -309,7 +291,7 @@ class ConnectionBC(object):
             price_data[["OPEN", "HIGH", "LOW", "FINAL"]] * bc_price_multiplier
         return price_data
 
-    def _get_overview(self, contract_id, log: logger):
+    def _get_overview(self, contract_id):
         """
         GET the futures overview page, eg https://www.barchart.com/futures/quotes/B6M21/overview
         :param contract_id: contract identifier
@@ -319,7 +301,7 @@ class ConnectionBC(object):
         """
         url = BARCHART_URL + "futures/quotes/%s/overview" % contract_id
         resp = self.session.get(url)
-        log.msg(f"GET {url}, response {resp.status_code}")
+        self.log.msg(f"GET {url}, response {resp.status_code}")
         return resp
 
     def _create_bc_session(self):
@@ -327,7 +309,6 @@ class ConnectionBC(object):
         config = get_production_config()
         barchart_username = config.get_element("barchart_username")
         barchart_password = config.get_element("barchart_password")
-
 
         # start a session
         session = requests.Session()

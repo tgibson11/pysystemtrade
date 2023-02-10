@@ -4,6 +4,9 @@ from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractP
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
 from syscore.exceptions import missingData
 from sysdata.barchart.bc_connection import ConnectionBC
+from sysdata.barchart.bc_futures_contract import BcFuturesContract
+from sysdata.barchart.bc_instruments_data import BarchartFuturesInstrumentData
+from sysdata.data_blob import dataBlob
 from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
 from sysexecution.tick_data import dataFrameOfRecentTicks, tickerObject
@@ -21,9 +24,10 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
     """
 
-    def __init__(self, bc_connection: ConnectionBC, log=logtoscreen("bcFuturesContractPriceData")):
+    def __init__(self, bc_connection: ConnectionBC, data: dataBlob, log=logtoscreen("bcFuturesContractPriceData")):
         self._bc_connection = bc_connection
-        super().__init__(log=log)
+        self._futures_instrument_data = BarchartFuturesInstrumentData(log=log)
+        super().__init__(data=data, log=log)
 
     def __repr__(self):
         return "Barchart futures per contract price data"
@@ -31,6 +35,10 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
     @property
     def barchart(self):
         return self._bc_connection
+
+    @property
+    def futures_instrument_data(self) -> BarchartFuturesInstrumentData:
+        return self._futures_instrument_data
 
     def has_merged_price_data_for_contract(self, futures_contract: futuresContract) -> bool:
         """
@@ -41,7 +49,9 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         :param futures_contract:
         :return: bool
         """
-        return self.barchart.has_data_for_contract(futures_contract)
+
+        bc_contract_id = self._get_bc_contract_id(futures_contract)
+        return self.barchart.has_data_for_contract(bc_contract_id)
 
     def has_price_data_for_contract_at_frequency(self, contract_object: futuresContract, frequency: Frequency) -> bool:
         """
@@ -54,7 +64,8 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
         :return: bool
         """
         # This check isn't for a specific frequency though
-        return self.barchart.has_data_for_contract(contract_object)
+        bc_contract_id = self._get_bc_contract_id(contract_object)
+        return self.barchart.has_data_for_contract(bc_contract_id)
 
     def get_contracts_with_merged_price_data(self) -> listOfFuturesContracts:
         raise NotImplementedError("Do not use get_contracts_with_merged_price_data with Barchart")
@@ -88,10 +99,12 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
         new_log = contract_object.log(self.log)
 
+        bc_futures_contract = self._get_bc_futures_contract(contract_object)
+
         try:
             price_data = self.barchart.get_historical_futures_data_for_contract(
-                contract_object,
-                bar_freq=frequency
+                bc_futures_contract=bc_futures_contract,
+                bar_freq=frequency,
             )
         except missingData:
             new_log.warn(
@@ -108,6 +121,26 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
             return futuresContractPrices.create_empty()
 
         return futuresContractPrices(price_data)
+
+    def _get_bc_futures_instrument(self, futures_contract: futuresContract):
+        instrument_code = futures_contract.instrument_code
+        return self.futures_instrument_data.get_bc_futures_instrument(instrument_code)
+
+    def _get_bc_futures_contract(self, futures_contract: futuresContract):
+        bc_futures_instrument = self._get_bc_futures_instrument(futures_contract)
+        bc_futures_contract = BcFuturesContract(
+            futures_contract=futures_contract,
+            bc_futures_instrument=bc_futures_instrument
+        )
+        return bc_futures_contract
+
+    def _get_bc_contract_id(self, futures_contract: futuresContract):
+        bc_futures_instrument = self._get_bc_futures_instrument(futures_contract)
+        bc_futures_contract = BcFuturesContract(
+            futures_contract=futures_contract,
+            bc_futures_instrument=bc_futures_instrument
+        )
+        return bc_futures_contract.get_bc_contract_id()
 
     def get_ticker_object_for_order(self, order: contractOrder) -> Optional[tickerObject]:
         return None
