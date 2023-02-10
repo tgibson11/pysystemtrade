@@ -3,7 +3,7 @@ from typing import Optional
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
 from syscore.exceptions import missingData
-from sysdata.barchart.bc_connection import bcConnection
+from sysdata.barchart.bc_connection import ConnectionBC
 from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
 from sysexecution.tick_data import dataFrameOfRecentTicks, tickerObject
@@ -21,7 +21,7 @@ class bcFuturesContractPriceData(brokerFuturesContractPriceData):
 
     """
 
-    def __init__(self, bc_connection: bcConnection, log=logtoscreen("bcFuturesContractPriceData")):
+    def __init__(self, bc_connection: ConnectionBC, log=logtoscreen("bcFuturesContractPriceData")):
         self._bc_connection = bc_connection
         super().__init__(log=log)
 

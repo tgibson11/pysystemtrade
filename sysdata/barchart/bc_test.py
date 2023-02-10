@@ -1,8 +1,8 @@
-from sysdata.barchart.bc_connection import bcConnection
+from sysdata.barchart.bc_connection import ConnectionBC
 from sysdata.data_blob import dataBlob
 from sysproduction.data.contracts import dataContracts
 
-bc = bcConnection()
+bc = ConnectionBC()
 
 data = dataBlob(log_name="Barchart-Test")
 diag_contracts = dataContracts(data)

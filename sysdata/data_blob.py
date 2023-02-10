@@ -4,7 +4,7 @@ from sysbrokers.IB.ib_connection import connectionIB
 from syscore.objects import get_class_name
 from syscore.constants import arg_not_supplied
 from syscore.text import camel_case_split
-from sysdata.barchart.bc_connection import bcConnection
+from sysdata.barchart.bc_connection import ConnectionBC
 from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.mongodb.mongo_log import logToMongod
@@ -20,7 +20,7 @@ class dataBlob(object):
         log_name: str = "",
         csv_data_paths: dict = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
-        bc_conn: bcConnection = arg_not_supplied,
+        bc_conn: ConnectionBC = arg_not_supplied,
         mongo_db: mongoDb = arg_not_supplied,
         log: logger = arg_not_supplied,
         keep_original_prefix: bool = False,
@@ -298,7 +298,7 @@ class dataBlob(object):
         return ib_conn
 
     @property
-    def bc_conn(self) -> bcConnection:
+    def bc_conn(self) -> ConnectionBC:
         bc_conn = getattr(self, "_bc_conn", arg_not_supplied)
         if bc_conn is arg_not_supplied:
             bc_conn = self._get_new_bc_connection()
@@ -326,8 +326,8 @@ class dataBlob(object):
                         self.db_ib_broker_client_id.release_clientid(id)
                     raise e
 
-    def _get_new_bc_connection(self) -> bcConnection:
-        bc_conn = bcConnection(log=self.log)
+    def _get_new_bc_connection(self) -> ConnectionBC:
+        bc_conn = ConnectionBC(log=self.log)
         return bc_conn
 
     def _get_next_client_id_for_ib(self) -> int:

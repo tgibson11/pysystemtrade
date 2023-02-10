@@ -21,7 +21,7 @@ from sysobjects.contracts import futuresContract
 BARCHART_URL = "https://www.barchart.com/"
 
 
-class bcConnection(object):
+class ConnectionBC(object):
 
     def __init__(self, log=logtoscreen("bcConnection")):
         """
