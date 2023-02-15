@@ -100,12 +100,13 @@ class Algo(object):
             # Allow market orders to be submitted without market data
             collected_prices = benchmarkPriceCollection()
         else:
-            collected_prices = self.get_market_data_for_order_modifies_ticker_object(
-                ticker_object, contract_order
-            )
-        if collected_prices is missing_data:
-            # no data available, no can do
-            return missing_order
+            try:
+                collected_prices = self.get_market_data_for_order_modifies_ticker_object(
+                    ticker_object, contract_order
+                )
+            except missingData:
+                # no data available, no can do
+                return missing_order
 
         ## We want to preserve these otherwise there is a danger they will dynamically change
         collected_prices = copy(collected_prices)
@@ -180,7 +181,7 @@ class Algo(object):
                 "Can't get market data for %s so not trading with limit order %s"
                 % (contract_order.instrument_code, str(contract_order))
             )
-            return missing_data
+            raise
 
         tick_analysis = ticker_object.analyse_for_tick(reference_tick)
 
