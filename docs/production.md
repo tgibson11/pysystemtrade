@@ -254,14 +254,20 @@ You need to:
 - Prerequisites:
     - Install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), install or update [python3](https://docs.python-guide.org/starting/install3/linux/). You may also find a simple text editor (like emacs) is useful for fine tuning, and if you are using a headless server then [x11vnc](http://www.karlrunge.com/x11vnc/) is helpful.
     - Add the following environment variables to your `~/.profile`: (feel free to use other directories):
+        - MONGO_DATA=/home/user_name/data/mongodb/
+          - I prefer to use Mongo's default location. Mongo won't start at boot if data is in an encrypted home directory. Also avoids having to specify a path when starting Mongo.
         - PYSYS_CODE=/home/user_name/pysystemtrade
         - PYSYS_PRIVATE_CONFIG_DIR=/home/user_name/private
+          - This needs to be exported so Python scripts can access
         - SCRIPT_PATH=/home/user_name/pysystemtrade/sysproduction/linux/scripts
         - ECHO_PATH=/home/user_name/echos
-        - Note: export variables that are used in Python (e.g., private config dir)
+        - MONGO_BACKUP_PATH=/media/shared_network/drive/mongo_backup
+          - This is not used
     - Add the SCRIPT_PATH directory to your PATH
     - Linux: update terminal preferences to run as a login shell
-    - Create the following directories (again use other directories if you like, but you must modify the .profile above)
+    - Create the following directories (again use other directories if you like, but you must modify the .profile above and specify the proper directories in 'private_config.yaml')
+        - '/home/user_name/data/mongodb/'
+          - If not using the default location
         - '/home/user_name/echos/'
         - '/home/user_name/data/mongo_dump'
         - '/home/user_name/data/backups_csv'
