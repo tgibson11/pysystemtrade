@@ -476,7 +476,7 @@ def get_perc_of_capital_position_size_across_instruments_for_strategy(
 
 
 def get_correlation_matrix_all_instruments(data) -> correlationEstimate:
-    instrument_list = get_list_of_instruments()
+    instrument_list = get_instruments_with_positions_all_strategies(data)
     cmatrix = get_correlation_matrix_for_instrument_returns(data, instrument_list)
 
     cmatrix = cmatrix.ordered_correlation_matrix()
