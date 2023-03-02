@@ -22,11 +22,10 @@ from syslogdiag.email_via_db_interface import send_production_mail_msg
 from sysobjects.contracts import futuresContract
 from sysobjects.futures_per_contract_prices import futuresContractPrices
 
-from sysproduction.data.prices import diagPrices, updatePrices, get_valid_instrument_code_from_user
+from sysproduction.data.prices import diagPrices, updatePrices
 from sysproduction.data.broker import dataBroker
 from sysproduction.data.instruments import diagInstruments
 from sysproduction.data.contracts import dataContracts
-from sysproduction.update_multiple_adjusted_prices import ALL_INSTRUMENTS
 
 NO_SPIKE_CHECKING = 99999999999.0
 
@@ -39,30 +38,7 @@ def update_historical_prices():
     """
     with dataBlob(log_name="Update-Historical-Prices") as data:
         update_historical_price_object = updateHistoricalPrices(data)
-
-        instrument_code = get_valid_instrument_code_from_user(
-            all_code=ALL_INSTRUMENTS, allow_all=True, source="multiple"
-        )
-
-        if instrument_code is ALL_INSTRUMENTS:
-            update_historical_price_object.update_historical_prices()
-            return success
-
-        cleaning_config = get_config_for_price_filtering(data)
-        update_historical_prices_for_instrument(instrument_code, data, cleaning_config=cleaning_config)
-
-        do_another = True
-
-        while do_another:
-            exit_code = "EXIT"
-            instrument_code = get_valid_instrument_code_from_user(
-                allow_exit=True, exit_code=exit_code, source="single"
-            )
-            if instrument_code == exit_code:
-                do_another = False
-            else:
-                update_historical_prices_for_instrument(instrument_code, data, cleaning_config=cleaning_config)
-
+        update_historical_price_object.update_historical_prices()
     return success
 
 
