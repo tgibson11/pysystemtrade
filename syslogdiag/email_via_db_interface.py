@@ -40,8 +40,7 @@ def send_email_and_record_date_or_store_on_fail(
     data, body: str, subject: str, email_is_report: bool = False
 ):
     try:
-        html_body = f"<html><body><pre>{body}</pre></body></html>"
-        send_mail_msg(html_body, subject, mail_type=MailType.html)
+        send_mail_msg(body, subject)
         record_date_of_email_send(data, subject)
         data.log.msg("Sent email subject %s" % subject)
     except Exception as e:
