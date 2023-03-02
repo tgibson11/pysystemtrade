@@ -266,6 +266,9 @@ class ibPriceClient(ibContractsClient):
         last_call = self.last_historic_price_calltime
         _avoid_pacing_violation(last_call, log=log)
 
+        # Request delayed data instead of real-time
+        self.ib.reqMarketDataType(3)
+
         bars = self.ib.reqHistoricalData(
             ibcontract,
             endDateTime="",
