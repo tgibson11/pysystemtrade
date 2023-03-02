@@ -89,6 +89,9 @@ class ibPriceClient(ibContractsClient):
             )
             raise
 
+        # Request delayed data instead of real-time
+        self.ib.reqMarketDataType(3)
+
         self.ib.reqMktData(ibcontract, "", False, False)
         ticker = self.ib.ticker(ibcontract)
 
@@ -149,6 +152,9 @@ class ibPriceClient(ibContractsClient):
             raise
 
         recent_time = datetime.datetime.now() - datetime.timedelta(seconds=60)
+
+        # Request delayed data instead of real-time
+        self.ib.reqMarketDataType(3)
 
         tick_data = self.ib.reqHistoricalTicks(
             ibcontract, recent_time, "", tick_count, "BID_ASK", useRth=False
