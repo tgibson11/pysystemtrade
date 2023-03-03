@@ -4,7 +4,7 @@ from syscore.dateutils import SECONDS_PER_DAY
 from syscore.exceptions import missingData
 from syslogdiag.mongo_email_control import mongoEmailControlData
 
-from syslogdiag.emailing import send_mail_msg, send_mail_pdfs, MailType
+from syslogdiag.emailing import send_mail_msg, send_mail_pdfs
 
 
 def send_production_mail_msg_attachment(body: str, subject: str, filename: str):
