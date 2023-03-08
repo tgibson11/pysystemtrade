@@ -3,6 +3,7 @@ import datetime as datetime
 from copy import copy
 import pandas as pd
 
+from syscore.constants import missing_data
 from syscore.exceptions import missingData
 from sysinit.futures.build_multiple_prices_from_raw_data import (
     create_multiple_price_stack_from_raw_data,
@@ -120,7 +121,7 @@ class futuresMultiplePrices(pd.DataFrame):
 
     def current_contract_dict(self) -> setOfNamedContracts:
         if len(self) == 0:
-            raise missingData
+            return missing_data
 
         final_row = self.iloc[-1]
         contract_dict = dict(
