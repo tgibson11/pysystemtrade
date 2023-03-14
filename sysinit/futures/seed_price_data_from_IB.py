@@ -34,7 +34,8 @@ def seed_price_data_from_IB(instrument_code):
 def seed_price_data_for_contract(data: dataBlob, contract_object: futuresContract):
     log = contract_object.specific_log(data.log)
 
-    list_of_frequencies = [HOURLY_FREQ, DAILY_PRICE_FREQ]
+    # list_of_frequencies = [HOURLY_FREQ, DAILY_PRICE_FREQ]
+    list_of_frequencies = [DAILY_PRICE_FREQ]
     for frequency in list_of_frequencies:
         log.msg("Getting data at frequency %s" % str(frequency))
         seed_price_data_for_contract_at_frequency(
