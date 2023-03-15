@@ -56,8 +56,8 @@ def process_new_instruments(
         spread_for_instrument = data_in.get_spread_cost(instrument_code)
         if check_on_add:
             okay_to_add = true_if_answer_is_yes(
-                "Add cost of %s for %f to database?"
-                % (instrument_code, spread_for_instrument)
+                "Add cost of %f for %s to database?"
+                % (spread_for_instrument, instrument_code)
             )
             if not okay_to_add:
                 continue
