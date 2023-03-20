@@ -8,7 +8,7 @@ from sysdata.barchart.bc_connection import ConnectionBC
 from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.mongodb.mongo_log import logToMongod
-from syslogdiag.logger import logger
+from syslogdiag.logger import logger, COMPONENT_LOG_LABEL
 
 from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 
@@ -233,7 +233,7 @@ class dataBlob(object):
 
     def _get_specific_logger(self, class_object):
         class_name = get_class_name(class_object)
-        log = self.log.setup(component=class_name)
+        log = self.log.setup(**{COMPONENT_LOG_LABEL: class_name})
 
         return log
 
