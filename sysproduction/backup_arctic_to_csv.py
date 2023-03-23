@@ -490,7 +490,9 @@ def backup_roll_state_data(data):
 
 
 def backup_contract_data(data):
-    instrument_list = data.mongo_futures_instrument.get_list_of_instruments()
+    instrument_list = (
+        data.mongo_futures_contract.get_list_of_all_instruments_with_contracts()
+    )
     for instrument_code in instrument_list:
         contract_list = (
             data.mongo_futures_contract.get_all_contract_objects_for_instrument_code(
