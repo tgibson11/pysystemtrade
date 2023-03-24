@@ -8,5 +8,3 @@ git stash pop
 # git pull from main pysystemtrade github repo
 cd ~/pysystemtrade/
 git pull
-# install changes
-sudo $VIRTUAL_ENV/bin/python3.8 -m pip install $PYSYS_CODE
