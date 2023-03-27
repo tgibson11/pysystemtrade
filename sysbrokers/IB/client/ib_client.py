@@ -118,8 +118,7 @@ class ibClient(object):
 
         msg = "Reqid %d: %d %s" % (reqid, error_code, error_string)
 
-        # log_to_use = self._get_log_for_contract(contract)
-        log_to_use = self.log.setup()
+        log_to_use = self._get_log_for_contract(contract)
 
         iserror = error_code in IB_IS_ERROR
         if iserror:
