@@ -11,7 +11,7 @@ from sysbrokers.IB.config.ib_instrument_config import (
     IBInstrumentIdentity,
 )
 
-from syscore.constants import arg_not_supplied
+from syscore.constants import arg_not_supplied, missing_contract
 from syscore.cache import Cache
 from syscore.exceptions import missingContract
 
@@ -138,6 +138,8 @@ class ibClient(object):
             instrument_code = self.get_instrument_code_from_broker_contract_object(
                 contract
             )
+            if instrument_code is missing_contract:
+                instrument_code = "UNKNOWN (%s)" % contract.symbol
             futures_contract = futuresContract(instrument_code, ib_expiry_str)
             log_to_use = futures_contract.specific_log(self.log)
 
@@ -160,6 +162,10 @@ class ibClient(object):
         instrument_code = self.get_instrument_code_from_broker_identity_for_contract(
             broker_identity
         )
+        if instrument_code is missing_contract:
+            ## WE DON'T RAISE AN ERROR HERE AS IT CAUSES ERROR RECURSION SEE #1085
+
+            return missing_contract
 
         return instrument_code
 
@@ -195,10 +201,20 @@ class ibClient(object):
         ib_contract_pattern: ibContract,
     ) -> IBInstrumentIdentity:
 
+        contract_details = self.get_contract_details(
+            ib_contract_pattern=ib_contract_pattern,
+            allow_expired=False,
+            allow_multiple_contracts=False,
+        )
+        if contract_details is missing_contract:
+            ## ## WE DON'T RAISE AN ERROR HERE AS IT CAUSES ERROR RECURSION SEE #1085
+            return missing_contract
+
         return IBInstrumentIdentity(
-            ib_code=ib_contract_pattern.symbol,
-            ib_multiplier=float(ib_contract_pattern.multiplier),
-            ib_exchange=ib_contract_pattern.exchange,
+            ib_code=str(contract_details.contract.symbol),
+            ib_multiplier=float(contract_details.contract.multiplier),
+            ib_exchange=str(contract_details.contract.exchange),
+            ib_valid_exchange=str(contract_details.validExchanges),
         )
 
     def get_contract_details(
@@ -208,19 +224,21 @@ class ibClient(object):
         allow_multiple_contracts: bool = False,
     ) -> Union[ibContractDetails, List[ibContractDetails]]:
 
-        """CACHING HERE CAUSES TOO MANY ERRORS SO DON'T USE IT"""
         contract_details = self._get_contract_details(
             ib_contract_pattern, allow_expired=allow_expired
         )
 
         if len(contract_details) == 0:
-            raise missingContract
+            ## WE DON'T RAISE AN ERROR HERE AS IT CAUSES ERROR RECURSION SEE #1085
+            return missing_contract
 
         if allow_multiple_contracts:
             return contract_details
 
         elif len(contract_details) > 1:
-            self.log.critical("Multiple contracts and only expected one")
+            self.log.critical(
+                "Multiple contracts and only expected one - returning the first"
+            )
 
         return contract_details[0]
 
