@@ -1,2 +1,0 @@
-# install changes
-sudo $VIRTUAL_ENV/bin/python3.8 -m pip install $PYSYS_CODE
