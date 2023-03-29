@@ -66,7 +66,7 @@ class runSystemClassic(object):
             data=data, strategy_name=strategy_name, system=system
         )
 
-        store_backtest_state(data, system, strategy_name=strategy_name)
+        # store_backtest_state(data, system, strategy_name=strategy_name)
 
     ## MODIFY THIS WHEN INHERITING FOR A DIFFERENT STRATEGY
     ## ARGUMENTS MUST BE: data: dataBlob, strategy_name: str, system: System
