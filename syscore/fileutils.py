@@ -291,8 +291,6 @@ def get_relative_pathname_from_list(path_as_list: List[str]) -> str:
         if base_dir is not None:
             directory_name_of_package = os.path.join(base_dir, package_name)
         else:
-            # Problematic when running scripts from sysproduction...
-            # Importing 'data' will use sysproduction.data instead of the top-level data package
             directory_name_of_package = os.path.dirname(
                 import_module(package_name).__file__
             )
