@@ -90,9 +90,9 @@ def _send_msg(msg: MIMEMultipart):
     context = ssl.create_default_context()
     # add tls for those using yahoo or gmail.
     try:
-       s.starttls(context=context)
+        s.starttls(context=context)
     except:
-       pass
+        pass
     s.login(email_address, email_pwd)
     s.sendmail(me, [you], msg.as_string())
     s.quit()
