@@ -368,8 +368,11 @@ def warn_not_rolling(instrument_code: str, auto_parameters: autoRollParameters):
 def manually_report_and_update_roll_state_for_code(
     data: dataBlob, instrument_code: str
 ):
+    print("Running roll report")
     run_roll_report(data, instrument_code)
+    print("Updating roll state")
     manually_update_roll_state_for_code(data, instrument_code)
+    print("Done")
 
 
 def manually_update_roll_state_for_code(data: dataBlob, instrument_code: str):
