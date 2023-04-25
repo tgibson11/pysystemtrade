@@ -368,11 +368,8 @@ def warn_not_rolling(instrument_code: str, auto_parameters: autoRollParameters):
 def manually_report_and_update_roll_state_for_code(
     data: dataBlob, instrument_code: str
 ):
-    print("Running roll report")
     run_roll_report(data, instrument_code)
-    print("Updating roll state")
     manually_update_roll_state_for_code(data, instrument_code)
-    print("Done")
 
 
 def manually_update_roll_state_for_code(data: dataBlob, instrument_code: str):
@@ -396,11 +393,15 @@ def manually_update_roll_state_for_code(data: dataBlob, instrument_code: str):
 
 
 def run_roll_report(data: dataBlob, instrument_code: str):
+    print("Getting new config")
     config = roll_report_config.new_config_with_modified_output("console")
+    print("Setting instrument code")
     config.modify_kwargs(instrument_code=instrument_code)
+    print("Running report")
     report_results = run_report_with_data_blob(config, data)
     if report_results is failure:
         raise Exception("Can't run roll report, so can't change status")
+    print("Done")
 
 
 def get_roll_state_required(roll_data: RollDataWithStateReporting) -> RollState:
