@@ -73,10 +73,14 @@ def run_report_with_data_blob(report_config: reportConfig, data: dataBlob):
 
     data.log.msg("Running report %s" % str(report_config))
 
+    print("Running report)")
     report_results = run_report_from_config(report_config=report_config, data=data)
+    print("Parsing results")
     parsed_report = parse_report_results(data=data, report_results=report_results)
 
+    print("Outputting report")
     output_report(parsed_report=parsed_report, report_config=report_config, data=data)
+    print("Done")
 
 
 def run_report_from_config(report_config: reportConfig, data: dataBlob) -> list:
