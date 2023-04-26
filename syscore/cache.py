@@ -26,10 +26,8 @@ class Cache(object):
         function_name = function_instance.__name__
         key = _get_key(function_name, args, kwargs)
         try:
-            print(f"Getting from cache; key={key}")
             value_from_store = self._get_from_store(key)
         except missingData:
-            print("Calculating")
             value_from_store = self._calculate_and_store(
                 key, function_instance, *args, **kwargs
             )
@@ -38,7 +36,6 @@ class Cache(object):
 
     def _calculate_and_store(self, key: str, function_instance, *args, **kwargs):
         value = function_instance(*args, **kwargs)
-        print(f"Storing; key={key}, value={value}")
         self._put_in_store(key, value)
 
         return value
