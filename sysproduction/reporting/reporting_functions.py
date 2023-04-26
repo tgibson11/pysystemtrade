@@ -81,12 +81,9 @@ def run_report_with_data_blob(report_config: reportConfig, data: dataBlob):
 
 def run_report_from_config(report_config: reportConfig, data: dataBlob) -> list:
 
-    print("Resolving function")
     report_function = resolve_function(report_config.function)
-    print("Getting kwargs")
     report_kwargs = report_config.kwargs
 
-    print("Running function")
     report_results = report_function(data, **report_kwargs)
 
     return report_results
