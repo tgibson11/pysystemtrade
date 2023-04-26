@@ -584,7 +584,6 @@ class reportingApi(object):
 
     @property
     def roll_data_dict(self):
-        print("Getting roll data")
         return self.cache.get(self._get_roll_data_dict)
 
     def _get_roll_data_dict(self):
