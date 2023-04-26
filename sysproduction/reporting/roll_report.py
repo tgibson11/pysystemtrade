@@ -37,9 +37,7 @@ def roll_report(
     formatted_output = []
 
     formatted_output.append(reporting_api.terse_header("Roll report"))
-    print("Getting table of roll data")
     formatted_output.append(reporting_api.table_of_roll_data(instrument_code))
-    print("Done")
     formatted_output.append(
         body_text(
             "Roll_exp is days until preferred roll set by roll parameters. Prc_exp is days until price contract expires, "

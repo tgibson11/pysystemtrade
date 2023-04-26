@@ -558,7 +558,9 @@ class reportingApi(object):
 
     #### ROLL REPORT ####
     def table_of_roll_data(self, instrument_code: str = ALL_ROLL_INSTRUMENTS):
+        print("Getting roll data")
         result_pd = self._roll_data_as_pd(instrument_code)
+        print("Done")
         result_pd = nice_format_roll_table(result_pd)
         table_result = table("Status and time to roll in days", result_pd)
 
