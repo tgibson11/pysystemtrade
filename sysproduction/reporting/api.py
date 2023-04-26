@@ -565,9 +565,7 @@ class reportingApi(object):
         return table_result
 
     def _roll_data_as_pd(self, instrument_code: str = ALL_ROLL_INSTRUMENTS):
-        print("Getting roll data")
         roll_data_dict = self.roll_data_dict_for_instrument_code(instrument_code)
-        print("Done")
 
         result_pd = pd.DataFrame.from_dict(roll_data_dict, orient="index")
 
@@ -586,6 +584,7 @@ class reportingApi(object):
 
     @property
     def roll_data_dict(self):
+        print("Getting roll data")
         return self.cache.get(self._get_roll_data_dict)
 
     def _get_roll_data_dict(self):
