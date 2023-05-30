@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import pandas as pd
+from pandas import NaT
 
 from syscore.exceptions import missingData
 from syscore.genutils import transfer_object_attributes
@@ -192,7 +193,7 @@ def get_last_futures_price_update_for_instrument(data, instrument_code):
     if len(px) > 0:
         last_timestamp = px.index[-1]
     else:
-        last_timestamp = missing_data
+        last_timestamp = NaT
     update = genericUpdate(instrument_code, last_timestamp)
 
     return update
