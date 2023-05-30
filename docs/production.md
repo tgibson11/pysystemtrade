@@ -264,7 +264,6 @@ You need to:
         - MONGO_BACKUP_PATH=/media/shared_network/drive/mongo_backup
           - This is not used
     - Add the SCRIPT_PATH directory to your PATH
-    - Linux: update terminal preferences to run as a login shell
     - Create the following directories (again use other directories if you like, but you must modify the .profile above and specify the proper directories in 'private_config.yaml')
         - '/home/user_name/data/mongodb/'
           - If not using the default location
@@ -279,7 +278,7 @@ You need to:
       - In API settings: check "Download open orders on connect", uncheck "Read-only"
     - [Install mongodb](https://docs.mongodb.com/manual/administration/install-on-linux/). Latest v4 is recommended, as [Arctic doesn't support 5](https://github.com/man-group/arctic#requirements) yet
     - create a file 'private_config.yaml' in the private directory of [pysystemtrade](/private), and optionally a ['private_control_config.yaml' file in the same directory](#process-configuration) See [here for more details](#system-defaults--private-config)
-       - Update email & Barchart passwords in private_config.yaml (do not commit)
+       - Update email password in private_config.yaml (do not commit)
     - [check a mongodb server is running with the right data directory](/docs/data.md#mongo-db) command line: `mongod --dbpath $MONGO_DATA`
     - launch an IB gateway (this could be done automatically depending on your security setup)
 - FX data:
