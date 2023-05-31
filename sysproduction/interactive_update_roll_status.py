@@ -215,14 +215,18 @@ def get_list_of_instruments_to_auto_cycle(data: dataBlob, days_ahead: int = 10) 
         diag_prices.get_list_of_instruments_in_multiple_prices()
     )
 
-    instruments_and_days_to_expiry = []
-    for instrument_code in list_of_potential_instruments:
-        days_to_expiry = days_until_earliest_expiry(data, instrument_code)
-        if days_to_expiry <= days_ahead:
-            instruments_and_days_to_expiry.append((instrument_code, days_to_expiry))
+    instruments_and_days_to_expiry = [
+        (instrument_code, days_until_earliest_expiry(data, instrument_code))
+        for instrument_code in list_of_potential_instruments
+    ]
 
-    instruments_and_days_to_expiry.sort(key=lambda t: t[1])
-    instrument_list = [t[0] for t in instruments_and_days_to_expiry]
+    filtered_list = [
+        t for t in instruments_and_days_to_expiry if t[1] <= days_ahead
+    ]
+
+    sorted_list = sorted(filtered_list, key=lambda t: t[1])
+    
+    instrument_list = [t[0] for t in sorted_list]
 
     print_with_landing_strips_around(
         "Identified following instruments that are near expiry %s"
