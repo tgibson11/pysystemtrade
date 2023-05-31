@@ -225,7 +225,7 @@ def get_list_of_instruments_to_auto_cycle(data: dataBlob, days_ahead: int = 10) 
     ]
 
     sorted_list = sorted(filtered_list, key=lambda t: t[1])
-    
+
     instrument_list = [t[0] for t in sorted_list]
 
     print_with_landing_strips_around(
