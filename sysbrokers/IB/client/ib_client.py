@@ -15,7 +15,8 @@ from syscore.constants import arg_not_supplied
 from syscore.cache import Cache
 from syscore.exceptions import missingContract
 
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger
+from syslogdiag.log_to_screen import logtoscreen
 
 from sysobjects.contracts import futuresContract
 

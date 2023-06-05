@@ -2,7 +2,7 @@ import pandas as pd
 
 from syscore.interactive.progress_bar import progressBar
 
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen, pst_logger
 
 from sysquant.fitting_dates import generate_fitting_dates, listOfFittingDates
 from sysquant.optimisation.portfolio_optimiser import portfolioOptimiser

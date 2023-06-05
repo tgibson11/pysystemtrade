@@ -1,7 +1,7 @@
 from sysdata.data_blob import dataBlob
 from sysdata.futures.instruments import futuresInstrumentData
 
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen
 
 
 class brokerFuturesInstrumentData(futuresInstrumentData):

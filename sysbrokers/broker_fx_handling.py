@@ -3,7 +3,7 @@ from sysdata.base_data import baseData
 from sysdata.data_blob import dataBlob
 from sysbrokers.broker_trade import brokerTrade
 
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen
 
 
 ### generic base class for FX handling

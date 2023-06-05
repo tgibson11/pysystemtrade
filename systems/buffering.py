@@ -2,7 +2,8 @@
 import pandas as pd
 
 from sysdata.config.configdata import Config
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger
+from syslogdiag.log_to_screen import logtoscreen
 from syscore.constants import arg_not_supplied
 
 

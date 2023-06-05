@@ -10,7 +10,8 @@ from syscore.constants import missing_file, missing_instrument, arg_not_supplied
 from syscore.exceptions import missingData
 from syscore.fileutils import resolve_path_and_filename_for_package
 from syscore.genutils import return_another_value_if_nan
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen
+from syslogdiag.pst_logger import pst_logger
 from sysobjects.instruments import futuresInstrument
 
 

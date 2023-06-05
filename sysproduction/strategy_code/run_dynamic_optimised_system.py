@@ -16,7 +16,7 @@ from sysproduction.data.contracts import dataContracts
 from sysproduction.data.optimal_positions import dataOptimalPositions
 from sysproduction.data.backtest import store_backtest_state
 
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen
 
 from systems.basesystem import System
 from systems.provided.rob_system.run_system import futures_system

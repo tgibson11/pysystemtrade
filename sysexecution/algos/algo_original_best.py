@@ -27,7 +27,7 @@ from sysexecution.orders.broker_orders import (
 )
 from sysexecution.orders.contract_orders import best_order_type, contractOrder
 
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger
 
 from sysproduction.data.broker import dataBroker
 

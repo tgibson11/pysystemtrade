@@ -6,7 +6,8 @@ from syscore.constants import arg_not_supplied
 
 from sysobjects.spot_fx_prices import listOfCurrencyValues
 
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger
+from syslogdiag.log_to_screen import logtoscreen
 
 
 class ibCapitalData(brokerCapitalData):

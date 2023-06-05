@@ -1,7 +1,7 @@
 from sysdata.futures.spreads import spreadsForInstrumentData
 from sysobjects.spreads import spreadsForInstrument
 from sysdata.arctic.arctic_connection import arcticData
-from syslogging.logger import *
+from syslogdiag.log_to_screen import logtoscreen
 import pandas as pd
 
 SPREAD_COLLECTION = "spreads"

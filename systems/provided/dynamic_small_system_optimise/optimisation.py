@@ -4,7 +4,7 @@ import numpy as np
 
 from syscore.constants import arg_not_supplied
 
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger, nullLog
 
 from sysquant.estimators.covariance import covarianceEstimate
 from sysquant.estimators.mean_estimator import meanEstimates

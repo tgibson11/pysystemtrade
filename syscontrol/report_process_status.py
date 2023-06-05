@@ -1,7 +1,8 @@
 import datetime
 
 from syscore.constants import arg_not_supplied
-from syslogging.logger import *
+from syslogdiag.pst_logger import pst_logger
+from syslogdiag.log_to_screen import logtoscreen
 
 LOG_CLEARED = object()
 NO_LOG_ENTRY = object()
