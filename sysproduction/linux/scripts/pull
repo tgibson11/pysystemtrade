@@ -9,4 +9,4 @@ git stash pop
 cd ~/pysystemtrade/
 git pull
 # install changes - not necessary if installed in develop mode (or using pip install -e)
-# sudo $VIRTUAL_ENV/bin/python3.8 -m pip install $PYSYS_CODE
+# sudo $VIRTUAL_ENV/bin/python3.8 -m pip install -e $PYSYS_CODE
