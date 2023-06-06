@@ -15,7 +15,7 @@ from sysbrokers.broker_instrument_data import brokerFuturesInstrumentData
 
 from sysdata.data_blob import dataBlob
 
-from syslogdiag.log_to_screen import logtoscreen
+from syslogging.logger import *
 
 
 class ibFuturesInstrumentData(brokerFuturesInstrumentData):
