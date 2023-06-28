@@ -487,6 +487,10 @@ class reportingApi(object):
 
     def table_of_used_position_limits(self):
         position_limits = get_position_limits_as_df(self.data)
+
+        # Filter rows w/ position 0
+        position_limits = position_limits.loc[~(position_limits['position'] == 0)]
+
         at_limit = filter_data_for_max_value_and_return_table(
             position_limits,
             field_column="spare",
