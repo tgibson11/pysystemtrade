@@ -388,6 +388,9 @@ def get_position_limits_as_df(data):
         [strat_instrument_limits_as_df, instrument_limits_as_df], axis=0
     )
 
+    # Filter rows w/ position 0
+    agg_limits = agg_limits.loc[~(agg_limits['position'] == 0)]
+
     return agg_limits
 
 
