@@ -30,6 +30,13 @@ roll_explanations = {
 }
 
 
+def is_double_sided_trade_roll_state(roll_state: RollState):
+    if roll_state in [RollState.Force, RollState.Force_Outright]:
+        return True
+    else:
+        return False
+
+
 def is_forced_roll_state(roll_state: RollState):
     if roll_state in [RollState.Force, RollState.Force_Outright, RollState.Close]:
         return True
@@ -87,7 +94,7 @@ def allowable_roll_state_from_current_and_position(
         Close1=["Close", "Force", "Force_Outright", "Passive", "No_Roll", "No_Open"],
         Roll_Adjusted0=["No_Roll"],
         Roll_Adjusted1=["Roll_Adjusted"],
-        No_Open0=["Roll_Adjusted", "Passive"],
+        No_Open0=["Roll_Adjusted", "Passive", "No_Open"],
         No_Open1=["Close", "Force", "Force_Outright", "Passive", "No_Roll"],
     )
 
