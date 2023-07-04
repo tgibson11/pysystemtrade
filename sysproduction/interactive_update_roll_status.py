@@ -471,11 +471,10 @@ def suggest_roll_state_for_instrument(
                 ## liquid forward, with position, close to expiry
                 ##   Up to the user to decide
                 default = auto_parameters.default_roll_state_if_undecided
-                print(type(default))
-                if type(default) is RollState:
-                    return RollState.Passive
-                else:
+                if isinstance(default, RollState):
                     return default
+                else:
+                    return RollState.Passive
             else:
                 ## liquid forward, with position held, not close to expiring
                 return RollState.Passive
