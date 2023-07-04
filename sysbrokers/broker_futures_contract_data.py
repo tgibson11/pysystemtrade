@@ -1,6 +1,4 @@
-from sysobjects.production.trading_hours.trading_hours import (
-    listOfTradingHours, MARKET_CLOSED_HOURS_LEFT
-)
+from sysobjects.production.trading_hours.trading_hours import listOfTradingHours
 from syscore.exceptions import missingContract
 from sysdata.futures.contracts import futuresContractData
 from sysdata.data_blob import dataBlob
@@ -36,17 +34,19 @@ class brokerFuturesContractData(futuresContractData):
 
         return trading_hours.okay_to_trade_now()
 
-    def hours_of_trading_left_for_contract(
-            self, contract_object: futuresContract
-    ) -> float:
+    def less_than_N_hours_of_trading_left_for_contract(
+        self, contract_object: futuresContract, N_hours: float = 1.0
+    ) -> bool:
         try:
             trading_hours = self.get_trading_hours_for_contract(contract_object)
         except missingContract:
-            return MARKET_CLOSED_HOURS_LEFT
+            return False
 
-        hours_of_trading_left_for_contract = trading_hours.hours_left_before_market_close()
+        less_than_N_hours_of_trading_left_for_contract = (
+            trading_hours.less_than_N_hours_left(N_hours=N_hours)
+        )
 
-        return hours_of_trading_left_for_contract
+        return less_than_N_hours_of_trading_left_for_contract
 
     def get_trading_hours_for_contract(
         self, futures_contract: futuresContract

@@ -8,9 +8,8 @@ from syscore.dateutils import (
     following_one_second_before_midnight_of_datetime,
     preceeding_midnight_of_datetime,
 )
+from syscore.exceptions import marketClosed
 from syscore.genutils import intersection_intervals
-
-MARKET_CLOSED_HOURS_LEFT = -1.0
 
 
 @dataclass()
@@ -30,7 +29,19 @@ class tradingHours:
         else:
             return False
 
+    def less_than_N_hours_left(self, N_hours: float = 1.0) -> bool:
+        hours_left = self.hours_left_before_market_close()
+
+        if hours_left < N_hours:
+            return True
+        else:
+            return False
+
     def hours_left_before_market_close(self) -> float:
+        if not self.okay_to_trade_now():
+            # market closed
+            raise marketClosed
+
         datetime_now = datetime.datetime.now()
         time_left = self.closing_time - datetime_now
         seconds_left = time_left.total_seconds()
@@ -89,18 +100,23 @@ class listOfTradingHours(list):
                 return True
         return False
 
-    def hours_left_before_market_close(self):
+    def less_than_N_hours_left(self, N_hours: float = 1.0):
         for check_period in self:
             if check_period.okay_to_trade_now():
                 # market is open, but for how long?
-                hours_left = check_period.hours_left_before_market_close()
+                less_than_N_hours_left = check_period.less_than_N_hours_left(
+                    N_hours=N_hours
+                )
 
-                return hours_left
+                if less_than_N_hours_left:
+                    return True
+                else:
+                    return False
             else:
                 # move on to next period
                 continue
 
-        return MARKET_CLOSED_HOURS_LEFT
+        raise marketClosed
 
 
 def split_trading_hours_across_two_weekdays(
