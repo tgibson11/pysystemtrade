@@ -56,7 +56,7 @@ class ibPriceClient(ibContractsClient):
                 contract_object_with_ib_broker_config, allow_expired=allow_expired
             )
         except missingContract:
-            specific_log.warn(
+            specific_log.warning(
                 "Can't resolve IB contract %s"
                 % str(contract_object_with_ib_broker_config)
             )
@@ -82,7 +82,7 @@ class ibPriceClient(ibContractsClient):
                 trade_list_for_multiple_legs=trade_list_for_multiple_legs,
             )
         except missingContract:
-            specific_log.warn(
+            specific_log.warning(
                 "Can't find matching IB contract for %s"
                 % str(contract_object_with_ib_data)
             )
@@ -114,7 +114,7 @@ class ibPriceClient(ibContractsClient):
                 trade_list_for_multiple_legs=trade_list_for_multiple_legs,
             )
         except missingContract:
-            specific_log.warn(
+            specific_log.warning(
                 "Can't find matching IB contract for %s"
                 % str(contract_object_with_ib_data)
             )
@@ -144,7 +144,7 @@ class ibPriceClient(ibContractsClient):
         try:
             ibcontract = self.ib_futures_contract(contract_object_with_ib_data)
         except missingContract:
-            specific_log.warn(
+            specific_log.warning(
                 "Can't find matching IB contract for %s"
                 % str(contract_object_with_ib_data)
             )
@@ -183,7 +183,7 @@ class ibPriceClient(ibContractsClient):
                 bar_freq
             )
         except Exception as exception:
-            log.warn(exception)
+            log.warning(exception)
             raise missingData
 
         price_data_raw = self._ib_get_historical_data_of_duration_and_barSize(
@@ -205,7 +205,7 @@ class ibPriceClient(ibContractsClient):
     ) -> pd.DataFrame:
 
         if price_data_raw is None:
-            log.warn("No price data from IB")
+            log.warning("No price data from IB")
             raise missingData
 
         price_data_as_df = price_data_raw[["open", "high", "low", "close", "volume"]]
@@ -335,7 +335,7 @@ def _avoid_pacing_violation(
     printed_warning_already = False
     while _pause_for_pacing(last_call_datetime):
         if not printed_warning_already:
-            log.msg(
+            log.debug(
                 "Pausing %f seconds to avoid pacing violation"
                 % (
                     last_call_datetime
