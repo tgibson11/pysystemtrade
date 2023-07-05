@@ -93,7 +93,7 @@ setup(
     install_requires=[
         "pandas==1.0.5",
         "matplotlib>=3.0.0",
-        "ib-insync==0.9.70",
+        "ib-insync==0.9.86",
         "PyYAML>=5.4",
         "numpy>=1.19.4,<1.24.0",
         "scipy>=1.0.0",
@@ -103,7 +103,7 @@ setup(
         "pytest>6.2",
         "Flask>=2.0.1",
         "Werkzeug>=2.0.1",
-        "statsmodels==0.12.2",
+        "statsmodels==0.13.0",
         "PyPDF2>=2.5.0",
     ],
     tests_require=["nose", "flake8"],
