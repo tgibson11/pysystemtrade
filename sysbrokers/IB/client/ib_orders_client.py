@@ -152,7 +152,7 @@ class ibOrdersClient(ibContractsClient):
             ## auxPrice is the offset so this will submit an order buy at the best offer, etc
             ## Works like a market order but works for instruments with no streaming data
             ib_order = ibOrder(
-                orderType="SNAP_MKT",
+                orderType="SNAP MKT",
                 action=ib_BS_str,
                 totalQuantity=ib_qty,
                 auxPrice=0.0,
@@ -161,7 +161,7 @@ class ibOrdersClient(ibContractsClient):
             ## auxPrice is the offset so this will submit an order buy at the best offer, etc
             ## Works like a market order but works for instruments with no streaming data
             ib_order = ibOrder(
-                orderType="SNAP_MID",
+                orderType="SNAP MID",
                 action=ib_BS_str,
                 totalQuantity=ib_qty,
                 auxPrice=0.0,
@@ -170,7 +170,7 @@ class ibOrdersClient(ibContractsClient):
             ## auxPrice is the offset so this will submit an order buy at the best offer, etc
             ## Works like a market order but works for instruments with no streaming data
             ib_order = ibOrder(
-                orderType="SNAP_PRIM",
+                orderType="SNAP PRIM",
                 action=ib_BS_str,
                 totalQuantity=ib_qty,
                 auxPrice=0.0,
