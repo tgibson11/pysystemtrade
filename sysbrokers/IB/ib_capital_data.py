@@ -2,7 +2,6 @@ from sysbrokers.IB.ib_connection import connectionIB
 from sysbrokers.IB.client.ib_accounting_client import ibAccountingClient
 from sysbrokers.broker_capital_data import brokerCapitalData
 from sysdata.data_blob import dataBlob
-from syscore.constants import arg_not_supplied
 
 from sysobjects.spot_fx_prices import listOfCurrencyValues
 
@@ -37,17 +36,15 @@ class ibCapitalData(brokerCapitalData):
         return "IB capital data"
 
     def get_account_value_across_currency(
-        self, account_id: str = arg_not_supplied
+        self, *account_ids: str
     ) -> listOfCurrencyValues:
-        return self.ib_client.broker_get_account_value_across_currency(
-            account_id=account_id
-        )
+        return self.ib_client.broker_get_account_value_across_currency(*account_ids)
 
     def get_excess_liquidity_value_across_currency(
-        self, account_id: str = arg_not_supplied
+        self, *account_ids: str
     ) -> listOfCurrencyValues:
         return self.ib_client.broker_get_excess_liquidity_value_across_currency(
-            account_id=account_id
+            *account_ids
         )
 
     """

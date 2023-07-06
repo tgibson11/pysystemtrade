@@ -5,34 +5,32 @@ from sysbrokers.IB.client.ib_client import (
     STALE_SECONDS_ALLOWED_ACCOUNT_SUMMARY,
 )
 
-from syscore.constants import arg_not_supplied
-
 from sysobjects.spot_fx_prices import currencyValue, listOfCurrencyValues
 
 
 class ibAccountingClient(ibClient):
     def broker_get_account_value_across_currency(
-        self, account_id: str = arg_not_supplied
+        self, *account_ids: str
     ) -> listOfCurrencyValues:
 
         list_of_values_per_currency = self._get_named_value_across_currency(
-            named_value="NetLiquidation", account_id=account_id
+            named_value="NetLiquidation", *account_ids
         )
 
         return list_of_values_per_currency
 
     def broker_get_excess_liquidity_value_across_currency(
-        self, account_id: str = arg_not_supplied
+        self, *account_ids: str
     ) -> listOfCurrencyValues:
 
         list_of_values_per_currency = self._get_named_value_across_currency(
-            named_value="FullExcessLiquidity", account_id=account_id
+            named_value="FullExcessLiquidity", *account_ids
         )
 
         return list_of_values_per_currency
 
     def _get_named_value_across_currency(
-        self, named_value: str, account_id: str = arg_not_supplied
+        self, named_value: str, *account_ids: str
     ) -> listOfCurrencyValues:
 
         list_of_currencies = self._get_list_of_currencies_for_named_values(named_value)
@@ -41,7 +39,7 @@ class ibAccountingClient(ibClient):
                 currencyValue(
                     currency,
                     self._get_named_value_for_currency_across_accounts(
-                        currency, account_id=account_id, named_value=named_value
+                        currency, named_value=named_value, *account_ids
                     ),
                 )
                 for currency in list_of_currencies
@@ -56,19 +54,19 @@ class ibAccountingClient(ibClient):
         self,
         currency: str,
         named_value: str,
-        account_id: str = arg_not_supplied,
+        *account_ids: str,
     ) -> float:
-        liquidiation_values_across_accounts_dict = (
+
+        values_across_accounts_dict = (
             self._get_named_value_across_accounts(named_value)
         )
-        if account_id is arg_not_supplied:
-            list_of_account_ids = liquidiation_values_across_accounts_dict.keys()
-        else:
-            list_of_account_ids = [account_id]
+
+        if not account_ids:
+            account_ids = values_across_accounts_dict.keys()
 
         values_for_currency = [
-            liquidiation_values_across_accounts_dict[account_id].get(currency, 0.0)
-            for account_id in list_of_account_ids
+            values_across_accounts_dict[account_id].get(currency, 0.0)
+            for account_id in account_ids
         ]
 
         return sum(values_for_currency)
