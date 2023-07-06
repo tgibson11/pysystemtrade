@@ -478,9 +478,15 @@ class dataBroker(productionDataLayerGeneric):
     def get_total_capital_value_in_base_currency(self) -> float:
         currency_data = dataCurrency(self.data)
         account_id = self.get_broker_account()
-        values_across_accounts = (
-            self.broker_capital_data.get_account_value_across_currency(account_id)
-        )
+        # TODO this will be cleaned up when get_broker_account can't return arg_not_supplied
+        if account_id is arg_not_supplied:
+            values_across_accounts = (
+                self.broker_capital_data.get_account_value_across_currency()
+            )
+        else:
+            values_across_accounts = (
+                self.broker_capital_data.get_account_value_across_currency(account_id)
+            )
 
         # This assumes that each account only reports either in one currency or
         # for each currency, i.e. no double counting
@@ -495,11 +501,17 @@ class dataBroker(productionDataLayerGeneric):
     def get_total_excess_liquidity_in_base_currency(self) -> float:
         currency_data = dataCurrency(self.data)
         account_id = self.get_broker_account()
-        values_across_accounts = (
-            self.broker_capital_data.get_excess_liquidity_value_across_currency(
-                account_id
+        # TODO this will be cleaned up when get_broker_account can't return arg_not_supplied
+        if account_id is arg_not_supplied:
+            values_across_accounts = (
+                self.broker_capital_data.get_excess_liquidity_value_across_currency()
             )
-        )
+        else:
+            values_across_accounts = (
+                self.broker_capital_data.get_excess_liquidity_value_across_currency(
+                    account_id
+                )
+            )
 
         # This assumes that each account only reports either in one currency or
         # for each currency, i.e. no double counting
