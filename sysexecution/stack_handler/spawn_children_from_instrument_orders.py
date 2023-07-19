@@ -336,7 +336,11 @@ def passive_roll_child_order(
         return [contractIdAndTrade(next_contract, trade)]
 
     # ok still have a position in the current contract
-    increasing_trade = sign(trade) == sign(position_current_contract)
+
+    # Temporary fix
+    trade_qty = sum(trade)
+
+    increasing_trade = sign(trade_qty) == sign(position_current_contract)
     if increasing_trade:
         # Passive roll and increasing trade
         # Do it all in next contract
