@@ -94,7 +94,7 @@ def check_and_if_required_allocate_algo_to_single_contract_order(
     is_roll_order = instrument_order.roll_order
 
     if algo_allocation_is_overriden_for_instrument(
-            contract_order=contract_order, config=config
+        contract_order=contract_order, config=config
     ):
         contract_order = allocate_algo_for_specific_instrument_with_override(
             contract_order=contract_order, config=config
