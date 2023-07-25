@@ -46,13 +46,7 @@ def get_roll_data_for_instrument(instrument_code, data):
     # length to expiries / length to suggested roll
 
     price_expiry_days = c_data.days_until_price_expiry(instrument_code)
-
-    # Don't blow up the report just because we don't have data for a carry contract
-    try:
-        carry_expiry_days = c_data.days_until_carry_expiry(instrument_code)
-    except ContractNotFound:
-        carry_expiry_days = None
-
+    carry_expiry_days = c_data.days_until_carry_expiry(instrument_code)
     when_to_roll_days = c_data.days_until_roll(instrument_code)
 
     # roll status
