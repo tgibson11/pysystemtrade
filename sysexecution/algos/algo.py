@@ -96,17 +96,13 @@ class Algo(object):
         if ticker_object is None:
             ticker_object = self.data_broker.get_ticker_object_for_order(contract_order)
 
-        if ticker_object is None and order_type == market_order_type:
-            # Allow market orders to be submitted without market data
-            collected_prices = benchmarkPriceCollection()
-        else:
-            try:
-                collected_prices = self.get_market_data_for_order_modifies_ticker_object(
-                    ticker_object, contract_order
-                )
-            except missingData:
-                # no data available, no can do
-                return missing_order
+        try:
+            collected_prices = self.get_market_data_for_order_modifies_ticker_object(
+                ticker_object, contract_order
+            )
+        except missingData:
+            # no data available, no can do
+            return missing_order
 
         ## We want to preserve these otherwise there is a danger they will dynamically change
         collected_prices = copy(collected_prices)
