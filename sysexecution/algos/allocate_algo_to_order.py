@@ -99,7 +99,7 @@ def check_and_if_required_allocate_algo_to_single_contract_order(
         contract_order = allocate_algo_for_specific_instrument_with_override(
             contract_order=contract_order, config=config
         )
-    elif instrument_order_type == market_order_type or instrument_order_type == zero_roll_order_type:
+    elif instrument_order_type == market_order_type:
         log.debug("Market order type, so allocating to algo_market")
         contract_order = allocate_market_algo(
             contract_order=contract_order, config=config

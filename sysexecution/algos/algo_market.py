@@ -105,12 +105,12 @@ class algoMarket(Algo):
                 log.debug("Trade completed")
                 break
 
-            # IB adaptive market orders can take longer to execute: don't timeout
-            # if is_order_timeout:
-            #     log.debug("Run out of time to execute: cancelling")
-            #     broker_order_with_controls = cancel_order(
-            #         self.data, broker_order_with_controls)
-            #     break
+            if is_order_timeout:
+                log.debug("Run out of time to execute: cancelling")
+                broker_order_with_controls = cancel_order(
+                    self.data, broker_order_with_controls
+                )
+                break
 
             if is_order_cancelled:
                 log.warning(

@@ -139,10 +139,6 @@ class ibOrdersClient(ibContractsClient):
 
         if order_type is market_order_type:
             ib_order = ibMarketOrder(ib_BS_str, ib_qty)
-            # Use IB adaptive algo for market orders
-            ib_order.algoStrategy = "Adaptive"
-            ib_order.algoParams = []
-            ib_order.algoParams.append(TagValue("adaptivePriority", "Patient"))
         elif order_type is limit_order_type:
             if limit_price is None:
                 self.log.critical("Need to have limit price with limit order!")
