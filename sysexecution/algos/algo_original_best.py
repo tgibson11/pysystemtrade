@@ -330,6 +330,7 @@ def is_market_about_to_close(
     log: pst_logger,
 ) -> bool:
     data_broker = dataBroker(data)
+
     try:
         short_of_time = data_broker.less_than_N_hours_of_trading_left_for_contract(
             order.futures_contract,
