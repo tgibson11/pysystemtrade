@@ -283,10 +283,9 @@ class ibFuturesContractPriceData(brokerFuturesContractPriceData):
                     futures_contract
                 )
             )
-        except missingContract:
+        except missingContract as e:
             new_log.warning("Can't get data for %s" % str(futures_contract))
-            # TODO this looks like a bug, but what should it do instead?
-            return futuresContractPrices.create_empty()
+            raise e
 
         ticker_with_bs = self.ib_client.get_ticker_object_with_BS(
             contract_object_with_ib_data,
