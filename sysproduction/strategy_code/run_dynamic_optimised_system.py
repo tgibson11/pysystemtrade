@@ -57,8 +57,6 @@ def dynamic_system(
     base_currency: str = arg_not_supplied,
 ) -> System:
 
-    log_level = "on"
-
     sim_data = get_sim_data_object_for_production(data)
     config = Config(config_filename)
 
@@ -71,8 +69,6 @@ def dynamic_system(
 
     system = futures_system(sim_data=sim_data, config=config)
     system._log = log
-
-    system.set_logging_level(log_level)
 
     return system
 
