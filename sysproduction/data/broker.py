@@ -300,7 +300,6 @@ class dataBroker(productionDataLayerGeneric):
             market_conditions = self.get_market_conditions_for_contract_order_by_leg(
                 contract_order
             )
-            print(market_conditions)
         except missingData:
             self.log.warning(
                 "Can't get market conditions, setting available size to one"
@@ -351,6 +350,7 @@ class dataBroker(productionDataLayerGeneric):
         """
 
         tick_data = self.get_recent_bid_ask_tick_data_for_contract_object(contract)
+        print(tick_data)
 
         analysis_of_tick_data = analyse_tick_data_frame(
             tick_data, qty, forward_fill=True, replace_qty_nans=True
