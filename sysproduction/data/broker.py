@@ -350,7 +350,6 @@ class dataBroker(productionDataLayerGeneric):
         """
 
         tick_data = self.get_recent_bid_ask_tick_data_for_contract_object(contract)
-        print(tick_data)
 
         analysis_of_tick_data = analyse_tick_data_frame(
             tick_data, qty, forward_fill=True, replace_qty_nans=True

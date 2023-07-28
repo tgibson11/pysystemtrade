@@ -47,6 +47,7 @@ def analyse_tick_data_frame(
         raise missingData("Tick data is empty")
 
     tick = extract_final_row_of_tick_data_frame(tick_data, forward_fill=forward_fill)
+    print(tick)
     results = analyse_tick(tick, qty, replace_qty_nans=replace_qty_nans)
 
     return results
