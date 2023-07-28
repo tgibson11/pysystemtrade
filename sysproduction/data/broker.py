@@ -291,9 +291,6 @@ class dataBroker(productionDataLayerGeneric):
             )
         )
 
-        print(f"offside_qty = ${offside_qty}")
-        print(f"new_qty = ${new_qty}")
-
         return new_qty
 
     def get_current_size_for_contract_order_by_leg(
@@ -303,6 +300,7 @@ class dataBroker(productionDataLayerGeneric):
             market_conditions = self.get_market_conditions_for_contract_order_by_leg(
                 contract_order
             )
+            print(market_conditions)
         except missingData:
             self.log.warning(
                 "Can't get market conditions, setting available size to one"
