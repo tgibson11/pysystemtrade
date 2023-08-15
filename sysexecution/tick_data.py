@@ -276,6 +276,8 @@ class tickerObject(object):
             self.refresh()
             last_bid = self.bid()
             last_ask = self.ask()
+            print(last_bid)
+            print(last_ask)
             last_bid_is_valid = not np.isnan(last_bid)
             last_ask_is_valid = not np.isnan(last_ask)
 
