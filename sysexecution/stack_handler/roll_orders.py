@@ -79,6 +79,7 @@ class stackHandlerForRolls(stackHandlerCore):
         roll_orders_required_from_positions = (
             self.check_if_positions_require_order_generation(instrument_code)
         )
+        print(f"roll_orders_required_from_positions = {roll_orders_required_from_positions}")
         if not roll_orders_required_from_positions:
             ## if we don't exit here will get errors even it we're not rolling
             return False
@@ -86,12 +87,13 @@ class stackHandlerForRolls(stackHandlerCore):
         roll_orders_required_from_roll_state = (
             self.check_if_roll_state_requires_order_generation(instrument_code)
         )
+        print(f"roll_orders_required_from_roll_state = {roll_orders_required_from_roll_state}")
         if not roll_orders_required_from_roll_state:
             ## if we don't exit here will get errors even it we're not rolling
             return False
 
         safe_to_roll = self.check_if_safe_to_add_roll_order(instrument_code)
-
+        print(f"safe_to_roll = {safe_to_roll}")
         if not safe_to_roll:
             return False
 
