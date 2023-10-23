@@ -9,8 +9,8 @@ logging.getLogger("arctic").setLevel(logging.ERROR)
 system = futures_system(config=Config("/home/todd/private/system_config.yaml"))
 
 system.config.use_forecast_scale_estimates = False
-system.config.use_forecast_weight_estimates = True
-system.config.use_forecast_div_mult_estimates = False
+system.config.use_forecast_weight_estimates = False
+system.config.use_forecast_div_mult_estimates = True
 system.config.use_instrument_weight_estimates = False
 system.config.use_instrument_div_mult_estimates = False
 
