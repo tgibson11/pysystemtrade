@@ -7,6 +7,7 @@ A strategy report is highly specific to a strategy, and will delve into the inte
 from datetime import datetime
 
 from syscore.constants import arg_not_supplied
+from syscore.dateutils import MARKER_DATE_FORMAT
 
 from sysdata.data_blob import dataBlob
 from sysobjects.production.backtest_storage import interactiveBacktest
@@ -77,7 +78,8 @@ def get_output_for_system_object(data: dataBlob, strategy_name: str, system):
     strategy_reporting_function = get_reporting_function_instance_for_strategy_name(
         data, strategy_name
     )
-    backtest = interactiveBacktest(system, str(datetime.now()), strategy_name)
+    timestamp = datetime.now().strftime(MARKER_DATE_FORMAT)
+    backtest = interactiveBacktest(system=system, timestamp=timestamp, strategy_name=strategy_name)
     strategy_format_output_list = strategy_reporting_function(data, backtest)
 
     return strategy_format_output_list
