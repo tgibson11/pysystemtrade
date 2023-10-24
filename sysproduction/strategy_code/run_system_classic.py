@@ -27,6 +27,9 @@ from sysproduction.data.optimal_positions import dataOptimalPositions
 from sysproduction.data.sim_data import get_sim_data_object_for_production
 
 from sysproduction.data.backtest import store_backtest_state
+from sysproduction.reporting.report_configs import strategy_report_config
+from sysproduction.reporting.reporting_functions import parse_report_results, output_report
+from sysproduction.reporting.strategies_report import get_output_for_system_object as get_report_for_system_object
 
 from syslogging.logger import *
 
@@ -66,7 +69,13 @@ class runSystemClassic(object):
             data=data, strategy_name=strategy_name, system=system
         )
 
+        # Saving the backtest takes a lot of memory
         # store_backtest_state(data, system, strategy_name=strategy_name)
+
+        # I only need the backtest for the strategy report, so just run it now instead
+        report_results = get_report_for_system_object(data=data, strategy_name=strategy_name, system=system)
+        parsed_report = parse_report_results(data=data, report_results=report_results)
+        output_report(parsed_report=parsed_report, report_config=strategy_report_config, data=data)
 
     ## MODIFY THIS WHEN INHERITING FOR A DIFFERENT STRATEGY
     ## ARGUMENTS MUST BE: data: dataBlob, strategy_name: str, system: System
