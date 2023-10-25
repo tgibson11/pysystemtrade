@@ -28,7 +28,7 @@ from sysproduction.data.sim_data import get_sim_data_object_for_production
 
 from sysproduction.data.backtest import store_backtest_state
 from sysproduction.reporting.report_configs import strategy_report_config
-from sysproduction.reporting.reporting_functions import parse_report_results, output_report
+from sysproduction.reporting.reporting_functions import parse_report_results, output_report, pandas_display_for_reports
 from sysproduction.reporting.strategies_report import get_output_for_system_object as get_report_for_system_object
 
 from syslogging.logger import *
@@ -74,6 +74,7 @@ class runSystemClassic(object):
 
         # I only need the backtest for the strategy report, so just run it now instead
         report_results = get_report_for_system_object(data=data, strategy_name=strategy_name, system=system)
+        pandas_display_for_reports()
         parsed_report = parse_report_results(data=data, report_results=report_results)
         output_report(parsed_report=parsed_report, report_config=strategy_report_config, data=data)
 
