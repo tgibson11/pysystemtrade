@@ -24,6 +24,7 @@ from syscore.constants import success
 from syscontrol.timer_functions import get_list_of_timer_functions, listOfTimerFunctions
 
 from sysdata.data_blob import dataBlob
+from syslogdiag.email_via_db_interface import send_production_mail_msg
 
 from syslogging.logger import *
 
@@ -102,9 +103,14 @@ class processToRun(object):
         except processNotStarted:
             return None
 
-        self._run_on_start()
-        self._main_loop_over_methods()
-        self._finish()
+        try:
+            self._run_on_start()
+            self._main_loop_over_methods()
+            self._finish()
+        except Exception:
+            msg = f"Process {self.process_name} failed"
+            send_production_mail_msg(self.data, msg)
+            raise
 
     def _run_on_start(self):
         self.data_control.start_process(self.process_name)
