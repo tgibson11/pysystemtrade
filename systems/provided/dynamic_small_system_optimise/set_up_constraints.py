@@ -6,7 +6,8 @@ from syscore.genutils import sign
 from syscore.constants import arg_not_supplied
 from sysquant.optimisation.weights import portfolioWeights
 
-A_VERY_LARGE_NUMBER = 999999999
+A_VERY_LARGE_NUMBER = 999  ##
+A_VERY_SMALL_NUMBER = 0.000001
 
 
 class minMaxAndDirectionAndStart(dict):
@@ -72,6 +73,7 @@ def get_data_and_calculate_for_code(
         no_trade = False
     else:
         no_trade = instrument_code in input_data.no_trade_keys
+
     if input_data.long_only_keys is arg_not_supplied:
         long_only = False
     else:
@@ -140,6 +142,8 @@ def calculate_minima_and_maxima(
     if no_trade:
         if weight_prior is not arg_not_supplied:
             return weight_prior, weight_prior
+        else:
+            return 0.0, 0.0
 
     if reduce_only:
         if weight_prior is not arg_not_supplied:
@@ -152,7 +156,7 @@ def calculate_minima_and_maxima(
 
             else:
                 ## prior weight equals zero, so no trade
-                return (0.0, 0.0)
+                return 0.0, 0.0
 
     if max_position is not arg_not_supplied:
         max_position = abs(max_position)
@@ -169,10 +173,12 @@ def calculate_direction(
     minimum: float = -A_VERY_LARGE_NUMBER,
     maximum: float = A_VERY_LARGE_NUMBER,
 ) -> float:
-    if minimum >= 0:
+
+    ## always start at zero, so if minima/maxima already bind we can only go up or down
+    if minimum >= 0.0:
         return 1
 
-    if maximum <= 0:
+    if maximum <= 0.0:
         return -1
 
     if np.isnan(optimum_weight):
