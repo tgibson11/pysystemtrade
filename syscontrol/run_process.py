@@ -109,7 +109,7 @@ class processToRun(object):
             self._finish()
         except Exception:
             msg = f"Process {self.process_name} failed"
-            send_production_mail_msg(self.data, msg)
+            send_production_mail_msg(self.data, msg, msg)
             raise
 
     def _run_on_start(self):
