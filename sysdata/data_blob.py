@@ -3,12 +3,13 @@ from copy import copy
 from sysbrokers.IB.ib_connection import connectionIB
 from syscore.objects import get_class_name
 from syscore.constants import arg_not_supplied
+from syscore.fileutils import get_resolved_pathname
 from syscore.text import camel_case_split
 from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
 from syslogging.logger import *
 from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
-
+from sysdata.parquet.parquet_access import ParquetAccess
 
 class dataBlob(object):
     def __init__(
@@ -16,6 +17,7 @@ class dataBlob(object):
         class_list: list = arg_not_supplied,
         log_name: str = "",
         csv_data_paths: dict = arg_not_supplied,
+        parquet_store_path: str = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
         mongo_db: mongoDb = arg_not_supplied,
         log: pst_logger = arg_not_supplied,
@@ -63,6 +65,7 @@ class dataBlob(object):
         self._log_name = log_name
         self._csv_data_paths = csv_data_paths
         self._keep_original_prefix = keep_original_prefix
+        self._parquet_store_path = parquet_store_path
 
         self._attr_list = []
 
@@ -101,6 +104,7 @@ class dataBlob(object):
             csv=self._add_csv_class,
             arctic=self._add_arctic_class,
             mongo=self._add_mongo_class,
+            parquet = self._add_parquet_class
         )
 
         method_to_add_with = class_dict.get(prefix, None)
@@ -160,6 +164,22 @@ class dataBlob(object):
                 "Error %s couldn't evaluate %s(mongo_db=self.mongo_db, log = self.log.setup(component = %s)) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
+                % (str(e), class_name, class_name)
+            )
+            self._raise_and_log_error(msg)
+
+        return resolved_instance
+
+    def _add_parquet_class(self, class_object):
+        log = self._get_specific_logger(class_object)
+        try:
+            resolved_instance = class_object(parquet_access = self.parquet_access, log=log)
+        except Exception as e:
+            class_name = get_class_name(class_object)
+            msg = (
+                "Error '%s' couldn't evaluate %s(parquet_access = self.parquet_access, log = self.log.setup(component = %s)) \
+                        This might be because import is missing\
+                         or arguments don't follow pattern or parquet_store is undefined"
                 % (str(e), class_name, class_name)
             )
             self._raise_and_log_error(msg)
@@ -308,6 +328,21 @@ class dataBlob(object):
 
         return mongo_db
 
+    @property
+    def parquet_access(self) -> ParquetAccess:
+        return ParquetAccess(self.parquet_root_directory)
+
+    @property
+    def parquet_root_directory(self) -> str:
+        path = self._parquet_store_path
+        if path is arg_not_supplied:
+            try:
+                path = get_parquet_root_directory(self.config)
+            except:
+                raise Exception("Need to define parquet_store in config to use parquet")
+
+        return path
+
     def _get_new_mongo_db(self) -> mongoDb:
         mongo_db = mongoDb()
 
@@ -340,7 +375,11 @@ class dataBlob(object):
         return log_name
 
 
-source_dict = dict(arctic="db", mongo="db", csv="db", ib="broker")
+source_dict = dict(arctic="db", mongo="db", csv="db", parquet="db",ib="broker")
+
+def get_parquet_root_directory(config):
+    path = config.get_element("parquet_store")
+    return get_resolved_pathname(path)
 
 
 def identifying_name(split_up_name: list, keep_original_prefix=False) -> str:

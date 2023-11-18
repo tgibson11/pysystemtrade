@@ -6,7 +6,7 @@ We then store those adjusted prices in arctic and/or csv
 """
 from syscore.constants import arg_not_supplied
 from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesData
-from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
+from sysdata.pointers import parquet_futures_adjusted_price_data
 from sysdata.csv.csv_adjusted_prices import csvFuturesAdjustedPricesData
 
 from sysobjects.adjusted_prices import futuresAdjustedPrices
@@ -16,10 +16,10 @@ from sysproduction.update_multiple_adjusted_prices import ALL_INSTRUMENTS
 
 def _get_data_inputs(csv_adj_data_path):
     arctic_multiple_prices = arcticFuturesMultiplePricesData()
-    arctic_adjusted_prices = arcticFuturesAdjustedPricesData()
+    parquet_adjusted_prices = parquet_futures_adjusted_price_data
     csv_adjusted_prices = csvFuturesAdjustedPricesData(csv_adj_data_path)
 
-    return arctic_multiple_prices, arctic_adjusted_prices, csv_adjusted_prices
+    return arctic_multiple_prices, parquet_adjusted_prices, csv_adjusted_prices
 
 
 def process_adjusted_prices_all_instruments(
@@ -46,7 +46,7 @@ def process_adjusted_prices_single_instrument(
 ):
     (
         arctic_multiple_prices,
-        arctic_adjusted_prices,
+        parquet_adjusted_prices,
         csv_adjusted_prices,
     ) = _get_data_inputs(csv_adj_data_path)
     if multiple_prices is arg_not_supplied:
@@ -58,7 +58,7 @@ def process_adjusted_prices_single_instrument(
     print(adjusted_prices)
 
     if ADD_TO_ARCTIC:
-        arctic_adjusted_prices.add_adjusted_prices(
+        parquet_adjusted_prices.add_adjusted_prices(
             instrument_code, adjusted_prices, ignore_duplication=True
         )
     if ADD_TO_CSV:

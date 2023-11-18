@@ -4,11 +4,15 @@ import pandas as pd
 from syscore.exceptions import missingData
 from syscore.pandas.pdutils import check_df_equals, check_ts_equals
 from syscore.dateutils import CALENDAR_DAYS_IN_YEAR
+from syscore.dateutils import DAILY_PRICE_FREQ, HOURLY_FREQ
+
 from sysdata.data_blob import dataBlob
 
+from sysdata.parquet.parquet_adjusted_prices import parquetFuturesAdjustedPricesData
+from sysdata.parquet.parquet_capital import parquetCapitalData
+from sysdata.parquet.parquet_futures_per_contract_prices import parquetFuturesContractPriceData
+
 from sysdata.csv.csv_futures_contracts import csvFuturesContractData
-from sysdata.csv.csv_adjusted_prices import csvFuturesAdjustedPricesData
-from sysdata.csv.csv_futures_contract_prices import csvFuturesContractPriceData
 from sysdata.csv.csv_multiple_prices import csvFuturesMultiplePricesData
 from sysdata.csv.csv_spot_fx import csvFxPricesData
 from sysdata.csv.csv_contract_position_data import csvContractPositionData
@@ -18,19 +22,19 @@ from sysdata.csv.csv_historic_orders import (
     csvContractHistoricOrdersData,
     csvBrokerHistoricOrdersData,
 )
-from sysdata.csv.csv_capital_data import csvCapitalData
 from sysdata.csv.csv_optimal_position import csvOptimalPositionData
 from sysdata.csv.csv_spread_costs import csvSpreadCostData
 from sysdata.csv.csv_roll_state_storage import csvRollStateData
 from sysdata.csv.csv_spreads import csvSpreadsForInstrumentData
 
-from sysdata.pointers import parquetFuturesAdjustedPricesData
-from sysdata.pointers import parquetCapitalData
-from sysdata.pointers import parquetFuturesContractPriceData
-
+from sysdata.arctic.arctic_futures_per_contract_prices import (
+    arcticFuturesContractPriceData,
+)
 from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesData
+from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
 from sysdata.arctic.arctic_spotfx_prices import arcticFxPricesData
 from sysdata.arctic.arctic_spreads import arcticSpreadsForInstrumentData
+from sysdata.arctic.arctic_capital import arcticCapitalData
 from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPositionData
 from sysdata.arctic.arctic_historic_contract_positions import arcticContractPositionData
 from sysdata.arctic.arctic_optimal_positions import arcticOptimalPositionData
@@ -51,104 +55,58 @@ from sysproduction.data.directories import get_csv_backup_directory, get_csv_dum
 from sysproduction.data.strategies import get_list_of_strategies
 
 
-def backup_arctic_to_csv():
-    data = dataBlob(log_name="backup_arctic_to_csv")
-    backup_object = backupArcticToCsv(data)
-    backup_object.backup_arctic_to_csv()
+def backup_arctic_to_parquet():
 
-    return None
+        backup_data = get_data_blob("backup_arctic_to_parquet")
+        log = backup_data.log
 
-
-# FIXME SOMEWHAT HACKY
-# SHOULD BE A 'BACKUP X' OPTION UNDER DIAGNOSTICS OR CONTROL?
-def quick_backup_of_all_price_data_including_expired():
-    backup_data = get_data_and_create_csv_directories("Quick backup of all price data")
-    backup_futures_contract_prices_to_csv(backup_data, ignore_long_expired=False)
-
-
-class backupArcticToCsv:
-    def __init__(self, data):
-        self.data = data
-
-    def backup_arctic_to_csv(self):
-        backup_data = get_data_and_create_csv_directories(self.data.log_name)
-        log = self.data.log
-
-        log.debug("Dumping from arctic, mongo to .csv files")
-        backup_adj_to_csv(backup_data)
-        backup_futures_contract_prices_to_csv(backup_data)
-        backup_spreads_to_csv(backup_data)
-        backup_fx_to_csv(backup_data)
-        backup_multiple_to_csv(backup_data)
-        backup_strategy_position_data(backup_data)
-        backup_contract_position_data(backup_data)
-        backup_historical_orders(backup_data)
+        log.debug("Dumping from arctic, mongo to parquet files")
+        backup_futures_contract_prices_to_parquet(backup_data)
+        #backup_spreads_to_csv(backup_data)
+        #backup_fx_to_csv(backup_data)
+        #backup_multiple_to_csv(backup_data)
+        backup_adj_to_parquet(backup_data)
+        #backup_strategy_position_data(backup_data)
+        #backup_contract_position_data(backup_data)
+        #backup_historical_orders(backup_data)
         backup_capital(backup_data)
-        backup_contract_data(backup_data)
-        backup_spread_cost_data(backup_data)
-        backup_optimal_positions(backup_data)
-        backup_roll_state_data(backup_data)
-        log.debug("Copying to backup directory")
-        backup_csv_dump(self.data)
+        #backup_contract_data(backup_data)
+        #backup_spread_cost_data(backup_data)
+        #backup_optimal_positions(backup_data)
+        #backup_roll_state_data(backup_data)
 
 
-def get_data_and_create_csv_directories(logname):
-
-    csv_dump_dir = get_csv_dump_dir()
-
-    class_paths = dict(
-        csvBrokerHistoricOrdersData="broker_orders",
-        csvCapitalData="capital",
-        csvContractHistoricOrdersData="contract_orders",
-        csvContractPositionData="contract_positions",
-        csvFuturesAdjustedPricesData="adjusted_prices",
-        csvFuturesContractData="contracts_data",
-        csvFuturesContractPriceData="contract_prices",
-        csvFuturesMultiplePricesData="multiple_prices",
-        csvFxPricesData="fx_prices",
-        csvOptimalPositionData="optimal_positions",
-        csvRollStateData="roll_state",
-        csvSpreadCostData="spread_costs",
-        csvSpreadsForInstrumentData="spreads",
-        csvStrategyHistoricOrdersData="strategy_orders",
-        csvStrategyPositionData="strategy_positions",
-    )
-
-    for class_name, path in class_paths.items():
-        dir_name = os.path.join(csv_dump_dir, path)
-        class_paths[class_name] = dir_name
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
+def get_data_blob(logname):
 
     data = dataBlob(
-        csv_data_paths=class_paths, keep_original_prefix=True, log_name=logname
+         keep_original_prefix=True, log_name=logname
     )
 
     data.add_class_list(
         [
-            csvBrokerHistoricOrdersData,
-            csvCapitalData,
-            csvContractHistoricOrdersData,
-            csvContractPositionData,
-            csvFuturesAdjustedPricesData,
-            csvFuturesContractData,
-            csvFuturesContractPriceData,
-            csvFuturesMultiplePricesData,
-            csvFxPricesData,
-            csvOptimalPositionData,
-            csvRollStateData,
-            csvSpreadCostData,
-            csvSpreadsForInstrumentData,
-            csvStrategyHistoricOrdersData,
-            csvStrategyPositionData,
+            #csvBrokerHistoricOrdersData,
+            parquetCapitalData,
+            #csvContractHistoricOrdersData,
+            #csvContractPositionData,
+            parquetFuturesAdjustedPricesData,
+            #csvFuturesContractData,
+            parquetFuturesContractPriceData,
+            #csvFuturesMultiplePricesData,
+            #csvFxPricesData,
+            #csvOptimalPositionData,
+            #csvRollStateData,
+            #csvSpreadCostData,
+            #csvSpreadsForInstrumentData,
+            #csvStrategyHistoricOrdersData,
+            #csvStrategyPositionData,
         ]
     )
 
     data.add_class_list(
         [
-            parquetCapitalData,
-            parquetFuturesAdjustedPricesData,
-            parquetFuturesContractPriceData,
+            arcticCapitalData,
+            arcticFuturesAdjustedPricesData,
+            arcticFuturesContractPriceData,
             arcticFuturesMultiplePricesData,
             arcticFxPricesData,
             arcticSpreadsForInstrumentData,
@@ -169,74 +127,104 @@ def get_data_and_create_csv_directories(logname):
 
 # Write function for each thing we want to backup
 # Think about how to check for duplicates (data frame equals?)
+def backup_adj_to_parquet(data):
+    instrument_list = data.arctic_futures_adjusted_prices.get_list_of_instruments()
+    for instrument_code in instrument_list:
+        backup_adj_to_parquet_for_instrument(data, instrument_code)
+
+def backup_adj_to_parquet_for_instrument(data: dataBlob, instrument_code: str):
+    arctic_data = data.arctic_futures_adjusted_prices.get_adjusted_prices(
+        instrument_code
+    )
+    try:
+        data.parquet_futures_adjusted_prices.add_adjusted_prices(
+            instrument_code, arctic_data, ignore_duplication=True
+        )
+        px = data.parquet_futures_adjusted_prices.get_adjusted_prices(
+        instrument_code
+            )
+        data.log.debug(
+            "Written .parquet backup for adjusted prices %s, %s" % (instrument_code,str(px))
+        )
+    except BaseException:
+        data.log.warning(
+            "Problem writing .parquet backup for adjusted prices %s" % instrument_code
+        )
 
 
 # Futures contract data
-def backup_futures_contract_prices_to_csv(data, ignore_long_expired: bool = True):
+def backup_futures_contract_prices_to_parquet(data):
     instrument_list = (
         data.arctic_futures_contract_price.get_list_of_instrument_codes_with_merged_price_data()
     )
     for instrument_code in instrument_list:
-        backup_futures_contract_prices_for_instrument_to_csv(
+        backup_futures_contract_prices_for_instrument_to_parquet(
             data=data,
-            instrument_code=instrument_code,
-            ignore_long_expired=ignore_long_expired,
+            instrument_code=instrument_code
         )
 
 
-def backup_futures_contract_prices_for_instrument_to_csv(
-    data: dataBlob, instrument_code: str, ignore_long_expired: bool = True
+def backup_futures_contract_prices_for_instrument_to_parquet(
+    data: dataBlob, instrument_code: str
 ):
-    list_of_contracts = data.parquet_futures_contract_price.contracts_with_merged_price_data_for_instrument_code(
+    list_of_contracts = data.arctic_futures_contract_price.contracts_with_merged_price_data_for_instrument_code(
         instrument_code
     )
 
     for futures_contract in list_of_contracts:
-        backup_futures_contract_prices_for_contract_to_csv(
+        backup_futures_contract_prices_for_contract_to_parquet(
             data=data,
             futures_contract=futures_contract,
-            ignore_long_expired=ignore_long_expired,
         )
 
 
-def backup_futures_contract_prices_for_contract_to_csv(
-    data: dataBlob, futures_contract: futuresContract, ignore_long_expired: bool = True
+def backup_futures_contract_prices_for_contract_to_parquet(
+    data: dataBlob, futures_contract: futuresContract
 ):
-    if ignore_long_expired:
-        if futures_contract.days_since_expiry() > CALENDAR_DAYS_IN_YEAR:
-            ## Almost certainly expired, skip
-            data.log.debug("Skipping expired contract %s" % str(futures_contract))
 
-            return None
+    arctic_data = (
+        data.arctic_futures_contract_price.get_merged_prices_for_contract_object(
+            futures_contract
+        )
+    )
 
+    data.parquet_futures_contract_price.write_merged_prices_for_contract_object(
+        futures_contract,
+        arctic_data,
+        ignore_duplication=True,
+    )
     parquet_data = (
         data.parquet_futures_contract_price.get_merged_prices_for_contract_object(
             futures_contract
         )
     )
-
-    csv_data = data.csv_futures_contract_price.get_merged_prices_for_contract_object(
-        futures_contract
+    data.log.debug(
+        "Written backup .csv of prices for %s was %s now %s" % (str(futures_contract), arctic_data, parquet_data)
     )
 
-    if check_df_equals(parquet_data, csv_data):
-        # No update needed, move on
-        data.log.debug("No prices backup needed for %s" % str(futures_contract))
-    else:
-        # Write backup
-        try:
-            data.csv_futures_contract_price.write_merged_prices_for_contract_object(
+    for frequency in [DAILY_PRICE_FREQ, HOURLY_FREQ]:
+        arctic_data = (
+            data.arctic_futures_contract_price.get_prices_at_frequency_for_contract_object(
                 futures_contract,
-                parquet_data,
-                ignore_duplication=True,
+                frequency=frequency
             )
-            data.log.debug(
-                "Written backup .csv of prices for %s" % str(futures_contract)
+        )
+
+        data.parquet_futures_contract_price.write_prices_at_frequency_for_contract_object(
+            futures_contract_object=futures_contract,
+            futures_price_data=arctic_data,
+            frequency=frequency,
+            ignore_duplication=True
+        )
+        parquet_data = (
+            data.parquet_futures_contract_price.get_prices_at_frequency_for_contract_object(
+                futures_contract,
+                frequency=frequency
             )
-        except BaseException:
-            data.log.warning(
-                "Problem writing .csv of prices for %s" % str(futures_contract)
-            )
+        )
+        data.log.debug(
+            "Written backup .csv of prices at frequency %s for %s was %s now %s" % (str(frequency), str(futures_contract), arctic_data, parquet_data)
+        )
 
 
 # fx
@@ -287,33 +275,8 @@ def backup_multiple_to_csv_for_instrument(data, instrument_code: str):
             )
 
 
-def backup_adj_to_csv(data):
-    instrument_list = data.parquet_futures_adjusted_prices.get_list_of_instruments()
-    for instrument_code in instrument_list:
-        backup_adj_to_csv_for_instrument(data, instrument_code)
 
 
-def backup_adj_to_csv_for_instrument(data: dataBlob, instrument_code: str):
-    arctic_data = data.parquet_futures_adjusted_prices.get_adjusted_prices(
-        instrument_code
-    )
-    csv_data = data.csv_futures_adjusted_prices.get_adjusted_prices(instrument_code)
-
-    if check_ts_equals(arctic_data, csv_data):
-        data.log.debug("No adjusted prices backup needed for %s" % instrument_code)
-        pass
-    else:
-        try:
-            data.csv_futures_adjusted_prices.add_adjusted_prices(
-                instrument_code, arctic_data, ignore_duplication=True
-            )
-            data.log.debug(
-                "Written .csv backup for adjusted prices %s" % instrument_code
-            )
-        except BaseException:
-            data.log.warning(
-                "Problem writing .csv backup for adjusted prices %s" % instrument_code
-            )
 
 
 def backup_spreads_to_csv(data: dataBlob):
@@ -419,22 +382,12 @@ def backup_historical_orders(data):
 
 
 def backup_capital(data):
-    strategy_capital_dict = get_dict_of_strategy_capital(data)
-    capital_data_df = add_total_capital_to_strategy_capital_dict_return_df(
-        data, strategy_capital_dict
-    )
-    capital_data_df = capital_data_df.ffill()
-
-    data.csv_capital.write_backup_df_of_all_capital(capital_data_df)
-
-
-def get_dict_of_strategy_capital(data: dataBlob) -> dict:
-    strategy_list = get_list_of_strategies(data)
-    strategy_capital_data = dict()
+    strategy_list = data.arctic_capital._get_list_of_strategies_with_capital_including_total()
     for strategy_name in strategy_list:
-        strategy_capital_data[
-            strategy_name
-        ] = data.parquet_capital.get_capital_pd_df_for_strategy(strategy_name)
+        strategy_capital_data=data.arctic_capital.get_capital_pd_df_for_strategy(strategy_name)
+        data.parquet_capital.update_capital_pd_df_for_strategy(strategy_name=strategy_name, updated_capital_df=strategy_capital_data)
+        written_data = data.parquet_capital.get_capital_pd_df_for_strategy(strategy_name)
+        print("Wrote capital data for strategy %s, was %s now %s" % (strategy_name, str(strategy_capital_data), str(written_data)))
 
     return strategy_capital_data
 
@@ -514,4 +467,4 @@ def backup_csv_dump(data):
 
 
 if __name__ == "__main__":
-    backup_arctic_to_csv()
+    backup_arctic_to_parquet()
