@@ -108,8 +108,9 @@ class processToRun(object):
             self._main_loop_over_methods()
             self._finish()
         except Exception:
-            msg = f"Process {self.process_name} failed"
-            send_production_mail_msg(self.data, msg, msg)
+            subject = f"Process {self.process_name} failed"
+            body = "See log for details"
+            send_production_mail_msg(self.data, body, subject)
             raise
 
     def _run_on_start(self):
