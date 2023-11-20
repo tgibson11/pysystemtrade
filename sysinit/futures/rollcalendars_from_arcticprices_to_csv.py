@@ -1,13 +1,19 @@
 from syscore.interactive.input import true_if_answer_is_yes
 from syscore.constants import arg_not_supplied
 
-from sysdata.pointers import parquet_futures_contract_price_data
 from sysobjects.rolls import rollParameters
 from sysobjects.roll_calendars import rollCalendar
 from sysdata.csv.csv_roll_calendars import csvRollCalendarData
 from sysdata.csv.csv_roll_parameters import csvRollParametersData
 from sysdata.futures.rolls_parameters import rollParametersData
-from sysproduction.data.prices import get_valid_instrument_code_from_user
+from sysproduction.data.prices import get_valid_instrument_code_from_user, diagPrices
+from sysproduction.data.production_data_objects import get_class_for_data_type, FUTURES_CONTRACT_PRICE_DATA
+
+from sysdata.data_blob import dataBlob
+
+diag_prices = diagPrices()
+
+parquet_futures_contract_price_data = diag_prices.db_futures_contract_price_data
 
 """
 Generate a 'best guess' roll calendar based on some price data for individual contracts

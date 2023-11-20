@@ -5,16 +5,17 @@ from syscore.exceptions import missingData
 from syscore.pandas.pdutils import check_df_equals, check_ts_equals
 from syscore.dateutils import CALENDAR_DAYS_IN_YEAR
 from syscore.dateutils import DAILY_PRICE_FREQ, HOURLY_FREQ
+from syscore.interactive.input import true_if_answer_is_yes
 
 from sysdata.data_blob import dataBlob
 
 from sysdata.parquet.parquet_adjusted_prices import parquetFuturesAdjustedPricesData
 from sysdata.parquet.parquet_capital import parquetCapitalData
 from sysdata.parquet.parquet_futures_per_contract_prices import parquetFuturesContractPriceData
+from sysdata.parquet.parquet_multiple_prices import parquetFuturesMultiplePricesData
+from sysdata.parquet.parquet_spotfx_prices import parquetFxPricesData
 
 from sysdata.csv.csv_futures_contracts import csvFuturesContractData
-from sysdata.csv.csv_multiple_prices import csvFuturesMultiplePricesData
-from sysdata.csv.csv_spot_fx import csvFxPricesData
 from sysdata.csv.csv_contract_position_data import csvContractPositionData
 from sysdata.csv.csv_strategy_position_data import csvStrategyPositionData
 from sysdata.csv.csv_historic_orders import (
@@ -61,15 +62,25 @@ def backup_arctic_to_parquet():
         log = backup_data.log
 
         log.debug("Dumping from arctic, mongo to parquet files")
-        backup_futures_contract_prices_to_parquet(backup_data)
+        do = true_if_answer_is_yes("Do futures contract prices?")
+        if do:
+            backup_futures_contract_prices_to_parquet(backup_data)
         #backup_spreads_to_csv(backup_data)
-        #backup_fx_to_csv(backup_data)
-        #backup_multiple_to_csv(backup_data)
-        backup_adj_to_parquet(backup_data)
+        do = true_if_answer_is_yes("FX?")
+        if do:
+            backup_fx_to_parquet(backup_data)
+        do = true_if_answer_is_yes("Multiple prices?")
+        if do:
+            backup_multiple_to_parquet(backup_data)
+        do = true_if_answer_is_yes("Adjusted prices?")
+        if do:
+            backup_adj_to_parquet(backup_data)
         #backup_strategy_position_data(backup_data)
         #backup_contract_position_data(backup_data)
         #backup_historical_orders(backup_data)
-        backup_capital(backup_data)
+        do = true_if_answer_is_yes("Capital?")
+        if do:
+            backup_capital(backup_data)
         #backup_contract_data(backup_data)
         #backup_spread_cost_data(backup_data)
         #backup_optimal_positions(backup_data)
@@ -79,27 +90,29 @@ def backup_arctic_to_parquet():
 def get_data_blob(logname):
 
     data = dataBlob(
-         keep_original_prefix=True, log_name=logname
+          log_name=logname,
+        keep_original_prefix=True
     )
 
     data.add_class_list(
         [
+            parquetFuturesMultiplePricesData,
             #csvBrokerHistoricOrdersData,
             parquetCapitalData,
             #csvContractHistoricOrdersData,
             #csvContractPositionData,
             parquetFuturesAdjustedPricesData,
             #csvFuturesContractData,
-            parquetFuturesContractPriceData,
-            #csvFuturesMultiplePricesData,
-            #csvFxPricesData,
+            parquetFxPricesData,
             #csvOptimalPositionData,
             #csvRollStateData,
             #csvSpreadCostData,
             #csvSpreadsForInstrumentData,
             #csvStrategyHistoricOrdersData,
             #csvStrategyPositionData,
-        ]
+            parquetFuturesContractPriceData,
+        ],
+
     )
 
     data.add_class_list(
@@ -119,7 +132,7 @@ def get_data_blob(logname):
             mongoSpreadCostData,
             mongoStrategyHistoricOrdersData,
             arcticStrategyPositionData,
-        ]
+        ],
     )
 
     return data
@@ -136,6 +149,10 @@ def backup_adj_to_parquet_for_instrument(data: dataBlob, instrument_code: str):
     arctic_data = data.arctic_futures_adjusted_prices.get_adjusted_prices(
         instrument_code
     )
+    px = data.parquet_futures_adjusted_prices.get_adjusted_prices(instrument_code)
+    if len(px)>=len(arctic_data):
+        data.log.warning("Appears to be more parquet data, not doing this")
+        return
     try:
         data.parquet_futures_adjusted_prices.add_adjusted_prices(
             instrument_code, arctic_data, ignore_duplication=True
@@ -187,6 +204,14 @@ def backup_futures_contract_prices_for_contract_to_parquet(
             futures_contract
         )
     )
+    parquet_data = (
+        data.parquet_futures_contract_price.get_merged_prices_for_contract_object(
+            futures_contract
+        )
+    )
+    if len(parquet_data)>=len(arctic_data):
+        data.log.warning("More parquet data, not doing")
+        return
 
     data.parquet_futures_contract_price.write_merged_prices_for_contract_object(
         futures_contract,
@@ -227,54 +252,50 @@ def backup_futures_contract_prices_for_contract_to_parquet(
         )
 
 
-# fx
-def backup_fx_to_csv(data):
-    fx_codes = data.arctic_fx_prices.get_list_of_fxcodes()
-    for fx_code in fx_codes:
-        arctic_data = data.arctic_fx_prices.get_fx_prices(fx_code)
-        csv_data = data.csv_fx_prices.get_fx_prices(fx_code)
-        if check_ts_equals(arctic_data, csv_data):
-            data.log.debug("No fx backup needed for %s" % fx_code)
-        else:
-            # Write backup
-            try:
-                data.csv_fx_prices.add_fx_prices(
-                    fx_code, arctic_data, ignore_duplication=True
-                )
-                data.log.debug("Written .csv backup for %s" % fx_code)
-            except BaseException:
-                data.log.warning("Problem writing .csv backup for %s" % fx_code)
-
-
-def backup_multiple_to_csv(data):
+def backup_multiple_to_parquet(data):
     instrument_list = data.arctic_futures_multiple_prices.get_list_of_instruments()
     for instrument_code in instrument_list:
-        backup_multiple_to_csv_for_instrument(data, instrument_code)
+        backup_multiple_to_parquet_for_instrument(data, instrument_code)
 
 
-def backup_multiple_to_csv_for_instrument(data, instrument_code: str):
+def backup_multiple_to_parquet_for_instrument(data, instrument_code: str):
     arctic_data = data.arctic_futures_multiple_prices.get_multiple_prices(
         instrument_code
     )
-    csv_data = data.csv_futures_multiple_prices.get_multiple_prices(instrument_code)
+    parquet_data = data.parquet_futures_multiple_prices.get_multiple_prices(
+        instrument_code)
+    if len(parquet_data)>=len(arctic_data):
+        data.log.warning("More parquet data, skipping")
+        return
 
-    if check_df_equals(arctic_data, csv_data):
-        data.log.debug("No multiple prices backup needed for %s" % instrument_code)
-        pass
-    else:
-        try:
-            data.csv_futures_multiple_prices.add_multiple_prices(
-                instrument_code, arctic_data, ignore_duplication=True
-            )
-            data.log.debug(
-                "Written .csv backup multiple prices for %s" % instrument_code
-            )
-        except BaseException:
-            data.log.warning(
-                "Problem writing .csv backup multiple prices for %s" % instrument_code
-            )
+    data.parquet_futures_multiple_prices.add_multiple_prices(
+        instrument_code, arctic_data, ignore_duplication=True
+    )
+    new_data = data.parquet_futures_multiple_prices.get_multiple_prices(
+        instrument_code)
+    data.log.debug(
+        "Written .csv backup multiple prices for %s was %s now %s" % (instrument_code,
+                                                                      arctic_data,
+                                                                      new_data)
+    )
 
 
+
+# fx
+def backup_fx_to_parquet(data):
+    fx_codes = data.arctic_fx_prices.get_list_of_fxcodes()
+    for fx_code in fx_codes:
+        arctic_data = data.arctic_fx_prices.get_fx_prices(fx_code)
+        parquet_data = data.parquet_fx_prices.get_fx_prices(fx_code)
+        if len(parquet_data)>=len(arctic_data):
+            data.log.debug("No fx backup needed for %s" % fx_code)
+        else:
+            # Write backup
+            data.parquet_fx_prices.add_fx_prices(
+                fx_code, arctic_data, ignore_duplication=True
+            )
+            parquet_data = data.parquet_fx_prices.get_fx_prices(fx_code)
+            data.log.debug("Written fx for %s, was %s now %s" % (fx_code, arctic_data, parquet_data))
 
 
 
@@ -385,6 +406,10 @@ def backup_capital(data):
     strategy_list = data.arctic_capital._get_list_of_strategies_with_capital_including_total()
     for strategy_name in strategy_list:
         strategy_capital_data=data.arctic_capital.get_capital_pd_df_for_strategy(strategy_name)
+        parquet_data = data.parquet_capital.get_capital_pd_df_for_strategy(strategy_name)
+        if len(parquet_data)>strategy_capital_data:
+            data.log.warning("More parquet data, skipping")
+
         data.parquet_capital.update_capital_pd_df_for_strategy(strategy_name=strategy_name, updated_capital_df=strategy_capital_data)
         written_data = data.parquet_capital.get_capital_pd_df_for_strategy(strategy_name)
         print("Wrote capital data for strategy %s, was %s now %s" % (strategy_name, str(strategy_capital_data), str(written_data)))
@@ -392,17 +417,6 @@ def backup_capital(data):
     return strategy_capital_data
 
 
-def add_total_capital_to_strategy_capital_dict_return_df(
-    data: dataBlob, capital_data: dict
-) -> pd.DataFrame:
-
-    strategy_capital_as_df = pd.concat(capital_data, axis=1)
-    total_capital = data.arctic_capital.get_df_of_all_global_capital()
-    capital_data = pd.concat([strategy_capital_as_df, total_capital], axis=1)
-
-    capital_data = capital_data.ffill()
-
-    return capital_data
 
 
 def backup_optimal_positions(data):
