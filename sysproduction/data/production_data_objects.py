@@ -3,16 +3,22 @@ from sysdata.parquet.parquet_capital import parquetCapitalData
 from sysdata.parquet.parquet_futures_per_contract_prices import parquetFuturesContractPriceData
 from sysdata.parquet.parquet_multiple_prices import parquetFuturesMultiplePricesData
 from sysdata.parquet.parquet_spotfx_prices import parquetFxPricesData
+from sysdata.parquet.parquet_spreads import parquetSpreadsForInstrumentData
+from sysdata.parquet.parquet_optimal_positions import parquetOptimalPositionData
+from sysdata.parquet.parquet_historic_strategy_positions import parquetStrategyPositionData
+from sysdata.parquet.parquet_historic_contract_positions import parquetContractPositionData
 
+"""
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
 from sysdata.arctic.arctic_capital import arcticCapitalData
 from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
 from sysdata.arctic.arctic_multiple_prices import arcticFuturesMultiplePricesData
 from sysdata.arctic.arctic_spotfx_prices import arcticFxPricesData
-from sysdata.arctic.arctic_historic_contract_positions import arcticContractPositionData
-from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPositionData
 from sysdata.arctic.arctic_optimal_positions import arcticOptimalPositionData
 from sysdata.arctic.arctic_spreads import arcticSpreadsForInstrumentData
+from sysdata.arctic.arctic_historic_contract_positions import arcticContractPositionData
+from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPositionData
+"""
 
 
 from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
@@ -28,7 +34,7 @@ from sysdata.mongodb.mongo_historic_orders import (
     mongoBrokerHistoricOrdersData,
 )
 from sysdata.mongodb.mongo_roll_state_storage import mongoRollStateData
-
+from sysdata.mongodb.mongo_spread_costs import mongoSpreadCostData
 
 from sysdata.csv.csv_instrument_data import csvFuturesInstrumentData
 from sysdata.csv.csv_roll_parameters import csvRollParametersData
@@ -40,7 +46,8 @@ CAPITAL_DATA = "capital_data"
 CONTRACT_POSITION_DATA = "contract_position_data"
 STRATEGY_POSITION_DATA = "strategy_position_data"
 OPTIMAL_POSITION_DATA = "optimal_position_data"
-SPREAD_DATA = "spread_data"
+HISTORIC_SPREAD_DATA = "historic_spread_data"
+STORED_SPREAD_DATA ="stored_spread_data"
 FX_DATA = "fx_data"
 ROLL_PARAMETERS_DATA = "roll_parameters_data"
 FUTURES_CONTRACT_DATA = "futures_contract_data"
@@ -59,6 +66,7 @@ use_production_classes = {
     ROLL_PARAMETERS_DATA: csvRollParametersData,
     FUTURES_INSTRUMENT_DATA: csvFuturesInstrumentData,
     FUTURES_CONTRACT_DATA: mongoFuturesContractData,
+    STORED_SPREAD_DATA: mongoSpreadCostData,
 
     FUTURES_CONTRACT_PRICE_DATA: parquetFuturesContractPriceData,
     FUTURES_MULTIPLE_PRICE_DATA: parquetFuturesMultiplePricesData,
@@ -66,10 +74,10 @@ use_production_classes = {
 
     CAPITAL_DATA: parquetCapitalData,
 
-    CONTRACT_POSITION_DATA: arcticContractPositionData,
-    STRATEGY_POSITION_DATA: arcticStrategyPositionData,
-    OPTIMAL_POSITION_DATA: arcticOptimalPositionData,
-    SPREAD_DATA: arcticSpreadsForInstrumentData,
+    CONTRACT_POSITION_DATA: parquetContractPositionData,
+    STRATEGY_POSITION_DATA: parquetStrategyPositionData,
+    OPTIMAL_POSITION_DATA: parquetOptimalPositionData,
+    HISTORIC_SPREAD_DATA: parquetSpreadsForInstrumentData,
 
     STRATEGY_HISTORIC_ORDERS_DATA: mongoStrategyHistoricOrdersData,
     CONTRACT_HISTORIC_ORDERS_DATA: mongoContractHistoricOrdersData,
@@ -77,7 +85,7 @@ use_production_classes = {
 
     INSTRUMENT_ORDER_STACK_DATA: mongoInstrumentOrderStackData,
     CONTRACT_ORDER_STACK_DATA: mongoContractOrderStackData,
-    BROKER_HISTORIC_ORDERS_DATA: mongoBrokerOrderStackData,
+    BROKER_ORDER_STACK_DATA: mongoBrokerOrderStackData,
 
     ROLL_STATE_DATA: mongoRollStateData,
 
