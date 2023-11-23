@@ -23,7 +23,6 @@ from systems.provided.rob_system.run_system import futures_system
 
 
 class runSystemCarryTrendDynamic(runSystemClassic):
-
     # DO NOT CHANGE THE NAME OF THIS FUNCTION; IT IS HARDCODED INTO CONFIGURATION FILES
     # BECAUSE IT IS ALSO USED TO LOAD BACKTESTS
     def system_method(
@@ -56,7 +55,6 @@ def dynamic_system(
     notional_trading_capital: float = arg_not_supplied,
     base_currency: str = arg_not_supplied,
 ) -> System:
-
     sim_data = get_sim_data_object_for_production(data)
     config = Config(config_filename)
 
@@ -102,7 +100,6 @@ def updated_optimal_positions_for_dynamic_system(
 def construct_optimal_position_entry(
     data: dataBlob, system: System, instrument_code: str
 ) -> optimalPositionWithReference:
-
     diag_contracts = dataContracts(data)
 
     optimal_position = get_optimal_position_from_system(system, instrument_code)
@@ -122,7 +119,6 @@ def construct_optimal_position_entry(
 
 
 def get_optimal_position_from_system(system: System, instrument_code: str) -> float:
-
     optimal_position = system.portfolio.get_notional_position(instrument_code)
 
     return float(optimal_position.iloc[-1])
