@@ -86,7 +86,7 @@ class parquetFuturesContractPriceData(futuresContractPriceData):
         futures_price_data: futuresContractPrices,
         frequency: Frequency,
     ):
-        log = futures_contract_object.log(self.log)
+        log = futures_contract_object.specific_log(self.log)
         ident = from_contract_and_freq_to_key(
             futures_contract_object, frequency=frequency
         )
