@@ -53,8 +53,6 @@ class rollCalendar(pd.DataFrame):
             roll_parameters_object, dict_of_futures_contract_prices
         )
 
-        print(approx_calendar)
-        print(dict_of_futures_contract_prices)
         adjusted_calendar = adjust_to_price_series(
             approx_calendar, dict_of_futures_contract_prices
         )
