@@ -482,6 +482,8 @@ def _valid_dates_from_matching_prices(paired_prices_matching, avoid_date):
 
     if avoid_date is not None:
         # Remove matching dates before avoid dates
+        print(valid_dates)
+        print(avoid_date)
         valid_dates = valid_dates[valid_dates > avoid_date]
 
     return valid_dates
