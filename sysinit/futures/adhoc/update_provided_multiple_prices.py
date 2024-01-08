@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 from sysinit.futures.multiple_and_adjusted_from_csv_to_arctic import init_arctic_with_csv_prices_for_code
-from sysinit.futures.multipleprices_from_arcticprices_and_csv_calendars_to_arctic import \
+from sysinit.futures.multipleprices_from_db_prices_and_csv_calendars_to_db import \
     process_multiple_prices_single_instrument
 from sysinit.futures.rollcalendars_from_arcticprices_to_csv import build_and_write_roll_calendar
 from sysproduction.data.prices import get_valid_instrument_code_from_user
@@ -26,7 +26,7 @@ input("Review roll calendar, press Enter to continue")
 process_multiple_prices_single_instrument(instrument_code,
                                           csv_multiple_data_path=multiple_prices_from_arctic,
                                           csv_roll_data_path=roll_calendars_from_arctic,
-                                          ADD_TO_ARCTIC=False,
+                                          ADD_TO_DB=False,
                                           ADD_TO_CSV=True)
 input("Review multiple prices, press Enter to continue")
 
@@ -53,8 +53,8 @@ if first_generated == last_supplied:
 # check we're using the same price and forward contracts
 # (i.e. no rolls missing, which there shouldn't be if there is date overlap)
 try:
-    assert(supplied.iloc[-1].PRICE_CONTRACT == generated.loc[last_supplied:].iloc[0].PRICE_CONTRACT)
-    assert(supplied.iloc[-1].FORWARD_CONTRACT == generated.loc[last_supplied:].iloc[0].FORWARD_CONTRACT)
+    assert (supplied.iloc[-1].PRICE_CONTRACT == generated.loc[last_supplied:].iloc[0].PRICE_CONTRACT)
+    assert (supplied.iloc[-1].FORWARD_CONTRACT == generated.loc[last_supplied:].iloc[0].FORWARD_CONTRACT)
 except AssertionError as e:
     print(supplied)
     print(generated)
