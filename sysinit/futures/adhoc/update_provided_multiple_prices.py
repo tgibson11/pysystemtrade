@@ -7,32 +7,32 @@ from sysinit.futures.multipleprices_from_db_prices_and_csv_calendars_to_db impor
 from sysinit.futures.rollcalendars_from_arcticprices_to_csv import build_and_write_roll_calendar
 from sysproduction.data.prices import get_valid_instrument_code_from_user
 
-roll_calendars_from_arctic = os.path.join(os.sep, 'home', 'todd', 'data', 'futures', 'roll_calendars_from_arctic')
-if not os.path.exists(roll_calendars_from_arctic):
-    os.makedirs(roll_calendars_from_arctic)
+roll_calendars_from_db = os.path.join(os.sep, 'home', 'todd', 'data', 'futures', 'roll_calendars_from_db')
+if not os.path.exists(roll_calendars_from_db):
+    os.makedirs(roll_calendars_from_db)
 
-multiple_prices_from_arctic = os.path.join(os.sep, 'home', 'todd', 'data', 'futures', 'multiple_from_arctic')
-if not os.path.exists(multiple_prices_from_arctic):
-    os.makedirs(multiple_prices_from_arctic)
+multiple_prices_from_db = os.path.join(os.sep, 'home', 'todd', 'data', 'futures', 'multiple_from_db')
+if not os.path.exists(multiple_prices_from_db):
+    os.makedirs(multiple_prices_from_db)
 
 spliced_multiple_prices = os.path.join(os.sep, 'home', 'todd', 'data', 'futures', 'multiple_prices_csv_spliced')
 if not os.path.exists(spliced_multiple_prices):
     os.makedirs(spliced_multiple_prices)
 
 instrument_code = get_valid_instrument_code_from_user(source="multiple")
-build_and_write_roll_calendar(instrument_code, output_datapath=roll_calendars_from_arctic)
+build_and_write_roll_calendar(instrument_code, output_datapath=roll_calendars_from_db)
 input("Review roll calendar, press Enter to continue")
 
 process_multiple_prices_single_instrument(instrument_code,
-                                          csv_multiple_data_path=multiple_prices_from_arctic,
-                                          csv_roll_data_path=roll_calendars_from_arctic,
+                                          csv_multiple_data_path=multiple_prices_from_db,
+                                          csv_roll_data_path=roll_calendars_from_db,
                                           ADD_TO_DB=False,
                                           ADD_TO_CSV=True)
 input("Review multiple prices, press Enter to continue")
 
 supplied_file = os.path.join(os.sep, 'home', 'todd', 'pysystemtrade', 'data', 'futures', 'multiple_prices_csv',
                              instrument_code + '.csv')  # repo data
-generated_file = os.path.join(multiple_prices_from_arctic, instrument_code + '.csv')
+generated_file = os.path.join(multiple_prices_from_db, instrument_code + '.csv')
 
 supplied = pd.read_csv(supplied_file, index_col=0, parse_dates=True)
 generated = pd.read_csv(generated_file, index_col=0, parse_dates=True)
