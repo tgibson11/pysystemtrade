@@ -277,9 +277,6 @@ def _adjust_row_of_approx_roll_calendar(
         _print_roll_date_error(local_row_data)
         return _bad_row
     try:
-        print(roll_date)
-        print(set_of_prices)
-        print(date_to_avoid)
         adjusted_roll_date = _find_best_matching_roll_date(
             roll_date,
             set_of_prices,
@@ -465,6 +462,7 @@ def _required_paired_prices(set_of_prices: setOfPrices) -> pd.DataFrame:
 
 def _valid_dates_from_paired_prices(paired_prices: pd.DataFrame, avoid_date):
     paired_prices_matching = _matching_prices_from_paired_prices(paired_prices)
+    print(paired_prices_matching)
     valid_dates = _valid_dates_from_matching_prices(paired_prices_matching, avoid_date)
 
     return valid_dates
