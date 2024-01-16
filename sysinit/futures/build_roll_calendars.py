@@ -188,6 +188,7 @@ def adjust_to_price_series(
 
     adjusted_roll_calendar_as_list = _listOfRollCalendarRows()
     idx_of_last_row_in_data = len(approx_calendar.index) - 1
+    print(idx_of_last_row_in_data)
 
     for row_number in range(len(approx_calendar.index)):
         local_row_data = _get_local_data_for_row_number(
@@ -480,7 +481,7 @@ def _valid_dates_from_matching_prices(paired_prices_matching, avoid_date):
     valid_dates = paired_prices_matching.index
     valid_dates.sort_values()
 
-    if avoid_date is not None and not valid_dates.empty:
+    if avoid_date is not None:
         # Remove matching dates before avoid dates
         valid_dates = valid_dates[valid_dates > avoid_date]
 
