@@ -196,7 +196,6 @@ def adjust_to_price_series(
         if local_row_data is _last_row:
             break
 
-        print(local_row_data)
         adjusted_row = _adjust_row_of_approx_roll_calendar(
             local_row_data, dict_of_futures_contract_prices
         )
@@ -278,6 +277,9 @@ def _adjust_row_of_approx_roll_calendar(
         _print_roll_date_error(local_row_data)
         return _bad_row
     try:
+        print(roll_date)
+        print(set_of_prices)
+        print(date_to_avoid)
         adjusted_roll_date = _find_best_matching_roll_date(
             roll_date,
             set_of_prices,
