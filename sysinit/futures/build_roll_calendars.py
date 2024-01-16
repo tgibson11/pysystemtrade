@@ -188,7 +188,6 @@ def adjust_to_price_series(
 
     adjusted_roll_calendar_as_list = _listOfRollCalendarRows()
     idx_of_last_row_in_data = len(approx_calendar.index) - 1
-    print(idx_of_last_row_in_data)
 
     for row_number in range(len(approx_calendar.index)):
         local_row_data = _get_local_data_for_row_number(
@@ -197,6 +196,7 @@ def adjust_to_price_series(
         if local_row_data is _last_row:
             break
 
+        print(local_row_data)
         adjusted_row = _adjust_row_of_approx_roll_calendar(
             local_row_data, dict_of_futures_contract_prices
         )
