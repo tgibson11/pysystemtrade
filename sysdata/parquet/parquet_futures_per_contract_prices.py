@@ -67,7 +67,7 @@ class parquetFuturesContractPriceData(futuresContractPriceData):
     ):
         """
         Write prices
-        CHECK prices are overriden on second write
+        CHECK prices are overridden on second write
 
         :param futures_contract_object: futuresContract
         :param futures_price_data: futuresContractPriceData
@@ -104,7 +104,9 @@ class parquetFuturesContractPriceData(futuresContractPriceData):
                 str(futures_contract_object.key),
                 str(frequency),
                 str(self),
-            )
+            ),
+            **futures_contract_object.log_attributes(),
+            method="temp",
         )
 
     def get_contracts_with_merged_price_data(self) -> listOfFuturesContracts:
@@ -194,7 +196,9 @@ class parquetFuturesContractPriceData(futuresContractPriceData):
         )
         self.log.debug(
             "Deleted all prices for %s from %s"
-            % (futures_contract_object.key, str(self))
+            % (futures_contract_object.key, str(self)),
+            **futures_contract_object.log_attributes(),
+            method="temp",
         )
 
 
