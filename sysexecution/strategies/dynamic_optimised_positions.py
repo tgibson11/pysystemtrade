@@ -204,7 +204,6 @@ def get_data_for_objective_instance(
     raw_optimal_position_data: dict,
 ) -> dataForObjectiveInstance:
     list_of_instruments = list(raw_optimal_position_data.keys())
-    print(list_of_instruments)
     data.log.debug("Getting data for optimisation")
 
     previous_positions_as_weights_object = portfolioWeights(previous_positions)
