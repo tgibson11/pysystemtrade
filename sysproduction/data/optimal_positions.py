@@ -51,10 +51,7 @@ class dataOptimalPositions(productionDataLayerGeneric):
             use_strategy_name
         )
 
-        stale_instruments = get_list_of_stale_instruments()
-        non_stale_instruments = [instr for instr in list_of_instruments if instr not in stale_instruments]
-
-        return non_stale_instruments
+        return list_of_instruments
 
     def get_list_of_strategies_with_optimal_position(self) -> list:
         list_of_strategies = (
@@ -155,9 +152,6 @@ class dataOptimalPositions(productionDataLayerGeneric):
     @property
     def db_optimal_position_data(self) -> optimalPositionData:
         return self.data.db_optimal_position
-
-    def delete_optimal_positions_for_instrument(self, instrument_code):
-        self.db_optimal_position_data.delete_optimal_positions_for_instrument(instrument_code)
 
 
 POST_TAG_FOR_RAW_OPTIMAL_POSITION = "_raw"
