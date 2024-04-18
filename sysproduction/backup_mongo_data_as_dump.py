@@ -26,8 +26,8 @@ class backupMongo(object):
         log = data.log
         log.debug("Exporting mongo data")
         dump_mongo_data(data)
-        # log.debug("Copying data to backup destination")
-        # backup_mongo_dump(data)
+        log.debug("Copying data to backup destination")
+        backup_mongo_dump(data)
 
 
 def dump_mongo_data(data: dataBlob):
