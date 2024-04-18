@@ -19,7 +19,6 @@ from syscore.interactive.display import (
 )
 
 from sysdata.data_blob import dataBlob
-from sysdata.futures.contracts import ContractNotFound
 
 
 from sysobjects.contracts import futuresContract
