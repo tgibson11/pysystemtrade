@@ -432,7 +432,8 @@ def auto_selected_roll_state_instrument(
     )
     if roll_state_required == ASK_FOR_STATE:
         print("Have to input roll state (recommend Force, Force_Outright or Close)")
-        roll_state_required = get_roll_state_required(roll_data)
+        current_state = roll_data.original_roll_status.name
+        roll_state_required = get_roll_state_required(roll_data, default_state=current_state)
 
     original_roll_status = roll_data.original_roll_status
     if original_roll_status == roll_state_required:
