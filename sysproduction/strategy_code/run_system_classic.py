@@ -24,10 +24,10 @@ from sysproduction.data.currency_data import dataCurrency
 from sysproduction.data.capital import dataCapital
 from sysproduction.data.contracts import dataContracts
 from sysproduction.data.optimal_positions import dataOptimalPositions
+from sysproduction.data.reports import dataReports
 from sysproduction.data.sim_data import get_sim_data_object_for_production
 
 from sysproduction.data.backtest import store_backtest_state
-from sysproduction.reporting.report_configs import strategy_report_config
 from sysproduction.reporting.reporting_functions import parse_report_results, output_report, pandas_display_for_reports
 from sysproduction.reporting.strategies_report import get_output_for_system_object as get_report_for_system_object
 
@@ -73,8 +73,14 @@ class runSystemClassic(object):
 
         # I only need the backtest for the strategy report, so just run it now instead
         report_results = get_report_for_system_object(data=data, strategy_name=strategy_name, system=system)
+
         pandas_display_for_reports()
         parsed_report = parse_report_results(data=data, report_results=report_results)
+
+        data_reports = dataReports(data)
+        all_report_configs = data_reports.get_report_configs_to_run()
+        strategy_report_config = all_report_configs.get("strategy_report")
+
         output_report(parsed_report=parsed_report, report_config=strategy_report_config, data=data)
 
     ## MODIFY THIS WHEN INHERITING FOR A DIFFERENT STRATEGY
