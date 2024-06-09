@@ -1,0 +1,2 @@
+#!/bin/bash
+less ~/data/reports/'P&L_report' ~/data/reports/Reconcile_report ~/data/reports/Status_report

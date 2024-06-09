@@ -1,3 +1,4 @@
+#!/bin/bash
 # git pull within git controlled private directory copy
 cd ~/private/
 # stash local changes (passwords in private_config.yaml)
