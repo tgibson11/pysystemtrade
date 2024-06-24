@@ -1,4 +1,4 @@
-from syscore.exceptions import missingData, missingContract
+from syscore.exceptions import missingData
 from sysexecution.stack_handler.stackHandlerCore import stackHandlerCore
 from sysobjects.contracts import futuresContract
 
@@ -53,9 +53,7 @@ class stackHandlerAdditionalSampling(stackHandlerCore):
     def refresh_sampling_without_checks(self, contract: futuresContract):
         try:
             average_spread = self.get_average_spread(contract)
-        except (missingData, missingContract):
-            # Not sure why we sometimes get missingContract here (seems like IB issue)
-            # Don't crash the stack handler just because we couldn't collect some spread data
+        except missingData:
             pass
         else:
             self.add_spread_data_to_db(contract, average_spread)
