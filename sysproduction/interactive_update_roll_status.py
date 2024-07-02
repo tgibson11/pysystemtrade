@@ -443,6 +443,7 @@ def auto_selected_roll_state_instrument(
         )
         return no_change_required
 
+    # FIXME this is printed erroneously when ASK_FOR_STATE & default (no change) is chosen
     print_with_landing_strips_around(
         "Automatically changing state from %s to %s for %s"
         % (original_roll_status, roll_state_required, roll_data.instrument_code)
@@ -473,6 +474,11 @@ def suggest_roll_state_for_instrument(
     if forward_liquid:
         if no_position_held:
             ## liquid forward, with no position
+            if roll_data.original_roll_status == RollState.No_Roll:
+                # Edge case: current contract may have open orders if state is No_Roll
+                # Switch to passive to allow any orders to be handled, then
+                # roll next time (if still no position)
+                return RollState.Passive
             return RollState.Roll_Adjusted
         else:
             ## liquid forward, with position held
