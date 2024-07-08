@@ -443,7 +443,6 @@ def auto_selected_roll_state_instrument(
         )
         return no_change_required
 
-    # FIXME this is printed erroneously when ASK_FOR_STATE & default (no change) is chosen
     print_with_landing_strips_around(
         "Automatically changing state from %s to %s for %s"
         % (original_roll_status, roll_state_required, roll_data.instrument_code)
@@ -638,7 +637,7 @@ def get_roll_state_required(
             )
             print("")
             if okay_to_change is None:
-                return no_change_required
+                return roll_data.original_roll_status
 
             if okay_to_change:
                 # happy
@@ -649,7 +648,7 @@ def get_roll_state_required(
                 continue
         else:
             print("No change")
-            return no_change_required
+            return roll_data.original_roll_status
 
 
 def setup_roll_data_with_state_reporting(
@@ -704,10 +703,7 @@ def modify_roll_state(
     roll_state_required: RollState,
     confirm_adjusted_price_change: bool = True,
 ):
-    roll_state_is_unchanged = (roll_state_required is no_change_required) or (
-        roll_state_required is original_roll_state
-    )
-    if roll_state_is_unchanged:
+    if roll_state_required == original_roll_state:
         return
 
     if original_roll_state is no_open_state:
