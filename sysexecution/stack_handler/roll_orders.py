@@ -85,6 +85,7 @@ class stackHandlerForRolls(stackHandlerCore):
             return False
 
         safe_to_roll = self.check_if_safe_to_add_roll_order(instrument_code)
+
         if not safe_to_roll:
             return False
 
