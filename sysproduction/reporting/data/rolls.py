@@ -5,7 +5,6 @@ import pandas as pd
 
 from syscore.constants import success, failure
 from sysdata.data_blob import dataBlob
-from sysdata.futures.contracts import ContractNotFound
 from sysobjects.adjusted_prices import futuresAdjustedPrices
 from sysobjects.contracts import futuresContract
 from sysobjects.dict_of_named_futures_per_contract_prices import (
