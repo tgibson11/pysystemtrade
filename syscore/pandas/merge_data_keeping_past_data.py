@@ -204,18 +204,16 @@ def _find_first_spike_in_data(
     data_to_check = _get_data_to_check(
         merged_data, column_to_check_for_spike=column_to_check_for_spike
     )
-    change_in_vol_normalised_units = _calculate_change_in_vol_normalised_units(
-        data_to_check
-    )
-    relevant_change_in_vol_normalised_units = (
-        _get_relevant_period_in_vol_normalised_units_to_check(
-            change_in_vol_normalised_units=change_in_vol_normalised_units,
+    change = _calculate_change_in_fractional_units(data_to_check)
+    relevant_change = (
+        _get_relevant_period_to_check(
+            change=change,
             date_of_merge_join=date_of_merge_join,
         )
     )
 
-    first_spike = _check_for_spikes_in_change_in_vol_normalised_units(
-        relevant_change_in_vol_normalised_units=relevant_change_in_vol_normalised_units,
+    first_spike = _check_for_spikes_in_change(
+        relevant_change=relevant_change,
         max_spike=max_spike,
     )
 
@@ -256,7 +254,17 @@ def _calculate_change_in_vol_normalised_units(data_to_check: pd.Series) -> pd.Se
     return change_in_vol_normalised_units
 
 
-def _calculate_change_in_daily_units(data_to_check: pd.Series) -> pd.Series:
+def _calculate_change_in_fractional_units(data_to_check: pd.Series) -> pd.Series:
+    # Calculate the average change per day
+    fractional_change_per_day = _calculate_change_in_daily_units(data_to_check, pct_diff=True)
+
+    # absolute is what matters
+    abs_fractional_change_per_day = fractional_change_per_day.abs()
+
+    return abs_fractional_change_per_day
+
+
+def _calculate_change_in_daily_units(data_to_check: pd.Series, pct_diff: bool = False) -> pd.Series:
     """
     Calculate the average change in daily units asssuming brownian motion
      for example, a change of 0.5 over half a day would be equal to a change of 0.5/sqrt(0.5) = 0.7 over a day
@@ -272,7 +280,11 @@ def _calculate_change_in_daily_units(data_to_check: pd.Series) -> pd.Series:
     2000-01-06 02:00:00    34.292856
     dtype: float64
     """
-    data_diff = data_to_check.diff()[1:]
+    if pct_diff:
+        data_diff = data_to_check.pct_change()[1:]
+    else:
+        data_diff = data_to_check.diff()[1:]
+
     index_diff = data_to_check.index[1:] - data_to_check.index[:-1]
     index_diff_days = [diff.total_seconds() / SECONDS_PER_DAY for diff in index_diff]
 
@@ -288,29 +300,29 @@ def _calculate_change_in_daily_units(data_to_check: pd.Series) -> pd.Series:
     return change_in_daily_units
 
 
-def _get_relevant_period_in_vol_normalised_units_to_check(
-    change_in_vol_normalised_units: pd.Series,
+def _get_relevant_period_to_check(
+    change: pd.Series,
     date_of_merge_join: Union[datetime.datetime, named_object] = NO_MERGE_DATE,
 ):
     if date_of_merge_join is NO_MERGE_DATE:
         # No merged data so we check it all
-        relevant_change_in_vol_normalised_units = change_in_vol_normalised_units
+        relevant_change = change
     else:
         # just check more recent data
-        relevant_change_in_vol_normalised_units = change_in_vol_normalised_units[
+        relevant_change = change[
             date_of_merge_join:
         ]
 
-    return relevant_change_in_vol_normalised_units
+    return relevant_change
 
 
-def _check_for_spikes_in_change_in_vol_normalised_units(
-    relevant_change_in_vol_normalised_units: pd.Series,
+def _check_for_spikes_in_change(
+    relevant_change: pd.Series,
     max_spike: float = VERY_BIG_NUMBER,
 ) -> Union[datetime.datetime, named_object]:
-    if any(relevant_change_in_vol_normalised_units > max_spike):
-        first_spike = relevant_change_in_vol_normalised_units.index[
-            relevant_change_in_vol_normalised_units > max_spike
+    if any(relevant_change > max_spike):
+        first_spike = relevant_change.index[
+            relevant_change > max_spike
         ][0]
     else:
         first_spike = NO_SPIKE
