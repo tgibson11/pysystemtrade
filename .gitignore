@@ -28,7 +28,3 @@ venv*/
 
 # libreoffice
 .~lock.*
-
-# logs
-*.log
-
