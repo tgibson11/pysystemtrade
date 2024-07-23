@@ -18,6 +18,8 @@ We kick them all off in the crontab at a specific time (midnight is easiest), bu
 """
 import time
 import sys
+import traceback
+
 from syscontrol.report_process_status import reportProcessStatus
 from syscore.constants import success
 
@@ -108,7 +110,7 @@ class processToRun(object):
             self._finish()
         except Exception:
             subject = f"Process {self.process_name} failed"
-            body = "See log for details"
+            body = traceback.format_exc()
             send_production_mail_msg(self.data, body, subject)
             raise
 
