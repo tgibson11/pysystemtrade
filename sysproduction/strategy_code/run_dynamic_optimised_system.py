@@ -56,17 +56,17 @@ def dynamic_system(
     base_currency: str = arg_not_supplied,
 ) -> System:
     sim_data = get_sim_data_object_for_production(data)
-    config = Config(config_filename)
+
+
+    system = futures_system(sim_data=sim_data, config_filename=config_filename)
+    system._log = log
 
     # Overwrite capital and base currency
     if notional_trading_capital is not arg_not_supplied:
-        config.notional_trading_capital = notional_trading_capital
+        system.config.notional_trading_capital = notional_trading_capital
 
     if base_currency is not arg_not_supplied:
-        config.base_currency = base_currency
-
-    system = futures_system(sim_data=sim_data, config=config)
-    system._log = log
+        system.config.base_currency = base_currency
 
     return system
 
