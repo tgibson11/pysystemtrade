@@ -204,16 +204,18 @@ def _find_first_spike_in_data(
     data_to_check = _get_data_to_check(
         merged_data, column_to_check_for_spike=column_to_check_for_spike
     )
-    change = _calculate_change_in_fractional_units(data_to_check)
-    relevant_change = (
-        _get_relevant_period_to_check(
-            change=change,
+    change_in_vol_normalised_units = _calculate_change_in_vol_normalised_units(
+        data_to_check
+    )
+    relevant_change_in_vol_normalised_units = (
+        _get_relevant_period_in_vol_normalised_units_to_check(
+            change_in_vol_normalised_units=change_in_vol_normalised_units,
             date_of_merge_join=date_of_merge_join,
         )
     )
 
-    first_spike = _check_for_spikes_in_change(
-        relevant_change=relevant_change,
+    first_spike = _check_for_spikes_in_change_in_vol_normalised_units(
+        relevant_change_in_vol_normalised_units=relevant_change_in_vol_normalised_units,
         max_spike=max_spike,
     )
 
@@ -300,29 +302,29 @@ def _calculate_change_in_daily_units(data_to_check: pd.Series, pct_diff: bool = 
     return change_in_daily_units
 
 
-def _get_relevant_period_to_check(
-    change: pd.Series,
+def _get_relevant_period_in_vol_normalised_units_to_check(
+    change_in_vol_normalised_units: pd.Series,
     date_of_merge_join: Union[datetime.datetime, named_object] = NO_MERGE_DATE,
 ):
     if date_of_merge_join is NO_MERGE_DATE:
         # No merged data so we check it all
-        relevant_change = change
+        relevant_change_in_vol_normalised_units = change_in_vol_normalised_units
     else:
         # just check more recent data
-        relevant_change = change[
+        relevant_change_in_vol_normalised_units = change_in_vol_normalised_units[
             date_of_merge_join:
         ]
 
-    return relevant_change
+    return relevant_change_in_vol_normalised_units
 
 
-def _check_for_spikes_in_change(
-    relevant_change: pd.Series,
+def _check_for_spikes_in_change_in_vol_normalised_units(
+    relevant_change_in_vol_normalised_units: pd.Series,
     max_spike: float = VERY_BIG_NUMBER,
 ) -> Union[datetime.datetime, named_object]:
-    if any(relevant_change > max_spike):
-        first_spike = relevant_change.index[
-            relevant_change > max_spike
+    if any(relevant_change_in_vol_normalised_units > max_spike):
+        first_spike = relevant_change_in_vol_normalised_units.index[
+            relevant_change_in_vol_normalised_units > max_spike
         ][0]
     else:
         first_spike = NO_SPIKE
