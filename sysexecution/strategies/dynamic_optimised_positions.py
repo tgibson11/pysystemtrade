@@ -110,7 +110,6 @@ class orderGeneratorForDynamicPositions(orderGeneratorForStrategy):
         list_of_instruments = optimal_position_data.get_list_of_instruments_for_strategy_with_optimal_position(
             strategy_name, raw_positions=True
         )
-        print(list_of_instruments)
 
         list_of_instrument_strategies = [
             instrumentStrategy(
