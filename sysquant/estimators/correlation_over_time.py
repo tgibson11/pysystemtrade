@@ -16,6 +16,7 @@ def correlation_over_time_for_returns(
     if forward_fill_price_index:
         index_prices_for_correlation = index_prices_for_correlation.ffill()
 
+    print(index_prices_for_correlation)
     index_prices_for_correlation = index_prices_for_correlation.resample(
         frequency
     ).last()
