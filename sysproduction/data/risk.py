@@ -67,7 +67,6 @@ def _replicate_creation_of_correlation_list_in_sim(
 ):
     ## double coding but too complex to do differently
 
-    print(list_of_instruments)
     returns_as_pd = get_perc_returns_across_instruments(data, list_of_instruments)
     corr_func, correlation_estimation_parameters = get_corr_params_and_func(
         data,

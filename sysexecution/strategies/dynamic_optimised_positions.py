@@ -203,6 +203,7 @@ def get_data_for_objective_instance(
     previous_positions: dict,
     raw_optimal_position_data: dict,
 ) -> dataForObjectiveInstance:
+    print(raw_optimal_position_data.keys())
     list_of_instruments = list(raw_optimal_position_data.keys())
     data.log.debug("Getting data for optimisation")
 
