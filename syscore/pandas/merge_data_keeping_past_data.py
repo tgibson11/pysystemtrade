@@ -256,17 +256,7 @@ def _calculate_change_in_vol_normalised_units(data_to_check: pd.Series) -> pd.Se
     return change_in_vol_normalised_units
 
 
-def _calculate_change_in_fractional_units(data_to_check: pd.Series) -> pd.Series:
-    # Calculate the average change per day
-    fractional_change_per_day = _calculate_change_in_daily_units(data_to_check, pct_diff=True)
-
-    # absolute is what matters
-    abs_fractional_change_per_day = fractional_change_per_day.abs()
-
-    return abs_fractional_change_per_day
-
-
-def _calculate_change_in_daily_units(data_to_check: pd.Series, pct_diff: bool = False) -> pd.Series:
+def _calculate_change_in_daily_units(data_to_check: pd.Series) -> pd.Series:
     """
     Calculate the average change in daily units asssuming brownian motion
      for example, a change of 0.5 over half a day would be equal to a change of 0.5/sqrt(0.5) = 0.7 over a day
@@ -282,11 +272,7 @@ def _calculate_change_in_daily_units(data_to_check: pd.Series, pct_diff: bool = 
     2000-01-06 02:00:00    34.292856
     dtype: float64
     """
-    if pct_diff:
-        data_diff = data_to_check.pct_change()[1:]
-    else:
-        data_diff = data_to_check.diff()[1:]
-
+    data_diff = data_to_check.diff()[1:]
     index_diff = data_to_check.index[1:] - data_to_check.index[:-1]
     index_diff_days = [diff.total_seconds() / SECONDS_PER_DAY for diff in index_diff]
 
