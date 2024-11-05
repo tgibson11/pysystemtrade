@@ -82,9 +82,7 @@ class orderGeneratorForDynamicPositions(orderGeneratorForStrategy):
     def calculate_write_and_return_optimised_positions_data(self) -> dict:
         ## We bring in
         previous_positions = self.get_actual_positions_for_strategy()
-        print(f"previous_positions = {previous_positions}")
         raw_optimal_position_data = self.get_raw_optimal_position_data()
-        print(f"raw_optimal_position_data = {raw_optimal_position_data}")
 
         data = self.data
         strategy_name = self.strategy_name
@@ -95,7 +93,6 @@ class orderGeneratorForDynamicPositions(orderGeneratorForStrategy):
             previous_positions=previous_positions,
             raw_optimal_position_data=raw_optimal_position_data,
         )
-        print(f"optimised_positions_data = {optimised_positions_data}")
 
         self.write_optimised_positions_data(optimised_positions_data)
 
@@ -155,6 +152,7 @@ def calculate_optimised_positions_data(
         previous_positions=previous_positions,
         raw_optimal_position_data=raw_optimal_position_data,
     )
+    print(f"data_for_objective = {data_for_objective}")
 
     objective_function = get_objective_instance(
         data=data, data_for_objective=data_for_objective
