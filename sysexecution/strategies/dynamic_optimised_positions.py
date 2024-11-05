@@ -549,11 +549,15 @@ def get_optimised_positions_data_dict_given_optimisation(
     objective_function: objectiveFunctionForGreedy,
 ) -> dict:
     optimised_positions = objective_function.optimise_positions()
+    print(f"optimised_positions = {optimised_positions}")
+
     optimised_positions = optimised_positions.replace_weights_with_ints()
+    print(f"optimised_positions = {optimised_positions}")
 
     optimised_position_weights = get_weights_given_positions(
         optimised_positions, per_contract_value=data_for_objective.per_contract_value
     )
+    print(f"optimised_position_weights = {optimised_position_weights}")
     instrument_list: List[str] = objective_function.keys_with_valid_data
     print(f"instrument_list = {instrument_list}")
 
