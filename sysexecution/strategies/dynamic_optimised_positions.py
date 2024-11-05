@@ -152,7 +152,6 @@ def calculate_optimised_positions_data(
         previous_positions=previous_positions,
         raw_optimal_position_data=raw_optimal_position_data,
     )
-    print(f"data_for_objective = {data_for_objective}")
 
     objective_function = get_objective_instance(
         data=data, data_for_objective=data_for_objective
@@ -556,6 +555,7 @@ def get_optimised_positions_data_dict_given_optimisation(
         optimised_positions, per_contract_value=data_for_objective.per_contract_value
     )
     instrument_list: List[str] = objective_function.keys_with_valid_data
+    print(f"instrument_list = {instrument_list}")
 
     minima_weights = portfolioWeights.from_weights_and_keys(
         list_of_keys=instrument_list,
