@@ -237,11 +237,8 @@ class dataForOptimisation(object):
     @property
     def _keys_with_valid_data(self) -> list:
         valid_correlation_keys = self.covariance_matrix.assets_with_data()
-        print(f"valid_correlation_keys = {valid_correlation_keys}")
         valid_optimal_weight_keys = self.weights_optimal.assets_with_data()
-        print(f"valid_optimal_weight_keys = {valid_correlation_keys}")
         valid_per_contract_keys = self.per_contract_value.assets_with_data()
-        print(f"valid_per_contract_keys = {valid_correlation_keys}")
 
         valid_correlation_keys_set = set(valid_correlation_keys)
         valid_optimal_weight_keys_set = set(valid_optimal_weight_keys)
