@@ -122,18 +122,9 @@ def get_current_daily_perc_stdev_for_instrument(data, instrument_code) -> float:
 def get_daily_ts_stdev_perc_of_prices(data, instrument_code: str) -> pd.Series:
     ## 100 scaled
     denom_price = get_daily_current_price_series_for_risk(data, instrument_code)
-    if instrument_code == 'SGX':
-        print(f"denom_price = {denom_price}")
     return_vol = get_daily_ts_stdev_of_prices(data, instrument_code)
-    if instrument_code == 'SGX':
-        print(f"return_vol = {return_vol}")
     (denom_price, return_vol) = denom_price.align(return_vol, join="right")
-    if instrument_code == 'SGX':
-        print(f"denom_price = {denom_price}")
-        print(f"return_vol = {return_vol}")
     perc_vol = return_vol / denom_price.ffill()
-    if instrument_code == 'SGX':
-        print(f"perc_vol = {perc_vol}")
 
     return perc_vol
 
@@ -187,6 +178,8 @@ def get_ann_ts_stdev_of_prices(data, instrument_code):
 
 def get_daily_ts_stdev_of_prices(data, instrument_code):
     dailyreturns = get_daily_returns_for_risk(data, instrument_code)
+    if instrument_code == 'SGX':
+        print(f"dailyreturns = {dailyreturns}")
     volconfig = copy(vol_config(data))
 
     # volconfig contains 'func' and some other arguments
@@ -195,6 +188,8 @@ def get_daily_ts_stdev_of_prices(data, instrument_code):
 
     volfunction = resolve_function(volconfig.pop("func"))
     vol = volfunction(dailyreturns, **volconfig)
+    if instrument_code == 'SGX':
+        print(f"dailyreturns = {dailyreturns}")
 
     return vol
 
