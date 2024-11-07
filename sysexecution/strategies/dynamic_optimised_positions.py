@@ -466,13 +466,17 @@ def get_covariance_matrix_for_instrument_returns_for_optimisation(
     corr_matrix = get_correlation_matrix_for_instrument_returns(
         data, list_of_instruments
     )
+    print(f"corr_matrix = {corr_matrix}")
 
     stdev_estimate = get_annualised_stdev_perc_of_instruments(
         data, instrument_list=list_of_instruments
     )
+    print(f"stdev_estimate = {stdev_estimate}")
+
     covariance = covariance_from_stdev_and_correlation(
         stdev_estimate=stdev_estimate, correlation_estimate=corr_matrix
     )
+    print(f"covariance = {covariance}")
 
     return covariance
 
