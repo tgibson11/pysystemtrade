@@ -178,8 +178,6 @@ def get_ann_ts_stdev_of_prices(data, instrument_code):
 
 def get_daily_ts_stdev_of_prices(data, instrument_code):
     dailyreturns = get_daily_returns_for_risk(data, instrument_code)
-    if instrument_code == 'SGX':
-        print(f"dailyreturns = {dailyreturns}")
     volconfig = copy(vol_config(data))
 
     # volconfig contains 'func' and some other arguments
@@ -188,8 +186,6 @@ def get_daily_ts_stdev_of_prices(data, instrument_code):
 
     volfunction = resolve_function(volconfig.pop("func"))
     vol = volfunction(dailyreturns, **volconfig)
-    if instrument_code == 'SGX':
-        print(f"dailyreturns = {dailyreturns}")
 
     return vol
 

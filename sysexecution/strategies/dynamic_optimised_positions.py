@@ -470,7 +470,6 @@ def get_covariance_matrix_for_instrument_returns_for_optimisation(
     stdev_estimate = get_annualised_stdev_perc_of_instruments(
         data, instrument_list=list_of_instruments
     )
-
     covariance = covariance_from_stdev_and_correlation(
         stdev_estimate=stdev_estimate, correlation_estimate=corr_matrix
     )
@@ -550,7 +549,6 @@ def get_optimised_positions_data_dict_given_optimisation(
     objective_function: objectiveFunctionForGreedy,
 ) -> dict:
     optimised_positions = objective_function.optimise_positions()
-
     optimised_positions = optimised_positions.replace_weights_with_ints()
 
     optimised_position_weights = get_weights_given_positions(
