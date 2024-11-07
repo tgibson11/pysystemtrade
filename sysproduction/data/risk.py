@@ -122,9 +122,14 @@ def get_current_daily_perc_stdev_for_instrument(data, instrument_code) -> float:
 def get_daily_ts_stdev_perc_of_prices(data, instrument_code: str) -> pd.Series:
     ## 100 scaled
     denom_price = get_daily_current_price_series_for_risk(data, instrument_code)
+    print(f"denom_price = {denom_price}")
     return_vol = get_daily_ts_stdev_of_prices(data, instrument_code)
+    print(f"return_vol = {return_vol}")
     (denom_price, return_vol) = denom_price.align(return_vol, join="right")
+    print(f"denom_price = {denom_price}")
+    print(f"return_vol = {return_vol}")
     perc_vol = return_vol / denom_price.ffill()
+    print(f"perc_vol = {perc_vol}")
 
     return perc_vol
 
