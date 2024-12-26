@@ -46,7 +46,8 @@ def backup_mongo_dump(data):
     source_path = get_mongo_dump_directory()
     destination_path = get_mongo_backup_directory()
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
-    os.system("rsync -av %s %s" % (source_path, destination_path))
+    # os.system("rsync -av %s %s" % (source_path, destination_path))
+    os.system("robocopy %s %s /XO /fp" % (source_path, destination_path))
 
 
 if __name__ == "__main__":
