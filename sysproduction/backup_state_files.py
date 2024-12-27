@@ -30,7 +30,7 @@ def backup_state_files_with_data_object(data):
     destination_path = get_statefile_backup_directory()
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
     # os.system("rsync -av %s %s" % (source_path, destination_path))
-    os.system("robocopy %s %s /XO /fp" % (source_path, destination_path))
+    os.system("robocopy %s %s /MIR" % (source_path, destination_path))
 
 
 if __name__ == "__main__":

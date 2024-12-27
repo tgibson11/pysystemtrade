@@ -35,10 +35,11 @@ def dump_mongo_data(data: dataBlob):
     host = config.get_element_or_arg_not_supplied("mongo_host")
     path = get_mongo_dump_directory()
     data.log.debug("Dumping mongo data to %s NOT TESTED IN WINDOWS" % path)
-    if host.startswith("mongodb://"):
-        os.system("mongodump --uri='%s' -o=%s" % (host, path))
-    else:
-        os.system("mongodump --host='%s' -o=%s" % (host, path))
+    # if host.startswith("mongodb://"):
+    #     os.system("mongodump --uri='%s' -o=%s" % (host, path))
+    # else:
+    #     os.system("mongodump --host='%s' -o=%s" % (host, path))
+    os.system("mongodump -o=%s" % path)
     data.log.debug("Dumped")
 
 
@@ -47,7 +48,7 @@ def backup_mongo_dump(data):
     destination_path = get_mongo_backup_directory()
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
     # os.system("rsync -av %s %s" % (source_path, destination_path))
-    os.system("robocopy %s %s /XO /fp" % (source_path, destination_path))
+    os.system("robocopy %s %s /MIR" % (source_path, destination_path))
 
 
 if __name__ == "__main__":
