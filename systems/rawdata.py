@@ -53,7 +53,7 @@ class RawData(SystemStage):
             instrument_code=instrument_code, base_currency=base_currency
         )
 
-    @input
+    @output()
     def get_daily_prices(self, instrument_code) -> pd.Series:
         """
         Gets daily prices
