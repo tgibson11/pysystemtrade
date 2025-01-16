@@ -342,7 +342,7 @@ def update_historical_prices_for_instrument_and_contract(
     intraday_frequency = diag_prices.get_intraday_frequency_for_historical_download()
     daily_frequency = DAILY_PRICE_FREQ
 
-    list_of_frequencies = [daily_frequency]
+    list_of_frequencies = [intraday_frequency, daily_frequency]
 
     for frequency in list_of_frequencies:
         get_and_add_prices_for_frequency(
@@ -482,13 +482,13 @@ def write_merged_prices_for_contract(
     diag_prices = diagPrices(data)
     price_updater = updatePrices(data)
 
-    list_of_data = []
-    for frequency in list_of_frequencies:
-        prices = diag_prices.get_prices_at_frequency_for_contract_object(
+    list_of_data = [
+        diag_prices.get_prices_at_frequency_for_contract_object(
             contract_object,
             frequency=frequency,
         )
-        list_of_data.append(prices)
+        for frequency in list_of_frequencies
+    ]
 
     merged_prices = merge_data_with_different_freq(list_of_data)
 
