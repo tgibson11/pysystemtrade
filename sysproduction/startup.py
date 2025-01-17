@@ -10,3 +10,6 @@ def startup():
 
     data_clientids = dataBrokerClientIDs()
     data_clientids.clear_all_clientids()
+
+if __name__ == "__main__":
+    startup()
