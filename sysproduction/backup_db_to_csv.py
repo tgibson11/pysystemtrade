@@ -71,8 +71,9 @@ class backupDbToCsv:
         backup_spread_cost_data(backup_data)
         backup_optimal_positions(backup_data)
         backup_roll_state_data(backup_data)
-        log.debug("Copying to backup directory")
-        backup_csv_dump(self.data)
+        # This is slow, and duplicates the mongo/parquet backup
+        # log.debug("Copying to backup directory")
+        # backup_csv_dump(self.data)
 
 
 def get_data_and_create_csv_directories(logname):
