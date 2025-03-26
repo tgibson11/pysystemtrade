@@ -12,16 +12,15 @@ from sysproduction.startup import startup
 
 startup()
 
+run_capital_update()
 run_daily_fx_and_contract_updates()
 run_daily_price_updates()
 run_daily_update_multiple_adjusted_prices()
 
-run_capital_update()
 run_systems()
 run_strategy_order_generator()
-
-run_reports()
 run_stack_handler()
 
 run_cleaners()
 run_backups()
+run_reports()
