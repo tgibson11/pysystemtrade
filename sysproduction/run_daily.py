@@ -1,3 +1,6 @@
+import os
+
+from sysdata.config.private_directory import PRIVATE_CONFIG_DIR_ENV_VAR
 from sysproduction.run_backups import run_backups
 from sysproduction.run_capital_update import run_capital_update
 from sysproduction.run_cleaners import run_cleaners
@@ -9,6 +12,12 @@ from sysproduction.run_stack_handler import run_stack_handler
 from sysproduction.run_strategy_order_generator import run_strategy_order_generator
 from sysproduction.run_systems import run_systems
 from sysproduction.startup import startup
+
+# Use config for LLC account
+os.environ[PRIVATE_CONFIG_DIR_ENV_VAR] = "%PYSYS_PRIVATE_CONFIG_DIR%\llc"
+
+# Use config for personal account
+# os.environ[PRIVATE_CONFIG_DIR_ENV_VAR] = "%PYSYS_PRIVATE_CONFIG_DIR%\personal"
 
 startup()
 
