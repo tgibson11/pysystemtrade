@@ -1,9 +1,3 @@
-from sysproduction.use_account import use_account, Accounts
-
-use_account(Accounts.LLC_ACCOUNT.value)
-# use_account(Accounts.PERSONAL_ACCOUNT.value)
-
-# Import here to avoid loading config prematurely
 from sysproduction.run_backups import run_backups
 from sysproduction.run_capital_update import run_capital_update
 from sysproduction.run_cleaners import run_cleaners
