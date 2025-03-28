@@ -49,3 +49,10 @@ class stackHandler(
         self.instrument_stack.remove_all_deactivated_orders_from_stack()
         self.contract_stack.remove_all_deactivated_orders_from_stack()
         self.broker_stack.remove_all_deactivated_orders_from_stack()
+
+    def all_stacks_empty(self) -> bool:
+        instrument_order_count = self.instrument_stack.number_of_orders_on_stack()
+        contract_order_count = self.contract_stack.number_of_orders_on_stack()
+        broker_order_count = self.broker_stack.number_of_orders_on_stack()
+        total_order_count = instrument_order_count + contract_order_count + broker_order_count
+        return total_order_count == 0
