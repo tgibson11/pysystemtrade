@@ -17,8 +17,8 @@ We kick them all off in the crontab at a specific time (midnight is easiest), bu
 
 """
 import time
-import sys
 import traceback
+from typing import Callable
 
 from syscontrol.report_process_status import reportProcessStatus
 from syscore.constants import success
@@ -51,12 +51,18 @@ class processToRun(object):
         process_name: str,
         data: dataBlob,
         list_of_timer_names_and_functions_as_strings: list,
+        finished_function: Callable | None = None,
     ):
         self._data = data
         self._process_name = process_name
         self._list_of_timer_functions = get_list_of_timer_functions(
             data, process_name, list_of_timer_names_and_functions_as_strings
         )
+
+        if finished_function:
+            self._finished_function = finished_function
+        else:
+            self._finished_function = _default_finished_function
 
         self._setup()
 
@@ -71,6 +77,10 @@ class processToRun(object):
     @property
     def list_of_timer_functions(self) -> listOfTimerFunctions:
         return self._list_of_timer_functions
+
+    @property
+    def finished_function(self) -> Callable:
+        return self._finished_function
 
     def _setup(self):
         self._log = self.data.log
@@ -206,7 +216,7 @@ def _is_okay_to_start(process_to_run: processToRun) -> bool:
 NOT_STARTING_CONDITION = "Not starting process"
 
 
-def _check_if_process_status_is_okay_to_run(process_to_run: processToRun) -> bool:
+def _check_if_process_status_is_okay_to_run(process_to_run: processToRun) -> bool | None:
     data_control = process_to_run.data_control
     process_name = process_to_run.process_name
     okay_to_run = data_control.check_if_okay_to_start_process(process_name)
@@ -382,25 +392,29 @@ def _check_for_stop(process_to_run: processToRun) -> bool:
     :return: bool
     """
 
-    process_requires_stop = _check_for_stop_control_process(process_to_run)
-    all_methods_finished = _check_if_all_methods_finished(process_to_run)
-    time_to_stop = _check_for_finish_time(process_to_run)
-
     log = process_to_run.log
 
+    process_requires_stop = _check_for_stop_control_process(process_to_run)
     if process_requires_stop:
         log.debug("Process control marked as STOP")
+        return True
 
+    all_methods_finished = _check_if_all_methods_finished(process_to_run)
     if all_methods_finished:
         log.debug("Finished doing all executions of provided methods")
+        return True
 
+    time_to_stop = _check_for_finish_time(process_to_run)
     if time_to_stop:
         log.debug("Passed finish time of process")
-
-    if process_requires_stop or all_methods_finished or time_to_stop:
         return True
-    else:
-        return False
+
+    all_work_done = _check_ready_to_finish(process_to_run)
+    if all_work_done:
+        log.debug("Process indicates it is ready to finish")
+        return True
+
+    return False
 
 
 def _check_for_stop_control_process(process_to_run: processToRun) -> bool:
@@ -424,3 +438,12 @@ def _check_for_finish_time(process_to_run: processToRun) -> bool:
     process_name = process_to_run.process_name
 
     return diag_process.is_it_time_to_stop(process_name)
+
+
+def _check_ready_to_finish(process_to_run: processToRun) -> bool:
+    finished_function = process_to_run.finished_function
+    return finished_function()
+
+
+def _default_finished_function() -> bool:
+    return False
