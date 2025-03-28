@@ -57,6 +57,7 @@ def dynamic_system(
 ) -> System:
     sim_data = get_sim_data_object_for_production(data)
 
+    log.debug(f"Using config from {config_filename}")
 
     system = futures_system(sim_data=sim_data, config_filename=config_filename)
     system._log = log
