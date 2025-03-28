@@ -98,6 +98,8 @@ class connectionIB(object):
         self._ib = ib
         self._account = account
 
+        check_ib_account(ib, account)
+
     @property
     def ib(self):
         return self._ib
@@ -131,3 +133,12 @@ def get_broker_account() -> str:
     production_config = get_production_config()
     account_id = production_config.get_element("broker_account")
     return account_id
+
+
+def check_ib_account(ib: IB, expected_ib_account: str):
+    ib_accounts = ib.managedAccounts()
+    if expected_ib_account not in ib_accounts:
+        ib_accounts_as_str = ",".join(ib_accounts)
+        message = (f"Configured broker_account {expected_ib_account} "
+                   f"does not match the current IB connection {ib_accounts_as_str}")
+        raise Exception(message)
