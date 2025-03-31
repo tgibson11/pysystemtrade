@@ -9,6 +9,7 @@ from sysproduction.run_reports import run_reports
 from sysproduction.run_stack_handler import run_stack_handler
 from sysproduction.run_strategy_order_generator import run_strategy_order_generator
 from sysproduction.run_systems import run_systems
+from sysproduction.send_email import send_email
 from sysproduction.startup import startup
 
 startup()
@@ -26,3 +27,5 @@ run_stack_handler()
 run_cleaners()
 run_backups()
 run_reports()
+
+send_email("Daily processes completed")
