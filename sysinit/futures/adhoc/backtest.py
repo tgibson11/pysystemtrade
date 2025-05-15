@@ -1,3 +1,6 @@
+import matplotlib
+from matplotlib import pyplot as plt
+
 from systems.provided.rob_system.run_system import futures_system
 
 system = futures_system(config_filename="/Users/Todd/PyCharmProjects/private/system_config.yaml")
