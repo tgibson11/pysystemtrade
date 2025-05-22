@@ -8,11 +8,11 @@ system = futures_system(
     config_filename="/Users/Todd/PyCharmProjects/private/system_config.yaml"
 )
 
-# system.config.use_forecast_scale_estimates = False
-# system.config.use_forecast_weight_estimates = False
-# system.config.use_forecast_div_mult_estimates = True
-# system.config.use_instrument_weight_estimates = False
-# system.config.use_instrument_div_mult_estimates = True
+system.config.use_forecast_scale_estimates = False
+system.config.use_forecast_weight_estimates = False
+system.config.use_forecast_div_mult_estimates = True
+system.config.use_instrument_weight_estimates = False
+system.config.use_instrument_div_mult_estimates = True
 
 sysdiag = systemDiag(system)
 sysdiag.yaml_config_with_estimated_parameters('someyamlfile.yaml')
