@@ -25,8 +25,6 @@ run_generate_roll_orders()
 run_stack_handler()
 
 run_reports()
-emailing.send_mail_msg("", "Reports ready")
-simplex.send("Reports ready")
 
 run_cleaners()
 run_backups()
