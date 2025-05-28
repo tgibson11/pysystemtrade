@@ -10,15 +10,26 @@ handlers:
     level: DEBUG
     stream: ext://sys.stdout
     formatter: simple
-  email:
-    class: syslogging.handlers.PstSMTPHandler
-    level: CRITICAL
-    formatter: simple
-  socket:
-    class: logging.handlers.SocketHandler
-    host: localhost
-    port: 9020
+#  email:
+#    class: syslogging.handlers.PstSMTPHandler
+#    level: CRITICAL
+#    formatter: simple
+#  socket:
+#    class: logging.handlers.SocketHandler
+#    host: localhost
+#    port: 9020
+#    level: DEBUG
+#    formatter: simple
+  file:
+    class: logging.handlers.TimedRotatingFileHandler
+    filename: /Users/Todd/pysystemtrade/logs/pysystemtrade_log.txt
+    when: D
+    backupCount: 7
     level: DEBUG
+    formatter: simple
+  simplex:
+    class: syslogging.handlers.SimpleXHandler
+    level: CRITICAL
     formatter: simple
 loggers:
   ib_insync:
@@ -31,5 +42,5 @@ root:
   level: DEBUG
   handlers:
     - console
-    - email
-    - socket
+    - file
+    - simplex
