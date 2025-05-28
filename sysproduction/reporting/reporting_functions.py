@@ -18,6 +18,7 @@ from syscore.interactive.display import (
     centralise_text,
 )
 from sysdata.data_blob import dataBlob
+from syslogdiag import simplex
 
 from syslogdiag.email_via_db_interface import (
     send_production_mail_msg,
@@ -243,19 +244,8 @@ def display_pdf_report(parsed_report: ParsedReport):
 def email_report(
     parsed_report: ParsedReport, report_config: reportConfig, data: dataBlob
 ):
-    if parsed_report.contains_pdf:
-        send_production_mail_msg_attachment(
-            body="Report attached",
-            subject=report_config.title,
-            filename=parsed_report.pdf_filename,
-        )
-    else:
-        send_production_mail_msg(
-            data=data,
-            body=parsed_report.text,
-            subject=report_config.title,
-            email_is_report=True,
-        )
+    file = output_file_report(parsed_report, report_config, data)
+    simplex.send_file(file)
 
 
 def output_file_report(
@@ -264,14 +254,16 @@ def output_file_report(
     full_filename = resolve_report_filename(report_config=report_config, data=data)
     if parsed_report.contains_pdf:
         ## Already a file so just rename temp file name to final one
-        pdf_full_filename = "%s.pdf" % full_filename
-        shutil.copyfile(parsed_report.pdf_filename, pdf_full_filename)
+        filename_w_ext = "%s.pdf" % full_filename
+        shutil.copyfile(parsed_report.pdf_filename, filename_w_ext)
     else:
+        filename_w_ext = "%s.txt" % full_filename
         write_text_report_to_file(
-            report_text=parsed_report.text, full_filename=full_filename
+            report_text=parsed_report.text, full_filename=filename_w_ext
         )
 
     data.log.debug("Written report to %s" % full_filename)
+    return filename_w_ext
 
 
 def resolve_report_filename(report_config, data: dataBlob):

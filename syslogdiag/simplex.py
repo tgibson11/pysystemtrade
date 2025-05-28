@@ -8,11 +8,9 @@ def send(msg: str):
     os.system(f"simplex-chat -e \"@{recipient} {msg}\"")
 
 
-def send_as_file(name: str, content: str):
+def send_file(file_path: str):
     recipient = get_recipient()
-    with open(name, 'w') as file:
-        file.write(content)
-    os.system(f"simplex-chat -e \"/f @{recipient} {file_path}\"")
+    os.system(f"simplex-chat -e \"/f @{recipient} {file_path}\" -t 5")
 
 
 def get_recipient():

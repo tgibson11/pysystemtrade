@@ -3,6 +3,7 @@ import datetime
 
 from syscore.dateutils import SECONDS_PER_DAY
 from syscore.exceptions import missingData
+from syslogdiag import simplex
 from syslogdiag.mongo_email_control import mongoEmailControlData
 
 from syslogdiag.emailing import send_mail_msg, send_mail_pdfs
@@ -45,6 +46,7 @@ def send_email_and_record_date_or_store_on_fail(
 ):
     try:
         send_mail_msg(body, subject)
+        simplex.send(subject)
         record_date_of_email_send(data, subject)
         data.log.debug("Sent email subject %s" % subject)
     except Exception as e:
