@@ -45,7 +45,7 @@ def send_email_and_record_date_or_store_on_fail(
     data, body: str, subject: str, email_is_report: bool = False
 ):
     try:
-        send_mail_msg(body, subject)
+        # send_mail_msg(body, subject)
         simplex.send(subject)
         record_date_of_email_send(data, subject)
         data.log.debug("Sent email subject %s" % subject)
