@@ -10,7 +10,7 @@ def send(msg: str):
 
 def send_file(file_path: str):
     recipient = get_recipient()
-    os.system(f"simplex-chat -e \"/f @{recipient} {file_path}\" -t 5")
+    os.system(f"simplex-chat -e \"/f @{recipient} {file_path}\" -t 6")
 
 
 def get_recipient():
