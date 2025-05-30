@@ -433,7 +433,7 @@ class updatePositions(productionDataLayerGeneric):
 
         if has_no_priced_contract_position and roll_state_requires_order_generation:
             self.set_roll_state(instrument_code, passive_roll_state)
-            self.log.critical(
+            self.log.warning(
                 "Set roll state to passive for %s because no longer have position in priced contract"
                 % instrument_code
             )
