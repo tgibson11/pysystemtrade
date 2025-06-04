@@ -1,4 +1,3 @@
-from syslogdiag import emailing, simplex
 from sysproduction.run_backups import run_backups
 from sysproduction.run_capital_update import run_capital_update
 from sysproduction.run_cleaners import run_cleaners
