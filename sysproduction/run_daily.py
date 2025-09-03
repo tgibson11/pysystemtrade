@@ -23,7 +23,6 @@ run_strategy_order_generator()
 run_generate_roll_orders()
 run_stack_handler()
 
-run_reports()
-
 run_cleaners()
 run_backups()
+run_reports()
