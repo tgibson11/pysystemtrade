@@ -1,22 +1,28 @@
 from sysproduction.run_backups import run_backups
+from sysproduction.run_capital_update import run_capital_update
 from sysproduction.run_cleaners import run_cleaners
 from sysproduction.run_daily_fx_and_contract_updates import run_daily_fx_and_contract_updates
 from sysproduction.run_daily_price_updates import run_daily_price_updates
 from sysproduction.run_daily_update_multiple_adjusted_prices import run_daily_update_multiple_adjusted_prices
 from sysproduction.run_reports import run_reports
+from sysproduction.run_stack_handler import run_stack_handler
 from sysproduction.run_strategy_order_generator import run_strategy_order_generator
 from sysproduction.run_systems import run_systems
 from sysproduction.startup import startup
 
 startup()
 
+run_capital_update()
 run_daily_fx_and_contract_updates()
 run_daily_price_updates()
 run_daily_update_multiple_adjusted_prices()
 
 run_systems()
 run_strategy_order_generator()
+run_stack_handler()
 
 run_cleaners()
 run_backups()
+
 run_reports()
+
