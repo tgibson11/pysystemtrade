@@ -25,6 +25,9 @@ class cleanTruncateBacktestStates:
             directory_to_use, days_old=30, extension=".pck"
         )
         delete_old_files_with_extension_in_pathname(
+            directory_to_use, days_old=30, extension=".pckz"
+        )
+        delete_old_files_with_extension_in_pathname(
             directory_to_use, days_old=30, extension=".yaml"
         )
 

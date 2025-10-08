@@ -22,6 +22,7 @@ strategy_capital_allocation:
 #
 ## Where do we save backtests
 backtest_store_directory: 'private.backtests'
+backtest_compress: False
 #
 # And backups
 csv_backup_directory: 'data.backups_csv'
