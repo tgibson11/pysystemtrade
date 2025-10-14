@@ -6,6 +6,7 @@ import pandas as pd
 from syscore.exceptions import missingData
 from syscore.pandas.pdutils import check_df_equals, check_ts_equals
 from syscore.dateutils import CALENDAR_DAYS_IN_YEAR
+from sysdata.config.production_config import get_production_config
 from sysdata.data_blob import dataBlob
 
 from sysdata.csv.csv_futures_contracts import csvFuturesContractData
@@ -59,7 +60,7 @@ class backupDbToCsv:
         backup_data = get_data_and_create_csv_directories(self.data.log_name)
         log = self.data.log
 
-        log.debug("Dumping from arctic, mongo to .csv files")
+        log.debug("Dumping from db, mongo to .csv files")
         backup_adj_to_csv(backup_data)
         backup_futures_contract_prices_to_csv(backup_data)
         backup_spreads_to_csv(backup_data)
@@ -73,9 +74,8 @@ class backupDbToCsv:
         backup_spread_cost_data(backup_data)
         backup_optimal_positions(backup_data)
         backup_roll_state_data(backup_data)
-        # This is slow, and duplicates the mongo/parquet backup
-        # log.debug("Copying to backup directory")
-        # backup_csv_dump(self.data)
+        log.debug("Copying to offsystem backup directory")
+        backup_csv_dump(self.data)
 
 
 def get_data_and_create_csv_directories(logname):
@@ -490,7 +490,8 @@ def backup_csv_dump(data):
     if platform.system() == "Windows":
         os.system("robocopy %s %s /MIR" % (source_path, destination_path))
     else:
-        os.system("rsync -av %s %s" % (source_path, destination_path))
+        options = get_production_config().get_element("offsystem_backup_options")
+        os.system(f"rsync {options} {source_path} {destination_path}")
 
 
 if __name__ == "__main__":

@@ -172,7 +172,7 @@ def get_resolved_pathname(pathname: str) -> str:
         # special case when already a Path
         pathname = str(pathname.absolute())
 
-    if "@" in pathname:
+    if "@" in pathname or "::" in pathname:
         # This is an ssh address for rsync - don't change
         return pathname
 
@@ -370,8 +370,9 @@ def files_with_extension_in_resolved_pathname(
     Find all the files with a particular extension in a directory
     """
 
-    file_list = os.listdir(resolved_pathname)
-    file_list = [filename for filename in file_list if filename.endswith(extension)]
+    file_list = [
+        os.path.basename(f) for f in glob.glob(f"{resolved_pathname}/*{extension}")
+    ]
     file_list_no_extension = [filename.split(".")[0] for filename in file_list]
 
     return file_list_no_extension
