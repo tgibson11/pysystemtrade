@@ -487,10 +487,10 @@ def backup_csv_dump(data):
     source_path = get_csv_dump_dir()
     destination_path = get_csv_backup_directory()
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
+    options = get_production_config().get_element("offsystem_backup_options")
     if platform.system() == "Windows":
-        os.system("robocopy %s %s /MIR" % (source_path, destination_path))
+        os.system(f"robocopy {source_path} {destination_path} {options}")
     else:
-        options = get_production_config().get_element("offsystem_backup_options")
         os.system(f"rsync {options} {source_path} {destination_path}")
 
 
