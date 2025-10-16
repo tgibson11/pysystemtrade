@@ -517,7 +517,7 @@ def check_if_getting_close_to_desired_roll_date(
     roll_data: RollDataWithStateReporting,
     auto_parameters: autoRollParameters,
 ):
-    ## close to desired roll date, not technnically 'expiry'
+    ## close to desired roll date, not technically 'expiry'
     return roll_data.days_until_roll < auto_parameters.near_expiry_days
 
 
