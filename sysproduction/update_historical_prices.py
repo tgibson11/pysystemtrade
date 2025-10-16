@@ -376,7 +376,7 @@ def get_and_add_prices_for_frequency(
             )
         )
     except missingData:
-        print(
+        data.log.warning(
             "Something went wrong with getting prices for %s to check"
             % str(contract_object)
         )
