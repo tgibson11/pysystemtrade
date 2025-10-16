@@ -706,7 +706,7 @@ def resolve_kwargs_to_str(kwargs, use_arg_names: bool = True):
     return ", ".join(long_flag_string)
 
 
-# null decorator doesn't do antyihng
+# null decorator doesn't do anything
 def null_decorator(func):
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
