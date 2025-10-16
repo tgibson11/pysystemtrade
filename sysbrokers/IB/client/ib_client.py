@@ -17,7 +17,6 @@ from syscore.exceptions import missingContract
 
 from syslogging.logger import *
 
-from sysobjects.contracts import futuresContract
 
 # IB state that pacing violations only occur for bar sizes of less than 1 minute
 # See footnote at bottom of

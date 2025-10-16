@@ -1,4 +1,4 @@
-from syscore.dateutils import Frequency, DAILY_PRICE_FREQ, MIXED_FREQ
+from syscore.dateutils import Frequency, DAILY_PRICE_FREQ
 from syscore.exceptions import missingContract, missingData
 from sysdata.data_blob import dataBlob
 
@@ -9,7 +9,7 @@ from sysbrokers.IB.ib_connection import connectionIB
 from sysbrokers.IB.client.ib_price_client import tickerWithBS, ibPriceClient
 from sysbrokers.broker_futures_contract_price_data import brokerFuturesContractPriceData
 
-from sysexecution.tick_data import tickerObject, dataFrameOfRecentTicks
+from sysexecution.tick_data import tickerObject
 from sysexecution.orders.contract_orders import contractOrder
 from sysexecution.trade_qty import tradeQuantity
 

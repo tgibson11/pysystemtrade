@@ -16,7 +16,6 @@ from sysexecution.order_stacks.broker_order_stack import orderWithControls
 from sysexecution.algos.algo import Algo
 from sysexecution.stack_handler.fills import stackHandlerForFills
 from sysproduction.data.controls import dataLocks
-from sysproduction.data.broker import dataBroker
 
 
 class stackHandlerCreateBrokerOrders(stackHandlerForFills):

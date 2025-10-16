@@ -5,13 +5,12 @@ from sysdata.futures.futures_per_contract_prices import (
 )
 from sysdata.data_blob import dataBlob
 
-from sysexecution.tick_data import tickerObject, dataFrameOfRecentTicks
+from sysexecution.tick_data import tickerObject
 from sysexecution.orders.contract_orders import contractOrder
 from sysexecution.orders.broker_orders import brokerOrder
-from sysexecution.trade_qty import tradeQuantity
 
 from sysobjects.futures_per_contract_prices import futuresContractPrices
-from sysobjects.contracts import futuresContract, listOfFuturesContracts
+from sysobjects.contracts import futuresContract
 
 from syslogging.logger import *
 
