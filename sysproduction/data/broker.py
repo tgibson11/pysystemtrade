@@ -1,4 +1,3 @@
-
 from sysbrokers.broker_contract_commission_data import (
     brokerFuturesContractCommissionData,
 )

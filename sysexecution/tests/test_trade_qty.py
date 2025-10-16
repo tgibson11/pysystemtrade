@@ -1,5 +1,3 @@
-
-
 def _doc_tests1():
     """
 

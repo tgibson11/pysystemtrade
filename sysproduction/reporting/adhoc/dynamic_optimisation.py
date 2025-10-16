@@ -32,7 +32,6 @@ from sysquant.estimators.stdev_estimator import stdevEstimates
 from sysquant.optimisation.weights import portfolioWeights
 
 
-
 def get_notional_risk_target():
     ## might be overridden by strategy but we don't have the backtest .yaml here
     return 25.0

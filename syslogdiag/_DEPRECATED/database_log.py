@@ -1,4 +1,3 @@
-
 from sysdata.base_data import baseData
 from syslogdiag.pst_logger import pst_logger
 from syslogdiag.log_to_screen import logtoscreen

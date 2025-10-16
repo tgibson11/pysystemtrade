@@ -1,4 +1,3 @@
-
 from sysquant.estimators.clustering_correlations import cluster_correlation_matrix
 from sysquant.estimators.estimates import Estimates
 from sysquant.estimators.correlations import correlationEstimate
