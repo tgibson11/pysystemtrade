@@ -134,8 +134,8 @@ class orderGeneratorForStrategy(object):
                 "%s trade change from %s to %s because of override %s"
                 % (
                     instrument_strategy.key,
-                    str(revised_order.trade),
                     str(proposed_order.trade),
+                    str(revised_order.trade),
                     str(override),
                 ),
                 **proposed_order.log_attributes(),
