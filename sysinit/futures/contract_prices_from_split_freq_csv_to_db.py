@@ -43,7 +43,7 @@ def init_db_with_split_freq_csv_prices_for_code(
     print(f"Importing split freq csv prices for {instrument_code}")
     csv_prices = csvFuturesContractPriceData(datapath, config=csv_config)
 
-    print(f"Getting split freq .csv prices may take some time")
+    print("Getting split freq .csv prices may take some time")
     hourly_dict = csv_prices.get_prices_at_frequency_for_instrument(
         instrument_code,
         frequency=HOURLY_FREQ,
