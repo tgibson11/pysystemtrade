@@ -785,7 +785,7 @@ def base_system_cache(protected=False, not_pickable=False):
     return decorate
 
 
-# actual decoraters used, snappier names for 'stage wiring'
+# actual decorators used, snappier names for 'stage wiring'
 input = null_decorator
 dont_cache = null_decorator
 diagnostic = stage_access_cache_decorator
