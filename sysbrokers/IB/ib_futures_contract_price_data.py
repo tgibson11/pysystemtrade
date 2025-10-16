@@ -47,11 +47,7 @@ class ibTickerObject(tickerObject):
 
 class ibFuturesContractPriceData(brokerFuturesContractPriceData):
     """
-    Extends the baseData object to a data source that reads in and writes prices for specific futures contracts
-
-    This gets HISTORIC data from interactive brokers. It is blocking code
-    In a live production system it is suitable for running on a daily basis to get end of day prices
-
+    Implementation of a data source for IB futures contract prices
     """
 
     def __init__(

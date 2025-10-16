@@ -18,11 +18,8 @@ from syslogging.logger import *
 
 class brokerFuturesContractPriceData(futuresContractPriceData):
     """
-    Extends the baseData object to a data source that reads in and writes prices for specific futures contracts
-
-    This gets HISTORIC data from interactive brokers. It is blocking code
-    In a live production system it is suitable for running on a daily basis to get end of day prices
-
+    Extends futuresContractPriceData to a base class for broker futures contract prices.
+    Could be extended for a specific broker
     """
 
     def __init__(
