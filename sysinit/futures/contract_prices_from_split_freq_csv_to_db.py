@@ -1,35 +1,24 @@
 from syscore.constants import arg_not_supplied
 from syscore.dateutils import MIXED_FREQ, HOURLY_FREQ, DAILY_PRICE_FREQ
 from syscore.pandas.frequency import merge_data_with_different_freq
+from sysdata.csv.csv_futures_contract_prices import ConfigCsvFuturesPrices
 from sysdata.csv.csv_futures_contract_prices import csvFuturesContractPriceData
 from sysobjects.contracts import futuresContract
 from sysobjects.futures_per_contract_prices import futuresContractPrices
-from sysproduction.data.prices import diagPrices
+from sysproduction.data.prices import diagPrices, get_valid_instrument_code_from_user
 
 diag_prices = diagPrices()
 db_prices = diag_prices.db_futures_contract_price_data
 
-
-def init_db_with_split_freq_csv_prices(
-    datapath: str,
-    csv_config=arg_not_supplied,
-    ignore_duplication: bool = True,  # if True, we overwrite existing prices
-):
-    csv_prices = csvFuturesContractPriceData(datapath)
-    input(
-        "WARNING THIS WILL ERASE ANY EXISTING DATABASE PRICES WITH DATA FROM %s ARE YOU SURE?! (CTRL-C TO STOP)"
-        % csv_prices.datapath
-    )
-
-    instrument_codes = csv_prices.get_list_of_instrument_codes_with_merged_price_data()
-    instrument_codes.sort()
-    for instrument_code in instrument_codes:
-        init_db_with_split_freq_csv_prices_for_code(
-            instrument_code,
-            datapath,
-            csv_config=csv_config,
-            ignore_duplication=ignore_duplication,
-        )
+BARCHART_CONFIG = ConfigCsvFuturesPrices(
+    input_date_index_name="Time",
+    input_skiprows=0,
+    input_skipfooter=0,
+    input_date_format="%Y-%m-%dT%H:%M:%S",
+    input_column_mapping=dict(
+        OPEN="Open", HIGH="High", LOW="Low", FINAL="Close", VOLUME="Volume"
+    ),
+)
 
 
 def init_db_with_split_freq_csv_prices_for_code(
@@ -171,4 +160,15 @@ if __name__ == "__main__":
     input("Will overwrite existing prices are you sure?! CTL-C to abort")
     # modify flags as required
     datapath = "*** NEED TO DEFINE A DATAPATH***"
-    init_db_with_split_freq_csv_prices(datapath)
+    do_another = True
+    while do_another:
+        EXIT_STR = "Finished: Exit"
+        instrument_code = get_valid_instrument_code_from_user(
+            source="single", allow_exit=True, exit_code=EXIT_STR
+        )
+        if instrument_code is EXIT_STR:
+            do_another = False
+        else:
+            init_db_with_split_freq_csv_prices_for_code(
+                instrument_code, datapath, csv_config=BARCHART_CONFIG
+            )
