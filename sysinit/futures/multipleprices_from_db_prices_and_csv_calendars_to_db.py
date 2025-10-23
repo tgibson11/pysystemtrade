@@ -27,7 +27,6 @@ from sysdata.csv.csv_roll_parameters import csvRollParametersData
 from sysinit.futures.build_roll_calendars import adjust_to_price_series
 from sysobjects.multiple_prices import futuresMultiplePrices
 
-from sysdata.data_blob import dataBlob
 
 diag_prices = diagPrices()
 
