@@ -2,6 +2,7 @@ import matplotlib.pyplot as pyplot
 
 import pandas as pd
 
+import private.projects.artandscience.methods
 from syscore.exceptions import missingData
 from syscore.fileutils import full_filename_for_file_in_home_dir
 from syscore.constants import user_exit
@@ -175,7 +176,7 @@ class interactiveBacktest(object):
 
     def get_list_of_methods_for_stage(self, stage_name):
         stage = self.get_stage(stage_name)
-        return stage.methods()
+        return private.projects.artandscience.methods.methods()
 
     def get_result_of_method_for_stage(self, stage_name, method_name):
         func = self.get_method_for_stage(stage_name, method_name)
