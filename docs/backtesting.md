@@ -657,7 +657,7 @@ system=futures_system(config=config)
 
 ## How do I....Use different data or instruments
 
-The default data used for the simulation is CSV files for futures stitched prices, FX and contract related data. It's my intention to update this and try to keep it reasonably current with each release. The data is stored in the [data/futures directory](/data/futures)
+The default data used for the simulation is CSV files for futures stitched prices, FX and contract related data. It's my intention to update this and try to keep it reasonably current with each release. The data is stored in the [data/futures directory](/data/futures). See [update Sep 2025](/docs/data.md#note-on-outdated-shipped-csv-data)
 
 You can update that data, if you wish. Be careful to save it as a CSV with the right formatting, or pandas will complain. Check that a file is correctly formatted like so:
 
@@ -1520,7 +1520,21 @@ system.cache.get_items_with_data() ## Cache is now populated. Any existing data 
 system.get_itemnames_for_stage("accounts") ## now doesn't include ('accounts', 'portfolio', 'percentageTdelayfillTroundpositionsT')
 
 system.accounts.portfolio().sharpe() ## Not coming from the cache, but this will run much faster and reuse many previous calculations
+```
 
+The pickle files are large. Turn on backtest compression to save space
+
+```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+
+system = futures_system()
+system.config.backtest_compress = True 
+system.cache.pickle("private.this_system_name.system.pckz") 
+
+# Now in a new session
+system = futures_system()
+system.cache.get_items_with_data()
+system.cache.unpickle("private.this_system_name.system.pckz")
 ```
 
 See [here](#file-names) for how to specify filenames in pysystemtrade.

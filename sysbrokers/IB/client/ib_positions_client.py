@@ -3,9 +3,7 @@ from sysbrokers.IB.client.ib_client import ibClient
 from sysbrokers.IB.ib_positions import (
     from_ib_positions_to_dict,
     positionsFromIB,
-    IBPositionWithExtendedAttr,
 )
-from ib_insync.ib import Position
 
 
 class ibPositionsClient(ibClient):

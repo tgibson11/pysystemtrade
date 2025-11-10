@@ -1,9 +1,8 @@
-import datetime
-from typing import Union, List
-from ib_insync import IB
+from typing import List
+from ib_insync import IB, ContractDetails as ibContractDetails
 
 from sysbrokers.IB.ib_connection import connectionIB
-from sysbrokers.IB.ib_contracts import ibContract, ibContractDetails
+from sysbrokers.IB.ib_contracts import ibContract
 from sysbrokers.IB.config.ib_instrument_config import (
     IBconfig,
     read_ib_config_from_file,
@@ -17,7 +16,6 @@ from syscore.exceptions import missingContract
 
 from syslogging.logger import *
 
-from sysobjects.contracts import futuresContract
 
 # IB state that pacing violations only occur for bar sizes of less than 1 minute
 # See footnote at bottom of
@@ -28,7 +26,7 @@ PACING_INTERVAL_SECONDS = 0.5
 STALE_SECONDS_ALLOWED_ACCOUNT_SUMMARY = 600
 
 IB_ERROR_TYPES = {
-    200: "ambgious_contract",
+    200: "ambiguous contract",
     501: "already connected",
     502: "can't connect",
     503: "TWS need upgrading",

@@ -15,11 +15,7 @@ from sysobjects.spot_fx_prices import currencyValue
 
 class ibFuturesContractCommissionData(brokerFuturesContractCommissionData):
     """
-    Extends the baseData object to a data source that reads in and writes prices for specific futures contracts
-
-    This gets HISTORIC data from interactive brokers. It is blocking code
-    In a live production system it is suitable for running on a daily basis to get end of day prices
-
+    Implementation of a data source for IB futures commission data
     """
 
     def __init__(
@@ -48,8 +44,13 @@ class ibFuturesContractCommissionData(brokerFuturesContractCommissionData):
         instrument_code = futures_contract.instrument_code
         contract_date = futures_contract.contract_date.list_of_date_str[0]
 
+        broker_account = self.data.config.get_element("broker_account")
         broker_order = brokerOrder(
-            test_commission_strategy, instrument_code, contract_date, size_of_test_trade
+            test_commission_strategy,
+            instrument_code,
+            contract_date,
+            size_of_test_trade,
+            broker_account=broker_account,
         )
 
         order = self.execution_stack.what_if_order(broker_order)
@@ -75,4 +76,4 @@ def get_commission_and_currency_from_ib_order(
 
 
 test_commission_strategy = "testCommmission"  ## whatever not put on stack
-size_of_test_trade = 10  ## arbitrary
+size_of_test_trade = 1  ## arbitrary

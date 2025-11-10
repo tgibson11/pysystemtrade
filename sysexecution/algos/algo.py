@@ -1,7 +1,7 @@
 from copy import copy
 from dataclasses import dataclass
 
-from syscore.exceptions import missingContract, missingData, orderCannotBeModified
+from syscore.exceptions import missingContract, missingData
 from syscore.constants import arg_not_supplied
 from sysexecution.orders.named_order_objects import missing_order
 
@@ -201,8 +201,6 @@ class Algo(object):
         input_limit_price: float = None,
         limit_price_from: str = limit_price_from_input,
     ) -> float:
-        assert limit_price_from in sources_of_limit_price
-
         if limit_price_from == limit_price_from_input:
             assert input_limit_price is not None
             limit_price = input_limit_price
