@@ -1396,11 +1396,10 @@ system.data.get_raw_price("SOFR")
 For a list of all the methods in a system and its stages see [stage methods](#table-of-standard-systemdata-and-systemstage-methods). Alternatively:
 
 ```python
-import private.projects.artandscience.methods
 
 system  ## lists all the stages
-private.projects.artandscience.methods.methods()  ## lists all the methods in a particular stage
-private.projects.artandscience.methods.methods()  ## also works for data
+system.stage_name.methods()  ## lists all the methods in a particular stage
+system.data.methods()  ## also works for data
 ```
 
 We can also access or change elements of the config object:

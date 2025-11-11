@@ -2,7 +2,6 @@ import matplotlib.pyplot as pyplot
 
 import pandas as pd
 
-import private.projects.artandscience.methods
 from syscore.exceptions import missingData
 from syscore.fileutils import full_filename_for_file_in_home_dir
 from syscore.constants import user_exit
