@@ -81,10 +81,8 @@ def updated_optimal_positions_for_dynamic_system(
 
     # Instruments with existing optimal positions
     # If not included in the system, they need to be assigned a weight of zero
-    instruments_with_positions = (
-        data_optimal_positions.get_list_of_instruments_for_strategy_with_optimal_position(
-            strategy_name, raw_positions=True
-        )
+    instruments_with_positions = data_optimal_positions.get_list_of_instruments_for_strategy_with_optimal_position(
+        strategy_name, raw_positions=True
     )
 
     list_of_instruments = set(instruments_in_system).union(instruments_with_positions)
