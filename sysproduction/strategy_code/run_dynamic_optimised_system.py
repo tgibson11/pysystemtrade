@@ -1,7 +1,7 @@
 import datetime
 from syscore.constants import arg_not_supplied
-from sysdata.config.configdata import Config
 
+from sysdata.config.configdata import Config
 from sysdata.data_blob import dataBlob
 from sysobjects.production.optimal_positions import (
     optimalPositionWithReference,
