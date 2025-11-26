@@ -1,5 +1,5 @@
+import datetime
 from syscore.constants import arg_not_supplied
-from syscore.exceptions import missingData
 from sysdata.config.configdata import Config
 
 from sysdata.data_blob import dataBlob
@@ -143,6 +143,7 @@ def updated_optimal_positions_for_dynamic_system(
 def construct_optimal_position_entry(
     data: dataBlob, system: System, instrument_code: str
 ) -> optimalPositionWithReference:
+    log = data.log
     diag_contracts = dataContracts(data)
 
     if instrument_code in system.get_instrument_list():
@@ -154,8 +155,11 @@ def construct_optimal_position_entry(
         reference_price = system.rawdata.get_daily_prices(instrument_code).iloc[-1]
         reference_date = system.rawdata.get_daily_prices(instrument_code).index[-1]
         reference_contract = diag_contracts.get_priced_contract_id(instrument_code)
-    except Exception as e:
-        raise missingData(f"{instrument_code} has optimal position, but no price data")
+    except Exception:
+        log.warning(f"{instrument_code} has optimal position, but no price data")
+        reference_price = 0.0
+        reference_date = datetime.datetime.now()
+        reference_contract = reference_date.strftime("%Y%m00")
 
     position_entry = optimalPositionWithReference(
         date=datetime.datetime.now(),
