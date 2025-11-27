@@ -11,7 +11,7 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
 loggers:
-  ib_insync:
+  ib_async:
     level: WARNING
   arctic:
     level: INFO

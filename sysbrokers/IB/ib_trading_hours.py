@@ -1,5 +1,5 @@
 import datetime
-from ib_insync import ContractDetails as ibContractDetails
+from ib_async import ContractDetails as ibContractDetails
 
 from sysdata.config.private_directory import get_full_path_for_private_config
 from sysobjects.production.trading_hours.trading_hours import (

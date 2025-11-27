@@ -20,7 +20,7 @@ dependencies = [
     "numpy>=1.24.0",
     "scipy>=1.0.0",
     "pymongo==3.11.3",
-    "ib-insync==0.9.86",
+    "ib_async>=2,<3",
     "psutil==5.6.7",
     "Flask>=2.0.1",
     "Werkzeug>=2.0.1",

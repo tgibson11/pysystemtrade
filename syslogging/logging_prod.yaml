@@ -21,7 +21,7 @@ handlers:
     level: DEBUG
     formatter: simple
 loggers:
-  ib_insync:
+  ib_async:
     level: WARNING
   arctic:
     level: INFO
