@@ -3,11 +3,18 @@ from typing import Tuple
 import pandas as pd
 from pandas import DataFrame, Series
 
+from syscore.constants import user_exit
+from sysdata.config.configdata import Config
+from sysdata.config.control_config import get_control_config
 from sysdata.config.production_config import get_production_config
+from sysdata.data_blob import dataBlob
+from sysproduction.interactive_diagnostics import get_valid_code_from_list
 
 
 def compare_strategy_reports():
+    data = dataBlob()
     config = get_production_config()
+    control_config = get_control_config()
     report_1 = config.get_element("compare_strategy_report_1")
     report_2 = config.get_element("compare_strategy_report_2")
 
@@ -76,22 +83,100 @@ def compare_strategy_reports():
     optimum_weights = optimum_weights.sort_values(
         "optimum_weight_diff", ascending=False
     )
-    print_with_title(optimum_weights, "Optimum Weights & Factors")
+    print_with_title(optimum_weights, "Optimal Weights & Key Inputs")
 
-    weighted_forecasts = compare_forecast_tables(
-        weighted_forecasts_1, weighted_forecasts_2
-    )
-    print_with_title(weighted_forecasts, "Weighted Forecast Diffs")
+    # Select an instrument for further analysis, or exit
+    instruments = optimum_weights.index.values
+    instrument = get_valid_code_from_list(instruments)
+    if instrument is user_exit:
+        return
 
-    unweighted_forecasts = compare_forecast_tables(
-        unweighted_forecasts_1, unweighted_forecasts_2
-    )
-    print_with_title(unweighted_forecasts, "Unweighted Forecast Diffs")
+    # Extract weighted forecasts for instrument
+    instr_weighted_forecasts_1 = weighted_forecasts_1.loc[instrument].rename("forecast_1")
+    instr_weighted_forecasts_2 = weighted_forecasts_2.loc[instrument].rename("forecast_2")
 
-    forecast_weights = compare_forecast_tables(
-        forecast_weights_1, forecast_weights_2
+    # Calculate forecast difference (for sorting)
+    forecast_diff = instr_weighted_forecasts_2.subtract(instr_weighted_forecasts_1, fill_value=0)
+    forecast_diff = forecast_diff.abs()
+    forecast_diff = forecast_diff.rename("forecast_diff")
+
+    # Construct weighted forecasts result
+    weighted_forecasts = (pd.concat(
+        [
+            instr_weighted_forecasts_1,
+            instr_weighted_forecasts_2,
+            forecast_diff,
+        ],
+        axis=1,
+        join="outer",
+    ))
+
+    weighted_forecasts = weighted_forecasts.sort_values(
+        "forecast_diff", ascending=False
     )
-    print_with_title(forecast_weights, "Forecast Weight Diffs")
+
+    print_with_title(weighted_forecasts, f"Weighted Forecasts for {instrument}")
+
+    # Select a forecast for further analysis, or exit
+    forecasts = weighted_forecasts.index.values
+    forecast = get_valid_code_from_list(forecasts)
+    if forecast is user_exit:
+        return
+
+    # Extract forecast weights for selected forecast
+    forecast_weights_for_forecast_1 = forecast_weights_1[forecast].rename("forecast_weight_1")
+    forecast_weights_for_forecast_2 = forecast_weights_2[forecast].rename("forecast_weight_2")
+
+    # Construct forecast weights result
+    forecast_weights = (pd.concat(
+        [
+            forecast_weights_for_forecast_1,
+            forecast_weights_for_forecast_2,
+        ],
+        axis=1,
+        join="outer",
+    ))
+
+    print_with_title(forecast_weights, f"Forecast weights for {forecast}")
+
+    # Extract unweighted forecasts for selected forecast
+    unweighted_forecasts_for_forecast_1 = unweighted_forecasts_1[forecast].rename("unweighted_forecast_1")
+    unweighted_forecasts_for_forecast_2 = unweighted_forecasts_2[forecast].rename("unweighted_forecast_2")
+
+    # Get configured forecast scalars
+    process_configuration_methods = control_config.get_element("process_configuration_methods")
+    run_systems_config = process_configuration_methods.get("run_systems")
+    # Assmume there is just one system defined, and get it, regardless of name
+    my_system_config = next(iter(run_systems_config.values()))
+    config_filename = my_system_config.get("backtest_config_filename")
+    system_config = Config(config_filename)
+    forecast_scalars_dict = system_config.get_element("forecast_scalars")
+    forecast_scalar = forecast_scalars_dict.get(forecast)
+    configured_forecast_scalars = pd.Series(
+        forecast_scalar, index=unweighted_forecasts_for_forecast_1.index
+    )
+    configured_forecast_scalars = configured_forecast_scalars.rename("forecast_scalar_2_config")
+
+    # Infer forecast scalars
+    implied_forecast_scalars = (
+        unweighted_forecasts_for_forecast_1 * configured_forecast_scalars / unweighted_forecasts_for_forecast_2
+    )
+    implied_forecast_scalars = implied_forecast_scalars.rename("forecast_scalar_1_implied")
+    implied_forecast_scalars = round(implied_forecast_scalars, 3)
+
+    # Construct unweighted forecasts & forecast scalars result
+    unweighted_forecasts = (pd.concat(
+        [
+            unweighted_forecasts_for_forecast_1,
+            unweighted_forecasts_for_forecast_2,
+            implied_forecast_scalars,
+            configured_forecast_scalars,
+        ],
+        axis=1,
+        join="outer",
+    ))
+
+    print_with_title(unweighted_forecasts, f"Unweighted forecasts for {forecast}")
 
 
 def parse_table(filepath: str, table_name: str, index_col: int = 0) -> DataFrame:
