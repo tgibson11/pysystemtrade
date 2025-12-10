@@ -2,13 +2,17 @@ import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sysdata.arctic.arctic_futures_per_contract_prices import arcticFuturesContractPriceData
-from sysdata.mongodb.mongo_connection import mongoDb
+from sysdata.config.production_config import get_production_config
+from sysdata.data_blob import get_parquet_root_directory
+from sysdata.parquet.parquet_access import ParquetAccess
+from sysdata.parquet.parquet_futures_per_contract_prices import parquetFuturesContractPriceData
 
-mongo_db = mongoDb()
-arctic_historical_prices = arcticFuturesContractPriceData(mongo_db=mongo_db)
+config = get_production_config()
+parquet_root_directory = get_parquet_root_directory(config)
+parquet_access = ParquetAccess(parquet_root_directory)
+historical_prices = parquetFuturesContractPriceData(parquet_access)
 
-hist_prices = arctic_historical_prices.get_all_prices_for_instrument("LUMBER")
+hist_prices = historical_prices.get_merged_prices_for_instrument("EURIBOR-ICE")
 
 prices_final = hist_prices.final_prices()
 prices_final_as_pd = pd.concat(prices_final, axis=1)
