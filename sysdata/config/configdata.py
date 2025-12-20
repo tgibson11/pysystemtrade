@@ -13,7 +13,6 @@ trading_rules - a specification of the trading rules for a system
 """
 
 from pathlib import Path
-import os
 
 import yaml
 
