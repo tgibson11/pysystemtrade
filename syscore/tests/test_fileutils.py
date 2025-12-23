@@ -42,6 +42,7 @@ class TestFileUtilsUnix:
         actual = resolve_path_and_filename_for_package("/home/rob/file.csv")
         assert actual == "/home/rob/file.csv"
 
+        # old: works, new: should not work
         actual = resolve_path_and_filename_for_package(".home.rob.file.csv")
         assert actual == "/home/rob/file.csv"
 
