@@ -3,6 +3,7 @@ from collections import namedtuple
 from PyPDF2 import PdfMerger
 import datetime
 import pandas as pd
+from pathlib import Path
 import os
 import shutil
 import matplotlib.pyplot as plt
@@ -274,14 +275,14 @@ def output_file_report(
     data.log.debug("Written report to %s" % full_filename)
 
 
-def resolve_report_filename(report_config, data: dataBlob):
+def resolve_report_filename(report_config, data: dataBlob) -> str:
     filename_with_spaces = report_config.title
     filename = filename_with_spaces.replace(" ", "_")
     use_directory = get_directory_for_reporting(data)
     use_directory_resolved = get_resolved_pathname(use_directory)
-    full_filename = os.path.join(use_directory_resolved, filename)
+    full_filename = Path(use_directory_resolved, filename)
 
-    return full_filename
+    return str(full_filename)
 
 
 def get_directory_for_reporting(data):
@@ -337,6 +338,6 @@ def _generate_temp_pdf_filename(
         TEMPFILE_PATTERN,
         str(datetime_to_long(datetime.datetime.now())),
     )
-    full_filename = os.path.join(use_directory_resolved, filename)
+    full_filename = Path(use_directory_resolved, filename)
 
-    return full_filename
+    return str(full_filename)
