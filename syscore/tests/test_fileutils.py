@@ -135,7 +135,7 @@ class TestFileUtilsWindoze:
         file = directory / "hello.txt"
         file.write_text("content", encoding="utf-8")
         resolved_path = get_resolved_pathname(str(file))
-        assert resolved_path == f"{tmp_path}/dir.name.with.dots/hello.txt"
+        assert resolved_path == f"{tmp_path}\\dir.name.with.dots\\hello.txt"
 
     def test_resolve_dotted_file_name(self, tmp_path):
         directory = tmp_path / "dir_name"
@@ -143,7 +143,7 @@ class TestFileUtilsWindoze:
         file = directory / "dotted.filename.txt"
         file.write_text("content", encoding="utf-8")
         resolved_path = get_resolved_pathname(str(file))
-        assert resolved_path == f"{tmp_path}/dir_name/dotted.filename.txt"
+        assert resolved_path == f"{tmp_path}\\dir_name\\dotted.filename.txt"
 
     def test_resolve_package_separate(self):
         actual = resolve_path_and_filename_for_package("C:\\home\\rob\\", "file.csv")
@@ -156,7 +156,7 @@ class TestFileUtilsWindoze:
     @pytest.mark.xfail(reason="Cannot work with new implementation")
     def test_resolve_package_combined_dotted(self):
         actual = resolve_path_and_filename_for_package(".home.rob.file.csv")
-        assert actual == "/home/rob/file.csv"
+        assert actual == "\\home\\rob\\file.csv"
 
     def test_resolve_package_module_separate(self, project_dir):
         actual = resolve_path_and_filename_for_package("syscore.tests", "file.csv")
