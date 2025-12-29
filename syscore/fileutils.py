@@ -131,15 +131,37 @@ def get_resolved_pathname(pathname: str) -> str:
     if path.is_absolute():
         return str(path)
     else:
-        return _get_path_for_module(pathname)
+        return _resolve_path(pathname)
 
 
-def _get_path_for_module(module_name: str) -> str:
-    module_spec = find_spec(module_name)
-    if module_spec is None:
-        raise ModuleNotFoundError(f"Module {module_name} not found")
-    path = Path(module_spec.origin)
-    return str(path.parent)
+def _resolve_path(path: str) -> str:
+    """
+    Resolve a dotted path by iteratively treating trailing parts as a filename.
+    Returns the full resolved path (module directory + filename if present).
+    """
+    parts = path.split(".")
+
+    for i in range(len(parts), 0, -1):
+        module_parts = parts[:i]
+        file_parts = parts[i:]
+
+        candidate_module = ".".join(module_parts)
+        candidate_file = ".".join(file_parts) if file_parts else None
+
+        try:
+            module_spec = find_spec(candidate_module)
+            if module_spec is not None and module_spec.origin:
+                module_path = Path(module_spec.origin).parent
+
+                if candidate_file:
+                    if "." in candidate_file:
+                        return str(module_path / candidate_file)
+                else:
+                    return str(module_path)
+        except (ModuleNotFoundError, ValueError, AttributeError):
+            continue
+
+    raise ModuleNotFoundError(f"Could not resolve path: {path}")
 
 
 """
