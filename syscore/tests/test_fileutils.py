@@ -35,24 +35,6 @@ class TestFileUtilsUnix:
         actual = get_resolved_pathname("syscore.testz")
         assert actual == f"{project_dir}/syscore/testz"
 
-    def test_resolve_path_and_filename_for_package(self):
-        actual = resolve_path_and_filename_for_package("/home/rob/", "file.csv")
-        assert actual == "/home/rob/file.csv"
-
-        actual = resolve_path_and_filename_for_package("/home/rob/file.csv")
-        assert actual == "/home/rob/file.csv"
-
-        # old: works, new: should not work
-        actual = resolve_path_and_filename_for_package(".home.rob.file.csv")
-        assert actual == "/home/rob/file.csv"
-
-    def test_path_and_filename_for_package_modules(self, project_dir):
-        actual = resolve_path_and_filename_for_package("syscore.tests", "file.csv")
-        assert actual == f"{project_dir}/syscore/tests/file.csv"
-
-        actual = resolve_path_and_filename_for_package("syscore.tests.file.csv")
-        assert actual == f"{project_dir}/syscore/tests/file.csv"
-
     @pytest.mark.xfail(reason="Cannot work with current implementation")
     def test_resolve_dotted_dir_name(self, tmp_path):
         directory = tmp_path / "dir.name.with.dots"
@@ -61,6 +43,36 @@ class TestFileUtilsUnix:
         file.write_text("content", encoding="utf-8")
         resolved_path = get_resolved_pathname(str(file))
         assert resolved_path == f"{tmp_path}/dir.name.with.dots/hello.txt"
+
+    @pytest.mark.xfail(reason="Cannot work with current implementation")
+    def test_resolve_dotted_file_name(self, tmp_path):
+        directory = tmp_path / "dir_name"
+        directory.mkdir()
+        file = directory / "dotted.filename.txt"
+        file.write_text("content", encoding="utf-8")
+        resolved_path = get_resolved_pathname(str(file))
+        assert resolved_path == f"{tmp_path}/dir_name/dotted.filename.txt"
+
+    def test_resolve_package_separate(self):
+        actual = resolve_path_and_filename_for_package("/home/rob/", "file.csv")
+        assert actual == "/home/rob/file.csv"
+
+    def test_resolve_package_combined(self):
+        actual = resolve_path_and_filename_for_package("/home/rob/file.csv")
+        assert actual == "/home/rob/file.csv"
+
+    def test_resolve_package_combined_dotted(self):
+        # old: works, new: should not work
+        actual = resolve_path_and_filename_for_package(".home.rob.file.csv")
+        assert actual == "/home/rob/file.csv"
+
+    def test_resolve_package_module_separate(self, project_dir):
+        actual = resolve_path_and_filename_for_package("syscore.tests", "file.csv")
+        assert actual == f"{project_dir}/syscore/tests/file.csv"
+
+    def test_resolve_package_module_combined(self, project_dir):
+        actual = resolve_path_and_filename_for_package("syscore.tests.file.csv")
+        assert actual == f"{project_dir}/syscore/tests/file.csv"
 
     @pytest.mark.xfail(reason="Cannot work with current implementation")
     def test_resolve_resolve_path_and_filename_for_package_with_dotted_dir_name(
@@ -74,15 +86,6 @@ class TestFileUtilsUnix:
             f"{tmp_path}/dir.name.with.dots", "hello.txt"
         )
         assert resolved_path == f"{tmp_path}/dir.name.with.dots/hello.txt"
-
-    @pytest.mark.xfail(reason="Cannot work with current implementation")
-    def test_resolve_dotted_file_name(self, tmp_path):
-        directory = tmp_path / "dir_name"
-        directory.mkdir()
-        file = directory / "dotted.filename.txt"
-        file.write_text("content", encoding="utf-8")
-        resolved_path = get_resolved_pathname(str(file))
-        assert resolved_path == f"{tmp_path}/dir_name/dotted.filename.txt"
 
     @pytest.mark.xfail(reason="Cannot work with current implementation")
     def test_resolve_resolve_path_and_filename_for_package_with_dotted_file_name(
