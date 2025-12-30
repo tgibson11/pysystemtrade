@@ -69,6 +69,12 @@ class TestFileUtilsUnix:
         actual = resolve_path_and_filename_for_package("syscore.tests", "file.csv")
         assert actual == f"{project_dir}/syscore/tests/file.csv"
 
+    def test_resolve_package_module_instr_data_module(self, project_dir):
+        actual = resolve_path_and_filename_for_package(
+            "data.futures.csvconfig", "instrumentconfig.csv"
+        )
+        assert actual == f"{project_dir}/data/futures/csvconfig/instrumentconfig.csv"
+
     def test_resolve_package_module_combined(self, project_dir):
         actual = resolve_path_and_filename_for_package(
             "syscore.tests.pricetestdata.csv"
