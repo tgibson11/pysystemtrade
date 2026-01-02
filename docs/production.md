@@ -720,7 +720,7 @@ In production, the requirements are more complex than in sim. As well as the con
 Configure the default production setup with:
 
 ```
-PYSYS_LOGGING_CONFIG=syslogging.logging_prod.yaml
+PYSYS_LOGGING_CONFIG=/home/user/config/logging_prod.yaml
 ```
 
 At the client side, (pysystemtrade) there are three handlers: socket, console, and email. There is a server (separate process) for the socket handler. More details on each below
