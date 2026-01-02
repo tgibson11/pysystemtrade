@@ -5,6 +5,7 @@ from importlib import import_module
 import os
 from pathlib import Path
 from typing import List, Tuple
+import warnings
 
 from syscore.dateutils import SECONDS_PER_DAY
 
@@ -136,6 +137,11 @@ def resolve_path_and_filename_for_package(
 
     path_and_filename_as_list = transform_path_into_list(path_and_filename)
     if separate_filename is None:
+        warnings.warn(
+            "Passing no 'separate_filename' is deprecated, "
+            "and will cause an error in future",
+            DeprecationWarning,
+        )
         (
             path_as_list,
             separate_filename,
