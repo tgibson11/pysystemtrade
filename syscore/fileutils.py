@@ -5,7 +5,6 @@ from importlib import import_module
 import os
 from pathlib import Path
 from typing import List, Tuple
-import warnings
 
 from syscore.dateutils import SECONDS_PER_DAY
 
@@ -137,11 +136,6 @@ def resolve_path_and_filename_for_package(
 
     path_and_filename_as_list = transform_path_into_list(path_and_filename)
     if separate_filename is None:
-        warnings.warn(
-            "Passing no 'separate_filename' is deprecated, "
-            "and will cause an error in future",
-            DeprecationWarning,
-        )
         (
             path_as_list,
             separate_filename,
@@ -387,6 +381,7 @@ def full_filename_for_file_in_home_dir(filename: str) -> str:
 
 
 def does_filename_exist(filename: str) -> bool:
+    # TODO
     resolved_filename = resolve_path_and_filename_for_package(filename)
     file_exists = does_resolved_filename_exist(resolved_filename)
     return file_exists
@@ -395,3 +390,7 @@ def does_filename_exist(filename: str) -> bool:
 def does_resolved_filename_exist(resolved_filename: str) -> bool:
     file_exists = os.path.isfile(resolved_filename)
     return file_exists
+
+
+def does_path_exist(filename: str) -> bool:
+    return Path(filename).exists()

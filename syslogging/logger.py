@@ -6,7 +6,6 @@ import logging.config
 import syslogging
 from syslogging.adapter import *
 from syslogging.pyyaml_env import parse_config
-from syscore.fileutils import resolve_path_and_filename_for_package
 
 CONFIG_ENV_VAR = "PYSYS_LOGGING_CONFIG"
 LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s %(message)s"
