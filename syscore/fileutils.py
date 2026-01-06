@@ -4,7 +4,7 @@ import time
 from importlib import import_module
 import os
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, TextIO
 
 from syscore.dateutils import SECONDS_PER_DAY
 
@@ -26,7 +26,7 @@ from syscore.dateutils import SECONDS_PER_DAY
 
 def rename_files_with_extension_in_pathname_as_archive_files(
     pathname: str, extension: str = ".txt", archive_extension: str = ".arch"
-):
+) -> None:
     """
     Find all the files with a particular extension in a directory, and rename them
      eg thing.txt will become thing_yyyymmdd.txt where yyyymmdd is todays date
@@ -47,7 +47,7 @@ def rename_files_with_extension_in_pathname_as_archive_files(
 
 def rename_file_as_archive(
     full_filename: str, old_extension: str = ".txt", archive_extension: str = ".arch"
-):
+) -> None:
     """
     Rename a file with archive suffix and extension
      eg thing.txt will become thing_yyyymmdd.arch where yyyymmdd is todays date
@@ -62,8 +62,8 @@ def rename_file_as_archive(
 
 
 def delete_old_files_with_extension_in_pathname(
-    pathname: str, days_old=30, extension=".arch"
-):
+    pathname: str, days_old: int = 30, extension: str = ".arch"
+) -> None:
     """
     Find all the files with a particular extension in a directory, and delete them
     if older than x days
@@ -77,7 +77,7 @@ def delete_old_files_with_extension_in_pathname(
         delete_file_if_too_old(filename, days_old=days_old)
 
 
-def delete_file_if_too_old(full_filename_with_ext: str, days_old: int = 30):
+def delete_file_if_too_old(full_filename_with_ext: str, days_old: int = 30) -> None:
     file_age = get_file_or_folder_age_in_days(full_filename_with_ext)
     if file_age > days_old:
         print("Deleting %s" % full_filename_with_ext)
@@ -103,7 +103,7 @@ def get_file_or_folder_age_in_days(full_filename_with_ext: str) -> float:
 
 
 def resolve_path_and_filename_for_package(
-    path_and_filename: str, separate_filename=None
+    path_and_filename: str, separate_filename: str | None = None
 ) -> str:
     """
     A way of resolving relative and absolute filenames, and dealing with awkward OS specific things
@@ -230,8 +230,8 @@ def add_reserved_characters_to_pathname(pathname: str) -> str:
 
 
 def extract_filename_from_combined_path_and_filename_list(
-    path_and_filename_as_list: list,
-) -> Tuple[list, str]:
+    path_and_filename_as_list: list[str],
+) -> Tuple[list[str], str]:
     """
     >>> extract_filename_from_combined_path_and_filename_list(['home', 'rob','file', 'csv'])
     (['home', 'rob'], 'file.csv')
@@ -308,12 +308,14 @@ def get_absolute_linux_pathname_from_list(path_as_list: List[str]) -> str:
     '/home/rob'
     """
     pathname = os.path.join(*path_as_list)
-    pathname = os.path.sep + pathname
+    pathname = os.path.sep + str(pathname)
 
     return pathname
 
 
-def get_absolute_windows_pathname_from_list(path_as_list: list) -> str:
+def get_absolute_windows_pathname_from_list(
+    path_as_list: list[str],
+) -> str:
     """
     Test will fail on linux
     >>> get_absolute_windows_pathname_from_list(['C:','home','rob'])
@@ -327,7 +329,7 @@ def get_absolute_windows_pathname_from_list(path_as_list: list) -> str:
 
     pathname = os.path.join(*path_as_list)
 
-    return pathname
+    return str(pathname)
 
 
 """
@@ -337,7 +339,9 @@ def get_absolute_windows_pathname_from_list(path_as_list: list) -> str:
 """
 
 
-def write_list_of_lists_as_html_table_in_file(file, list_of_lists: list):
+def write_list_of_lists_as_html_table_in_file(
+    file: TextIO, list_of_lists: list[str]
+) -> None:
     file.write("<table>")
     for sublist in list_of_lists:
         file.write("  <tr><td>")
@@ -347,7 +351,9 @@ def write_list_of_lists_as_html_table_in_file(file, list_of_lists: list):
     file.write("</table>")
 
 
-def files_with_extension_in_pathname(pathname: str, extension=".csv") -> List[str]:
+def files_with_extension_in_pathname(
+    pathname: str, extension: str = ".csv"
+) -> List[str]:
     """
     Find all the files with a particular extension in a directory
 
@@ -360,7 +366,7 @@ def files_with_extension_in_pathname(pathname: str, extension=".csv") -> List[st
 
 
 def files_with_extension_in_resolved_pathname(
-    resolved_pathname: str, extension=".csv"
+    resolved_pathname: str, extension: str = ".csv"
 ) -> List[str]:
     """
     Find all the files with a particular extension in a directory
