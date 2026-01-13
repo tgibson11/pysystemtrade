@@ -9,8 +9,7 @@ from sysobjects.production.trading_hours.trading_hours import (
     listOfTradingHours,
 )
 from syscore.fileutils import (
-    does_filename_exist,
-    does_path_exist,
+    does_resolved_filename_exist,
     resolve_path_and_filename_for_package,
 )
 from sysdata.config.production_config import get_production_config
@@ -24,7 +23,7 @@ def get_saved_trading_hours():
     private_path = resolve_path_and_filename_for_package(
         get_private_config_dir(), PRIVATE_CONFIG_TRADING_HOURS_FILE
     )
-    if does_path_exist(private_path):
+    if does_resolved_filename_exist(private_path):
         return read_trading_hours(private_path)
     else:
         default_path = resolve_path_and_filename_for_package(
