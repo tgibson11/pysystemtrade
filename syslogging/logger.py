@@ -6,6 +6,7 @@ import logging.config
 import syslogging
 from syslogging.adapter import *
 from syslogging.pyyaml_env import parse_config
+from syscore.fileutils import resolve_path_and_filename_for_package
 
 CONFIG_ENV_VAR = "PYSYS_LOGGING_CONFIG"
 LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s %(message)s"
@@ -97,9 +98,10 @@ def _configure_sim():
 
 def _configure_prod(logging_config_file):
     print(f"Attempting to configure prod logging from {logging_config_file}")
-    if Path(logging_config_file).exists():
+    config_path = resolve_path_and_filename_for_package(logging_config_file)
+    if Path(config_path).exists():
         try:
-            config = parse_config(path=logging_config_file)
+            config = parse_config(path=config_path)
             host, port = _get_log_server_config(config)
             try:
                 _check_log_server(host, port)
@@ -114,9 +116,7 @@ def _configure_prod(logging_config_file):
             print(f"ERROR: Problem configuring prod logging, reverting to sim: {exc}")
             _configure_sim()
     else:
-        print(
-            f"ERROR: prod logging config '{logging_config_file}' not found, reverting to sim"
-        )
+        print(f"ERROR: prod logging config '{config_path}' not found, reverting to sim")
         _configure_sim()
 
 

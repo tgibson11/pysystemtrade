@@ -10,7 +10,7 @@ from syscore.fileutils import resolve_path_and_filename_for_package
 from syscore.constants import arg_not_supplied
 import yaml
 
-DEFAULT_FILENAME = "defaults.yaml"
+DEFAULT_FILENAME = "sysdata.config.defaults.yaml"
 
 
 def get_system_defaults_dict(filename: str = arg_not_supplied) -> dict:
@@ -20,7 +20,7 @@ def get_system_defaults_dict(filename: str = arg_not_supplied) -> dict:
     """
     if filename is arg_not_supplied:
         filename = DEFAULT_FILENAME
-    default_file = resolve_path_and_filename_for_package("sysdata.config", filename)
+    default_file = resolve_path_and_filename_for_package(filename)
     with open(default_file) as file_to_parse:
         default_dict = yaml.load(file_to_parse, Loader=yaml.FullLoader)
 
