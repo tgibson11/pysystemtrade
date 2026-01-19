@@ -2,6 +2,7 @@ import glob
 import datetime
 import time
 import os
+import re
 from pathlib import Path, PurePath
 from typing import List, Tuple, TextIO
 
@@ -179,6 +180,12 @@ RESERVED_CHARACTERS = "&!*"
 
 
 def _make_absolute(path_as_list: list[str]) -> PurePath:
+    # handle absolute unix
+    if path_as_list[0] == "":
+        path_as_list[0] = os.sep
+    # handle absolute windows
+    if re.match("[A-Za-z]:$", path_as_list[0]):
+        path_as_list[0] = f"{path_as_list[0]}{os.sep}"
     path_obj = PurePath(*path_as_list)
     if not path_obj.is_absolute():
         path_obj = PYSYS_PROJECT_DIR / path_obj
@@ -216,9 +223,6 @@ def _transform_path_into_list(pathname: str) -> List[str]:
 
     if path_as_list[-1] == "":
         path_as_list.pop()
-
-    if path_as_list[0] == "":
-        path_as_list[0] = f"{os.sep}{path_as_list[0]}"
 
     return path_as_list
 
