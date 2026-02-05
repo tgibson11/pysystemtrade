@@ -2,9 +2,6 @@
 
 Systematic futures trading in python, using the systems developed by [Rob Carver](https://github.com/robcarver17/)
 
-
-[https://qoppac.blogspot.com/p/pysystemtrade.html](https://qoppac.blogspot.com/p/pysystemtrade.html)
-
 ## Description
 
 **pysystemtrade** is the open source version of Rob Carver's own backtesting and trading engine that implements systems according to the framework outlined in his book ["Systematic Trading"](https://www.systematicmoney.org/systematic-trading), which is further developed on [his blog](https://qoppac.blogspot.com) and in his [other books](https://www.systematicmoney.org/).
