@@ -10,13 +10,15 @@ class IBFilter(logging.Filter):
         super().__init__("ib_insync")
 
     def filter(self, record):
-        # if msg starts with 'Warning', then set the level to WARNING and allow
-        if record.msg.startswith("Warning"):
-            record.levelname = "WARNING"
-            record.levelno = 30
-            return True
-        # don't allow INFO or lower
-        if record.levelno < 25:
-            return False
+        # for all records with name starting 'ib_insync'
+        if record.name.startswith(self.name):
+            # if msg starts with 'Warning', then set the level to WARNING and allow
+            if record.msg.startswith("Warning"):
+                record.levelname = "WARNING"
+                record.levelno = 30
+                return True
+            # don't allow INFO or lower
+            if record.levelno < 25:
+                return False
         # otherwise allow
         return True
