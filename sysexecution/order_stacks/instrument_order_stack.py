@@ -1,4 +1,4 @@
-from sysexecution.orders.named_order_objects import missing_order, zero_order
+from sysexecution.orders.named_order_objects import missing_order
 from sysexecution.order_stacks.order_stack import orderStackData
 from sysexecution.orders.instrument_orders import instrumentOrder
 from sysexecution.orders.list_of_orders import listOfOrders
@@ -35,6 +35,12 @@ class instrumentOrderStackData(orderStackData):
             return False
 
         return True
+
+    def does_stack_have_orders_for_instrument_code(self, instrument_code: str) -> bool:
+        orders_with_instrument_code = self.list_of_orders_with_instrument_code(
+            instrument_code
+        )
+        return len(orders_with_instrument_code) > 0
 
     def list_of_strategies_with_orders_on_stack_for_instrument(
         self, instrument_code: str

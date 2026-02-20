@@ -14,7 +14,6 @@ trading_rules - a specification of the trading rules for a system
 
 from pathlib import Path
 import os
-from typing import Any
 
 import yaml
 
@@ -228,7 +227,7 @@ class Config(object):
         """
         Fills with defaults - private stuff first, then defaults
         """
-        self.log.debug("Adding config defaults")
+        # self.log.debug("Adding config defaults")
 
         self_as_dict = self.as_dict()
         defaults_dict = self.default_config_dict

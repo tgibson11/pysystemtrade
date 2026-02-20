@@ -22,11 +22,16 @@ strategy_capital_allocation:
 #
 ## Where do we save backtests
 backtest_store_directory: 'private.backtests'
+backtest_max_age: 30
+backtest_compress: False
 #
 # And backups
 csv_backup_directory: 'data.backups_csv'
 mongo_dump_directory: 'data.mongo_dump'
+# if mongo_dump_all is True, we dump all databases, otherwise just PST dbs
+mongo_dump_all: True
 echo_directory: 'data.echos'
+offsystem_backup_options: '-av'
 #
 # Interactive brokers
 ib_ipaddress: 127.0.0.1
@@ -316,6 +321,11 @@ small_system:
   cost_multiplier: 1.0
   tracking_error_buffer: 0.0125
   shrink_instrument_returns_correlation: 0.5
+#
+# Instruments with a region (ASIA, EMEA, US) listed here will cause warnings to
+# be issued by the strategy order generator if the instrument has 'active' roll
+# status (Force, Force Outright, Close, Roll Adjusted). Leave empty for no action
+regions_with_warn_on_force_orders: []
 #
 # duplicated/excluded instruments are ignored in backtests
 # we still collect price data for them in production, do rolls etc

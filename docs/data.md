@@ -16,6 +16,7 @@ Table of Contents
 * [Table of Contents](#table-of-contents)
 * [Part 1: A futures data workflow](#part-1-a-futures-data-workflow)
    * [A note on data storage](#a-note-on-data-storage)
+      * [Note on outdated shipped CSV data](#note-on-outdated-shipped-csv-data)
    * [Instrument configuration and spread costs](#instrument-configuration-and-spread-costs)
    * [Roll parameter configuration](#roll-parameter-configuration)
       * ['RollOffsetDays'](#rolloffsetdays)
@@ -24,6 +25,7 @@ Table of Contents
    * [Getting historical data for individual futures contracts](#getting-historical-data-for-individual-futures-contracts)
       * [Getting data from the broker (Interactive brokers)](#getting-data-from-the-broker-interactive-brokers)
       * [Getting data from an external data source (Barchart)](#getting-data-from-an-external-data-source-barchart)
+      * [Getting data from an external data source (Norgate Data)](#getting-data-from-an-external-data-source-norgate-data)
    * [Roll calendars](#roll-calendars)
       * [Generate a roll calendar from actual futures prices](#generate-a-roll-calendar-from-actual-futures-prices)
          * [Calculate the roll calendar](#calculate-the-roll-calendar)
@@ -102,7 +104,7 @@ In general each step relies on the previous step to work; more formally:
 
 Before we start, another note: Confusingly, data can be stored or come from various places, which include: 
 
-1. CSV files containing data that pysystemtrade is shipped with (stored in [this set of directories](/data/futures)). Any CSV data 'pipeline' object defaults to using this data set.
+1. CSV files containing data that pysystemtrade is shipped with (stored in [this set of directories](/data/futures)). Any CSV data 'pipeline' object defaults to using this data set. See [note below](#note-on-outdated-shipped-csv-data)
 2. configuration CSV files used to initialise the system, such as [`/data/futures/csvconfig/spreadcosts.csv`](/data/futures/csvconfig/spreadcosts.csv)
 3. Temporary CSV files created in the process of initialising the databases
 4. Backup CSV files, created by the production system.
@@ -123,6 +125,8 @@ Hence, there are five possible use cases:
 
 Because of this it's possible at (almost) every stage to store data in either CSV or databases (the exception are roll calendars, which only live in CSV format).
 
+### Note on outdated shipped CSV data
+The CSV multiple and adjusted files supplied with the project have not been updated since March 2024, when Rob stepped back from the project. You can find an updated (sub)set of files in [this project](https://github.com/bug-or-feature/pst-csv-data). See the [discussion here](https://github.com/pst-group/pysystemtrade/discussions/1553) 
 
 ## Instrument configuration and spread costs
 
@@ -227,6 +231,10 @@ def init_db_with_csv_futures_contract_prices_for_code(instrument_code: str, data
 ```
 
 The objects `csvFuturesContractPriceData` and `db_prices` are 'data pipelines', which allow us to read and write a specific type of data (in this case OHLC price data for individual futures contracts). They have the same methods (and they inherit from a more generic object, futuresContractPriceData), which allows us to write code that abstracts the actual place and way the data is stored. We'll see much more of this kind of thing later.
+
+### Getting data from an external data source (Norgate Data)
+
+For users preferring a one-time bulk import, [Norgate Data](https://norgatedata.com/) provides high-quality historical futures data with properly adjusted continuous contracts. If you have a Norgate subscription, you can use [norgate-pst-utils](https://github.com/davidszp/norgate-pst-utils) to export data in pysystemtrade format. Note that the Norgate API requires Windows, though this can be circumvented using virtual machines on macOS and Linux.
 
 ## Roll calendars
 
@@ -370,7 +378,9 @@ This will also copy adjusted prices, so you can now skip ahead to [creating FX d
 
 ### Updating shipped multiple prices
 
-Assuming that you have an Interactive Brokers account, you might want to update the (stale) data that you have [downloaded from the repo](/docs/backtesting.md#setting-up-mongodb-and-parquet) before [calculating back adjusted prices](#creating-and-storing-back-adjusted-prices).
+See [this script](https://github.com/pst-group/pysystemtrade/blob/develop/sysinit/futures/adhoc/update_provided_multiple_prices.py) 
+
+Assuming that you have an Interactive Brokers account, you might want to update the (stale) data that you have [downloaded from the repo](/docs/backtesting.md#setting-up-mongodb-and-parquet) before [calculating back adjusted prices](#creating-and-storing-back-adjusted-prices). [See this note](#note-on-outdated-shipped-csv-data)
 
 A first step is to [update the sampled contracts available](/docs/production.md#update-sampled-contracts-daily), and [their historical prices](/docs/production.md#update-futures-contract-historical-price-data-daily).  This might entail [manually checking](/docs/production.md#manual-check-of-futures-contract-historical-price-data) historical prices with spikes.
 

@@ -26,7 +26,7 @@ class backupMongo(object):
         log = data.log
         log.debug("Exporting mongo data")
         dump_mongo_data(data)
-        log.debug("Copying data to backup destination")
+        log.debug("Copying data to offsystem backup destination")
         backup_mongo_dump(data)
 
 
@@ -34,11 +34,25 @@ def dump_mongo_data(data: dataBlob):
     config = data.config
     host = config.get_element_or_arg_not_supplied("mongo_host")
     path = get_mongo_dump_directory()
-    data.log.debug("Dumping mongo data to %s NOT TESTED IN WINDOWS" % path)
-    if host.startswith("mongodb://"):
-        os.system("mongodump --uri='%s' -o=%s" % (host, path))
+    if host.startswith("mongodb"):
+        source = "uri"
     else:
-        os.system("mongodump --host='%s' -o=%s" % (host, path))
+        source = "host"
+
+    dump_all = config.get_element_or_default("mongo_dump_all", True)
+    if dump_all:
+        data.log.debug(f"Dumping ALL mongo data to {path} (NOT TESTED IN WINDOWS)")
+        os.system(f"mongodump --{source}='{host}' -o={path}")
+
+    else:
+        db_name = config.get_element("mongo_db")
+        data.log.debug(
+            f"Dumping mongo data from {db_name} to {path} (NOT TESTED IN WINDOWS)"
+        )
+        os.system(f"mongodump --{source}='{host}' -o={path} --db={db_name}")
+        # will silently fail if arctic db does not exist
+        os.system(f"mongodump --{source}='{host}' -o={path} --db=arctic_{db_name}")
+
     data.log.debug("Dumped")
 
 
@@ -46,7 +60,8 @@ def backup_mongo_dump(data):
     source_path = get_mongo_dump_directory()
     destination_path = get_mongo_backup_directory()
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
-    os.system("rsync -av %s %s" % (source_path, destination_path))
+    options = get_production_config().get_element("offsystem_backup_options")
+    os.system(f"rsync {options} {source_path} {destination_path}")
 
 
 if __name__ == "__main__":

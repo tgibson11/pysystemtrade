@@ -4,6 +4,7 @@ import socket
 import logging.config
 import syslogging
 from syslogging.adapter import *
+from syslogging.filters import IBFilter
 from syslogging.pyyaml_env import parse_config
 from syscore.fileutils import resolve_path_and_filename_for_package
 
@@ -80,10 +81,10 @@ def _configure_logging():
 
 
 def _configure_sim():
-    print(f"Configuring sim logging")
+    print("Configuring sim logging")
     handler = logging.StreamHandler(stream=sys.stdout)
     handler.setLevel(logging.DEBUG)
-    logging.getLogger("ib_insync").setLevel(logging.WARNING)
+    handler.addFilter(IBFilter())
     logging.getLogger("arctic").setLevel(logging.INFO)
     logging.getLogger("matplotlib").setLevel(logging.INFO)
     logging.basicConfig(

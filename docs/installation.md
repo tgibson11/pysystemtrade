@@ -15,7 +15,7 @@ git clone https://github.com/<your_git_hub_id>/pysystemtrade.git
 otherwise, you'll want the main repo
 
 ```
-git clone https://github.com/robcarver17/pysystemtrade.git
+git clone https://github.com/pst-group/pysystemtrade.git
 ```
 
 
@@ -241,7 +241,7 @@ Creating virtual environment at: .venv
 Activate with: source .venv/bin/activate
 ```
 
-Now activate the virtual envrionment as instructed.
+Now activate the virtual environment as instructed.
 ```
 source .venv/bin/activate
 ```
