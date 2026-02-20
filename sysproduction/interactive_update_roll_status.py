@@ -650,6 +650,7 @@ def get_roll_state_required(
         else:
             print("No change")
             return roll_data.original_roll_status
+    return None
 
 
 def setup_roll_data_with_state_reporting(

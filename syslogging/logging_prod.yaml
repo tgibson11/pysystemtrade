@@ -4,12 +4,16 @@ formatters:
   simple:
     format: '%(asctime)s %(levelname)s %(name)s %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
+filters:
+  ibFilter:
+    (): syslogging.filters.IBFilter
 handlers:
   console:
     class: logging.StreamHandler
     level: DEBUG
     stream: ext://sys.stdout
     formatter: simple
+    filters: [ibFilter]
 #  email:
 #    class: syslogging.handlers.PstSMTPHandler
 #    level: CRITICAL
@@ -20,6 +24,7 @@ handlers:
 #    port: 9020
 #    level: DEBUG
 #    formatter: simple
+#    filters: [ibFilter]
   file:
     class: logging.handlers.TimedRotatingFileHandler
     filename: /Users/Todd/pysystemtrade/logs/pysystemtrade_log.txt
@@ -27,13 +32,12 @@ handlers:
     backupCount: 7
     level: DEBUG
     formatter: simple
+    filters: [ibFilter]
   simplex:
     class: syslogging.handlers.SimpleXHandler
     level: CRITICAL
     formatter: simple
 loggers:
-  ib_insync:
-    level: WARNING
   arctic:
     level: INFO
   matplotlib:
