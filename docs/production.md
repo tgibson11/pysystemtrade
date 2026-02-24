@@ -279,6 +279,7 @@ You need to:
     - [Set up interactive brokers](/docs/IB.md), get a gateway running.
     - [Install MongoDB](https://docs.mongodb.com/manual/administration/install-on-linux/).
     - create a file `private_config.yaml` in the private directory of [pysystemtrade](/private), and optionally a [`private_control_config.yaml` file in the same directory](#process-configuration) See [here for more details](#system-defaults--private-config)
+    - if you are located anywhere other than GMT, then you must adjust the trading hours for your timezone. See [here](#trading-hours-configuration)
     - Set `parquet_store` in 'private_config.yaml' to the Parquet directory you set up earlier 
     - [check a MongoDB server is running with the right data directory](/docs/data.md#mongodb) command line: `mongod --dbpath $MONGO_DATA`
     - launch an IB gateway (this could be done automatically depending on your security setup)
@@ -2930,7 +2931,10 @@ The following are used when initialising the database with its initial configura
 
 ### Trading hours configuration
 
-The default trading hours config for IB is specified at: [sysbrokers/IB/ib_config_trading_hours.yaml](https://github.com/pst-group/pysystemtrade/blob/develop/sysbrokers/IB/ib_config_trading_hours.yaml). That document explains the format, and how to customise trading hours. If you are using the default private config directory, a custom file should be at `private/private_config_trading_hours.yaml`. Or, if using a [custom private directory](#custom-private-directory), then the file would be at `$PYSYS_PRIVATE_CONFIG_DIR/private_config_trading_hours.yaml`. Any changes must be made in conjunction with a change to `GMT_offset_hours` in your private config file, if you are not in the GMT timezone.
+The default trading hours config for IB is specified at: [sysbrokers/IB/ib_config_trading_hours.yaml](https://github.com/pst-group/pysystemtrade/blob/develop/sysbrokers/IB/ib_config_trading_hours.yaml). The default config assumes GMT. Anyone living anywhere else must do both of the following for production trading:
+- Update `GMT_offset_hours` in private config to your local timezone
+- Copy the trading hours config into a new private config file at `private/private_config_trading_hours.yaml`, or if using a [custom private directory](#custom-private-directory), then `$PYSYS_PRIVATE_CONFIG_DIR/private_config_trading_hours.yaml`
+- Update the per-timezone trading hours. The simplest way to do that is to add (or subtract) your GMT offset from the default times. Keep in mind that the start time always has to be before the end time, which means in some cases you might want two sessions per day if the trading hours would span midnight. See the instrument-specific examples for how to configure multiple sessions per day.
 
 ## Capital
 
