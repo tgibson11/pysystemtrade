@@ -28,5 +28,6 @@ def update_system_backtests():
             )
             system_backtest_runner.run_strategy_method()
 
+
 if __name__ == "__main__":
     update_system_backtests()

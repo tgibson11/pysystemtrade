@@ -29,5 +29,6 @@ def update_strategy_orders():
             )
             strategy_order_generator.run_strategy_method()
 
+
 if __name__ == "__main__":
     update_strategy_orders()
