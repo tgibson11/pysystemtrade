@@ -901,7 +901,7 @@ print(system.accounts.portfolio().sharpe())
 
 #### Arctic
 
-Early versions of this project used [Arctic](https://github.com/manahl/arctic) for storing time series data. Since November 2023, Parquet is the default. See [the reasoning behind the change](https://github.com/robcarver17/pysystemtrade/discussions/466), [switchover instructions](https://github.com/robcarver17/pysystemtrade/discussions/1290), and [required scheduling config changes](https://github.com/robcarver17/pysystemtrade/discussions/1291).
+Early versions of this project used [Arctic](https://github.com/manahl/arctic) for storing time series data. Since November 2023, Parquet is the default. See [the reasoning behind the change](https://github.com/pst-group/pysystemtrade/discussions/466), [switchover instructions](https://github.com/pst-group/pysystemtrade/discussions/1290), and [required scheduling config changes](https://github.com/pst-group/pysystemtrade/discussions/1291).
 
 The [original Arctic project](https://github.com/man-group/arctic) is no longer maintained - development has moved to [ArcticDB](https://github.com/man-group/ArcticDB)
 
@@ -3123,7 +3123,6 @@ resolve_path_and_filename_for_package("\\home/rob.file.csv")
 
 ```
 
-
 These functions are used internally whenever a file name is passed in, so feel free to use any of these file formats when specifying eg a configuration filename.
 ```
 ### Absolute: Windows (note use of double backslash in str)
@@ -3134,6 +3133,31 @@ These functions are used internally whenever a file name is passed in, so feel f
 
 ## Relative: Dot format to find a file in the installed pysystemtrade
 "syscore.tests.pricedata.csv"
+```
+
+Obviously, using 'dots' as a separator brings limitations, like supporting directories or files with 'dots' in their names. This won't work:
+```
+>>> resolve_path_and_filename_for_package("syscore/tests/price.test.data.csv")
+'/home/user/pysystemtrade/syscore/tests/price/test/data.csv'
+```
+
+do this instead:
+```
+>>> resolve_path_and_filename_for_package("syscore/tests", "price.test.data.csv")
+'/home/user/pysystemtrade/syscore/tests/price.test.data.csv'
+```
+
+This will also not work:
+```
+>>> get_resolved_pathname("data/dir.with.dots")
+'/home/user/pysystemtrade/data/dir/with/dots'
+```
+
+do this instead:
+```
+>>> from pathlib import Path
+>>> get_resolved_pathname(Path("data/dir.with.dots"))
+'/home/user/pysystemtrade/data/dir.with.dots'
 ```
 
 ## Logging
@@ -3443,7 +3467,7 @@ I've included a smoothing function, otherwise jumps in the multiplier will cause
 
 ## Specifying weights as hierarchy
 
-It is possible to specify instrument and forecast weights as a hierarchical config. This has the advantage that the high-level characteristics of a trading strategy can be maintained, even when rules (or instruments) are excluded due to costs. Read more [here](https://github.com/robcarver17/pysystemtrade/discussions/1160). See below for example config snippets
+It is possible to specify instrument and forecast weights as a hierarchical config. This has the advantage that the high-level characteristics of a trading strategy can be maintained, even when rules (or instruments) are excluded due to costs. Read more [here](https://github.com/pst-group/pysystemtrade/discussions/1160). See below for example config snippets
 
 ### Hierarchical forecast weight example
 

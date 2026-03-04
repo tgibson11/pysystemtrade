@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = [
+    "setuptools >= 61.0",
+    "setuptools-scm >= 8.0"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,6 +10,9 @@ name = "pysystemtrade"
 version = "1.8.2"
 authors = [
   { name="Robert Carver", email="rob@systematicmoney.org" },
+]
+maintainers = [
+  { name="Andy Geach", email="andy@bugorfeature.net" },
 ]
 description = "Systematic futures trading in Python"
 readme = "README.md"
@@ -21,7 +27,7 @@ dependencies = [
     "scipy>=1.0.0",
     "pymongo==3.11.3",
     "ib_async>=2,<3",
-    "psutil==5.6.7",
+    "psutil==7.2.1",
     "Flask>=2.0.1",
     "Werkzeug>=2.0.1",
     "statsmodels==0.14.0",
@@ -36,16 +42,19 @@ arctic = ["arctic @ git+https://github.com/man-group/arctic.git"]
 dev = ["pytest>6.2", "black==23.11.0"]
 
 [project.urls]
-"Homepage" = "https://github.com/robcarver17/pysystemtrade"
-"Bug Tracker" = "https://github.com/robcarver17/pysystemtrade/issues"
+"Homepage" = "https://github.com/pst-group/pysystemtrade"
+"Bug Tracker" = "https://github.com/pst-group/pysystemtrade/issues"
 
 [tool.setuptools.packages]
 find = {}
 
 [tool.setuptools.package-data]
 "data" = ["*.csv"]
+"data.futures" = ["*.csv"]
 "private" = ["*.yaml"]
-"sysbrokers" = ["*.csv", "*.yaml"]
+"sysbrokers" = ["*.csv"]
+"sysbrokers.IB" = ["*.yaml"]
+"sysbrokers.IB.config" = ["*.csv"]
 "syscontrol" = ["*.yaml"]
 "sysdata" = ["*.csv"]
 "sysdata.config" = ["*.yaml"]

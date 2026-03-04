@@ -4,12 +4,16 @@ formatters:
   simple:
     format: '%(asctime)s %(levelname)s %(name)s %(message)s'
     dateformat: '%Y-%m-%d %H:%M:%S'
+filters:
+  ibFilter:
+    (): syslogging.filters.IBFilter
 handlers:
   console:
     class: logging.StreamHandler
     level: DEBUG
     formatter: simple
     stream: ext://sys.stdout
+    filters: [ibFilter]
 loggers:
   ib_async:
     level: WARNING

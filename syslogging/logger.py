@@ -1,9 +1,11 @@
+from pathlib import Path
 import os
 import sys
 import socket
 import logging.config
 import syslogging
 from syslogging.adapter import *
+from syslogging.filters import IBFilter
 from syslogging.pyyaml_env import parse_config
 from syscore.fileutils import resolve_path_and_filename_for_package
 
@@ -83,7 +85,7 @@ def _configure_sim():
     print("Configuring sim logging")
     handler = logging.StreamHandler(stream=sys.stdout)
     handler.setLevel(logging.DEBUG)
-    logging.getLogger("ib_async").setLevel(logging.WARNING)
+    handler.addFilter(IBFilter())
     logging.getLogger("arctic").setLevel(logging.INFO)
     logging.getLogger("matplotlib").setLevel(logging.INFO)
     logging.basicConfig(
@@ -98,7 +100,7 @@ def _configure_sim():
 def _configure_prod(logging_config_file):
     print(f"Attempting to configure prod logging from {logging_config_file}")
     config_path = resolve_path_and_filename_for_package(logging_config_file)
-    if os.path.exists(config_path):
+    if Path(config_path).exists():
         try:
             config = parse_config(path=config_path)
             host, port = _get_log_server_config(config)
