@@ -133,6 +133,7 @@ def get_daily_ts_stdev_perc_of_prices(data, instrument_code: str) -> pd.Series:
 def get_corr_params_and_func(
     data, passed_correlation_estimation_parameters: dict = arg_not_supplied
 ) -> tuple:
+    # TODO 1252 correlations
     if passed_correlation_estimation_parameters is arg_not_supplied:
         config = data.config
         corr_params = config.get_element("instrument_returns_correlation")
