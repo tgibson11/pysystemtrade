@@ -407,7 +407,6 @@ class Portfolios(SystemStage):
         config = self.config
 
         # Get some useful stuff from the config
-        # TODO 1252 correlations
         corr_params = copy(config.instrument_correlation_estimate)
 
         # which function to use for calculation

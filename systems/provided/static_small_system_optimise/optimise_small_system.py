@@ -27,8 +27,6 @@ def find_best_ordered_set_of_instruments(
     ## 'system' can be precalculated up to the combined forecast stage to save time
 
     system.config.notional_trading_capital = capital
-
-    # TODO 1252 correlations
     system.config.instrument_correlation_estimate["floor_at_zero"] = False
 
     list_of_instruments = system.portfolio.get_instrument_list(
