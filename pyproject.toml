@@ -35,6 +35,7 @@ dependencies = [
     "scikit-learn>1.3.0",
     "pytz==2023.3",
     "pyarrow>=16,<20",
+    "windows_toasts",
 ]
 
 [project.optional-dependencies]
