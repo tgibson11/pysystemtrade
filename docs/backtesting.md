@@ -415,6 +415,8 @@ instruments: ["SOFR", "US10", "EUROSTX", "V2X", "MXP", "CORN"]
 Note that if moving from fixed to estimated instrument weights (by changing `system.config.use_instrument_weight_estimates` to `True`), the set of instruments selected in your `system.config.instrument_weights` will be ignored; if you want to continue using this same set of instruments, you need to say so:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.config.instruments = list(system.config.instrument_weights.keys())
 ```
 
@@ -1113,6 +1115,8 @@ Note this isn't enough for a working trading system as trading rules aren't popu
 
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.accounts.portfolio()
 ```
 
@@ -1175,6 +1179,8 @@ config.volatility_calculation['days']=20
 This is especially true if you're changing the config that has been included within a system, which will already include all the defaults:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.config.instrument_div_multiplier=1.1 ## not nested, no problem
 
 ## If we change anything that is nested, we need to change just one element to avoid clearing the defaults:
@@ -1203,6 +1209,8 @@ If you develop your own stages or modify existing ones you might want to include
 
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 
 ## Assuming your config item is called my_config_item; in the relevant method:
 
@@ -1297,6 +1305,7 @@ system=futures_system()
 We can override what's provided, and include our own data, and / or configuration, in such a system:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
 system=futures_system(data=my_data)
 system=futures_system(config=my_config)
 system=futures_system(data=my_data, config=my_config)
@@ -1305,6 +1314,7 @@ system=futures_system(data=my_data, config=my_config)
 Finally we can also create our own [trading rules object](#stage-rules), and pass that in. This is useful for interactive model development. If for example we've just written a new rule on the fly:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
 my_rules=dict(rule=a_new_rule)
 system=futures_system(trading_rules=my_rules) ## we probably need a new configuration as well here if we're using fixed forecast weights
 ```
@@ -1384,18 +1394,24 @@ The system object doesn't do very much in itself, except provide access to its '
 For example to get the final portfolio level 'notional' position, which is in the child stage named `portfolio`:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.portfolio.get_notional_position("SOFR")
 ```
 
 We can also access the methods in the data object that is part of every system:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.data.get_raw_price("SOFR")
 ```
 
 For a list of all the methods in a system and its stages see [stage methods](#table-of-standard-systemdata-and-systemstage-methods). Alternatively:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 
 system  ## lists all the stages
 system.stage_name.methods()  ## lists all the methods in a particular stage
@@ -1405,6 +1421,8 @@ system.data.methods()  ## also works for data
 We can also access or change elements of the config object:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.config.trading_rules
 system.config.instrument_div_multiplier=1.2
 ```
@@ -1556,6 +1574,8 @@ For example here are is how we'd check the cache after getting a notional positi
 
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.portfolio.get_notional_position("SOFR")
 
 system.cache.get_items_with_data() ## this list everything.
@@ -1829,6 +1849,8 @@ SystemStage 'rawdata'
 So we can access the data methods of each stage:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 system.rawdata.get_raw_price("SOFR").tail(5)
 ```
 
@@ -2786,6 +2808,8 @@ There is a lot more to `accountCurve` and group objects than meets the eye.
 Let's start with `accountCurve`, which is the output you get from `systems.account.pandl_for_subsystem` amongst other things
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 acc_curve=system.accounts.pandl_for_subsystem("DAX")
 ```
 
@@ -2861,6 +2885,8 @@ Incidentally you can 'daisy-chain' the percentage, frequency, and gross/net/cost
 `pandl_for_trading_rule_unweighted`. For example:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 acc_curve_group=system.accounts.portfolio()
 ```
 
@@ -2938,12 +2964,16 @@ acc_curve_group.get_stats("sharpe").pvalue(timeweighted=True) ## p value of t st
 A nested `accountCurveGroup`, is the output you get from `pandl_for_all_trading_rules` and `pandl_for_all_trading_rules_unweighted`. For example:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 nested_acc_curve_group=system.accounts.pandl_for_all_trading_rules()
 ```
 
 This is an account curve group, whose elements are the performance of each trading rule eg this kind of thing works:
 
 ```python
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
 ewmac64_acc=system.accounts.pandl_for_all_trading_rules()['ewmac64_256']
 ```
 
@@ -3942,9 +3972,9 @@ All other methods in pysystemtrade use fixed capital.
 The tables in this section list all the public methods that can be used to get data out of a system and its 'child' stages. You can also use the methods() method:
 
 ```python
-import private.projects.artandscience.methods
-
-private.projects.artandscience.methods.methods()  ## works for any stage or data
+from systems.provided.futures_chapter15.basesystem import futures_system
+system=futures_system()
+system.rawdata.methods()  ## works for any stage or data
 ```
 
 ### Explanation of columns
