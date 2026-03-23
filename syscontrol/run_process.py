@@ -17,15 +17,13 @@ We kick them all off in the crontab at a specific time (midnight is easiest), bu
 
 """
 import time
-import traceback
-
+import sys
 from syscontrol.report_process_status import reportProcessStatus
 from syscore.constants import success
 
 from syscontrol.timer_functions import get_list_of_timer_functions, listOfTimerFunctions
 
 from sysdata.data_blob import dataBlob
-from syslogdiag.email_via_db_interface import send_production_mail_msg
 
 from syslogging.logger import *
 
@@ -103,15 +101,9 @@ class processToRun(object):
         except processNotStarted:
             return None
 
-        try:
-            self._run_on_start()
-            self._main_loop_over_methods()
-            self._finish()
-        except Exception:
-            subject = f"Process {self.process_name} failed"
-            body = traceback.format_exc()
-            send_production_mail_msg(self.data, body, subject)
-            raise
+        self._run_on_start()
+        self._main_loop_over_methods()
+        self._finish()
 
     def _run_on_start(self):
         self.data_control.start_process(self.process_name)
