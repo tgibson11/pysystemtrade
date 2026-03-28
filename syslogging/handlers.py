@@ -91,22 +91,6 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         logger.handle(record)
 
 
-class SimpleXHandler(logging.Handler):
-    """
-    A handler class which sends a SimpleX message for each logging event, using the
-    existing PST config. Defaults to send emails for CRITICAL records only
-    """
-
-    def __init__(self, level=logging.CRITICAL):
-        logging.Handler.__init__(self, level=level)
-
-    def emit(self, record):
-        try:
-            msg = f"*{record.levelname}*: {record.msg}"
-            simplex.send(msg)
-        except Exception as exc:
-            print(f"Problem sending message: {exc}")
-
 class WindowsHandler(logging.Handler):
     """
     A handler class which creates a Windows notification for each logging event, using the
