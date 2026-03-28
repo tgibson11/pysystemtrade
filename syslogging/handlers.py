@@ -4,7 +4,7 @@ import pickle
 import socketserver
 import struct
 
-from syslogdiag import simplex, windows
+from syslogdiag import windows
 from syslogdiag.emailing import send_mail_msg
 
 
