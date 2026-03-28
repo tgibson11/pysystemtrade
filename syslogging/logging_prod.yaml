@@ -13,8 +13,8 @@ handlers:
     level: DEBUG
     stream: ext://sys.stdout
     formatter: simple
-    filters: [ ibFilter ]
-  #  email:
+    filters: [ibFilter]
+#  email:
 #    class: syslogging.handlers.PstSMTPHandler
 #    level: CRITICAL
 #    formatter: simple
@@ -24,7 +24,7 @@ handlers:
 #    port: 9020
 #    level: DEBUG
 #    formatter: simple
-  #    filters: [ibFilter]
+#    filters: [ibFilter]
   file:
     class: logging.handlers.TimedRotatingFileHandler
     filename: /Users/Todd/pysystemtrade/logs/pysystemtrade_log.txt
