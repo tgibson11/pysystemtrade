@@ -113,7 +113,9 @@ def _configure_prod(logging_config_file):
                 except BlockingIOError:
                     print(f"Log server detected OK at {host}:{port}")
                 except (ConnectionResetError, ConnectionRefusedError):
-                    print(f"Cannot connect to log server at {host}:{port}, is it running?")
+                    print(
+                        f"Cannot connect to log server at {host}:{port}, is it running?"
+                    )
                     raise
             logging.config.dictConfig(config)
             syslogging.logging_configured = True
