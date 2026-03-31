@@ -14,29 +14,17 @@ handlers:
     stream: ext://sys.stdout
     formatter: simple
     filters: [ibFilter]
-#  email:
-#    class: syslogging.handlers.PstSMTPHandler
-#    level: CRITICAL
-#    formatter: simple
-#  socket:
-#    class: logging.handlers.SocketHandler
-#    host: localhost
-#    port: 9020
-#    level: DEBUG
-#    formatter: simple
-#    filters: [ibFilter]
-  file:
-    class: logging.handlers.TimedRotatingFileHandler
-    filename: /Users/Todd/pysystemtrade/logs/pysystemtrade_log.txt
-    when: D
-    backupCount: 7
-    level: DEBUG
-    formatter: simple
-    filters: [ ibFilter]
-  windows:
-    class: syslogging.handlers.WindowsHandler
+  email:
+    class: syslogging.handlers.PstSMTPHandler
     level: CRITICAL
     formatter: simple
+  socket:
+    class: logging.handlers.SocketHandler
+    host: localhost
+    port: 9020
+    level: DEBUG
+    formatter: simple
+    filters: [ibFilter]
 loggers:
   arctic:
     level: INFO
@@ -46,5 +34,5 @@ root:
   level: DEBUG
   handlers:
     - console
-    - file
-    - windows
+    - email
+    - socket
