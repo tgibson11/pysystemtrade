@@ -1,6 +1,6 @@
 This document is specifically about using pysystemtrade to connect with *Interactive Brokers (IB)*
 
-As of version 0.28.0, this requires the [ib_async](https://github.com/ib-api-reloaded/ib_async) library.
+As of version 0.28.0, this requires the [ib-insync](https://github.com/erdewit/ib_insync) library. In April 2026, we switched to [ib_async](https://github.com/ib-api-reloaded/ib_async).
 
 Although this document is about Interactive Brokers, you should read it carefully if you plan to use other brokers as it explains how to modify the various classes to achieve that, or perhaps if you want to use an alternative Python layer to talk to the IB API
 
