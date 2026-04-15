@@ -4,7 +4,6 @@ import pickle
 import socketserver
 import struct
 
-from syslogdiag import windows
 from syslogdiag.emailing import send_mail_msg
 
 
@@ -89,20 +88,3 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         # to do filtering, do it at the client end to save wasting
         # cycles and network bandwidth!
         logger.handle(record)
-
-
-class WindowsHandler(logging.Handler):
-    """
-    A handler class which creates a Windows notification for each logging event, using the
-    existing PST config. Defaults to send emails for CRITICAL records only
-    """
-
-    def __init__(self, level=logging.CRITICAL):
-        logging.Handler.__init__(self, level=level)
-
-    def emit(self, record):
-        try:
-            msg = f"*{record.levelname}*: {record.msg}"
-            windows.notify(msg)
-        except Exception as exc:
-            print(f"Problem sending message: {exc}")
