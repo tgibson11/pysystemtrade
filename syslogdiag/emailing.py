@@ -7,6 +7,7 @@ from typing import List
 
 import pandas as pd
 
+from syscore.constants import arg_not_supplied
 from sysdata.config.production_config import get_production_config
 
 
@@ -77,7 +78,7 @@ def _send_msg(msg: MIMEMultipart):
     """
     Send a message composed by other things
     """
-    email_server, email_address, email_pwd, email_to, email_port = get_email_details()
+    email_server, email_address, email_pwd, email_to, email_port, email_username = get_email_details()
 
     me = email_address
     you = email_to
@@ -96,7 +97,7 @@ def _send_msg(msg: MIMEMultipart):
         s.starttls()
     except:
         pass
-    s.login(email_address, email_pwd)
+    s.login(email_username, email_pwd)
     s.sendmail(me, [you], msg.as_string())
     s.quit()
 
@@ -110,10 +111,13 @@ def get_email_details():
         email_server = production_config.email_server
         email_to = production_config.email_to
         email_port = production_config.email_port
+        email_username = production_config.get_element_or_default(
+            'email_username', email_address
+        )
     except:
         raise Exception(
             "Need to have all of these for email to work in private config: email_address, email_pwd, email_server, email_to",
             "email_port",
         )
 
-    return email_server, email_address, email_pwd, email_to, email_port
+    return email_server, email_address, email_pwd, email_to, email_port, email_username
