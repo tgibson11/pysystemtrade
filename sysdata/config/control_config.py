@@ -1,5 +1,3 @@
-import os
-
 from sysdata.config.configdata import Config
 from syscore.fileutils import resolve_path_and_filename_for_package
 from sysdata.config.private_config import get_private_config_dir
