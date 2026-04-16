@@ -10,10 +10,9 @@ DEFAULT_CONTROL_CONFIG_FILE = "syscontrol.control_config.yaml"
 
 
 def get_control_config() -> Config:
-    dir = get_private_config_dir()
     # Path resolution is done by the Config object
     # And doing it twice can be a problem (e.g., /usr/local/lib/python3.12/...)
-    private_control_path = os.path.join(dir, PRIVATE_CONTROL_CONFIG_FILE)
+    private_control_path = PRIVATE_CONTROL_CONFIG_FILE
     default_control_path = DEFAULT_CONTROL_CONFIG_FILE
 
     try:
