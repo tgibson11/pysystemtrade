@@ -1,3 +1,5 @@
+import os
+
 from sysdata.config.configdata import Config
 from syscore.fileutils import resolve_path_and_filename_for_package
 from sysdata.config.private_config import get_private_config_dir
@@ -9,12 +11,10 @@ DEFAULT_CONTROL_CONFIG_FILE = "syscontrol.control_config.yaml"
 
 def get_control_config() -> Config:
     dir = get_private_config_dir()
-    private_control_path = resolve_path_and_filename_for_package(
-        dir, PRIVATE_CONTROL_CONFIG_FILE
-    )
-    default_control_path = resolve_path_and_filename_for_package(
-        DEFAULT_CONTROL_CONFIG_FILE
-    )
+    # Path resolution is done by the Config object
+    # And doing it twice can be a problem (e.g., /usr/local/lib/python3.12/...)
+    private_control_path = os.path.join(dir, PRIVATE_CONTROL_CONFIG_FILE)
+    default_control_path = DEFAULT_CONTROL_CONFIG_FILE
 
     try:
         control_config = Config(
