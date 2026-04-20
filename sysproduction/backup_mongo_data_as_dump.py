@@ -66,7 +66,7 @@ def backup_mongo_dump(data):
     data.log.debug("Copy from %s to %s" % (source_path, destination_path))
     options = get_production_config().get_element("offsystem_backup_options")
     if platform.system() == "Windows":
-        os.system(f"robocopy {source_path} {destination_path} {options}")
+        os.system(f"robocopy \"{source_path}\" \"{destination_path}\" {options}")
     else:
         os.system(f"rsync {options} {source_path} {destination_path}")
 
