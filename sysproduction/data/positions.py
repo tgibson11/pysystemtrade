@@ -299,7 +299,8 @@ class diagPositions(productionDataLayerGeneric):
         data_contracts = dataContracts(self.data)
         try:
             actual_expiry = data_contracts.get_actual_expiry(
-                original_contract.instrument_code, original_contract.contract_date
+                original_contract.instrument_code,
+                original_contract.contract_date.date_str
             )
         except ContractNotFound:
             self.data.log.warning(
