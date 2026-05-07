@@ -188,9 +188,12 @@ class systemDiag(object):
         instrument_list = self.instrument_list()
         fdm_results = dict()
         for instrument in instrument_list:
-            fdm = system.combForecast.get_forecast_diversification_multiplier(
-                instrument
-            ).values[-1]
+            try:
+                fdm = system.combForecast.get_forecast_diversification_multiplier(
+                    instrument
+                ).values[-1]
+            except IndexError:
+                continue
             fdm_results[instrument] = float(fdm)
 
         return fdm_results
@@ -206,9 +209,13 @@ class systemDiag(object):
         instrument_list = self.instrument_list()
         forecast_weights = dict()
         for instrument in instrument_list:
-            weights = dict(
-                system.combForecast.get_forecast_weights(instrument).iloc[-1]
-            )
+            try:
+                weights = dict(
+                    system.combForecast.get_forecast_weights(instrument).iloc[-1]
+                )
+            except IndexError:
+                continue
+
             weights = dict(
                 (str(rule_name), float(weight)) for rule_name, weight in weights.items()
             )
@@ -262,6 +269,7 @@ class systemDiag(object):
                 output_dict[config_item] = dict_value
             except BaseException:
                 print("Couldn't get %s will exclude from output" % config_item)
+                raise
 
         return output_dict
 
