@@ -5,7 +5,7 @@ from systems.diagoutput import systemDiag
 from systems.provided.rob_system.run_system import futures_system
 
 system = futures_system(
-    config_filename="/Users/Todd/PyCharmProjects/private/system_config.yaml"
+    config_filename="/Users/Todd/PyCharmProjects/pysystemtrade-config/system_config.yaml"
 )
 
 system.config.use_forecast_scale_estimates = False
