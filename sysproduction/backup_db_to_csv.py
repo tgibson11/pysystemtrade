@@ -71,7 +71,7 @@ class backupDbToCsv:
         backup_contract_position_data(backup_data)
         backup_historical_orders(backup_data)
         backup_capital(backup_data)
-        # backup_contract_data(backup_data)
+        backup_contract_data(backup_data)
         backup_spread_cost_data(backup_data)
         backup_optimal_positions(backup_data)
         backup_roll_state_data(backup_data)
