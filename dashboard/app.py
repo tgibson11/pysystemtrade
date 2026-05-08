@@ -74,11 +74,7 @@ def capital():
     capital_data = dataCapital(data)
     capital_series = capital_data.get_series_of_all_global_capital()
     now = capital_series.iloc[-1]["Actual"]
-
-    yesterday_index = capital_series.index[-1] - pd.DateOffset(days=1)
-    last_day_df = capital_series.loc[capital_series.index > yesterday_index]
-    yesterday = last_day_df.iloc[0]["Actual"]
-
+    yesterday = capital_series.last("1D").iloc[0]["Actual"]
     return {"now": now, "yesterday": yesterday}
 
 
