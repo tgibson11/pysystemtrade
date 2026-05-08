@@ -1,4 +1,3 @@
-from sysdata.csv.csv_futures_contracts import csvFuturesContractData
 from sysdata.parquet.parquet_adjusted_prices import parquetFuturesAdjustedPricesData
 from sysdata.parquet.parquet_capital import parquetCapitalData
 from sysdata.parquet.parquet_futures_per_contract_prices import (
@@ -28,6 +27,7 @@ from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPosi
 """
 
 
+from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
 from sysdata.mongodb.mongo_process_control import mongoControlProcessData
 from sysdata.mongodb.mongo_order_stack import (
     mongoInstrumentOrderStackData,
@@ -71,7 +71,7 @@ use_production_classes = {
     FX_DATA: parquetFxPricesData,
     ROLL_PARAMETERS_DATA: csvRollParametersData,
     FUTURES_INSTRUMENT_DATA: csvFuturesInstrumentData,
-    FUTURES_CONTRACT_DATA: csvFuturesContractData,
+    FUTURES_CONTRACT_DATA: mongoFuturesContractData,
     STORED_SPREAD_DATA: mongoSpreadCostData,
     FUTURES_CONTRACT_PRICE_DATA: parquetFuturesContractPriceData,
     FUTURES_MULTIPLE_PRICE_DATA: parquetFuturesMultiplePricesData,

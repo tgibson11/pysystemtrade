@@ -3,7 +3,6 @@ from collections import deque
 import pickle
 import socketserver
 import struct
-
 from syslogdiag.emailing import send_mail_msg
 
 
