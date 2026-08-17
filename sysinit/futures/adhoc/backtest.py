@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 
 from systems.provided.rob_system.run_system import futures_system
 
-system = futures_system(config_filename="/Users/Todd/PyCharmProjects/private/system_config.yaml")
+system = futures_system(config_filename="/Users/Todd/PyCharmProjects/pysystemtrade-config/system_config.yaml")
 
 system.log.msg("Sharpe Ratio: " + str(system.accounts.portfolio().sharpe()))
 
