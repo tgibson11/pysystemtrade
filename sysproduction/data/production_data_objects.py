@@ -13,6 +13,7 @@ from sysdata.parquet.parquet_historic_strategy_positions import (
 from sysdata.parquet.parquet_historic_contract_positions import (
     parquetContractPositionData,
 )
+from sysdata.sqlite.sqlite_futures_contracts import sqliteFuturesContractData
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -26,8 +27,9 @@ from sysdata.arctic.arctic_historic_contract_positions import arcticContractPosi
 from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPositionData
 """
 
-
+"""
 from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
+"""
 from sysdata.mongodb.mongo_process_control import mongoControlProcessData
 from sysdata.mongodb.mongo_order_stack import (
     mongoInstrumentOrderStackData,
@@ -71,7 +73,7 @@ use_production_classes = {
     FX_DATA: parquetFxPricesData,
     ROLL_PARAMETERS_DATA: csvRollParametersData,
     FUTURES_INSTRUMENT_DATA: csvFuturesInstrumentData,
-    FUTURES_CONTRACT_DATA: mongoFuturesContractData,
+    FUTURES_CONTRACT_DATA: sqliteFuturesContractData,
     STORED_SPREAD_DATA: mongoSpreadCostData,
     FUTURES_CONTRACT_PRICE_DATA: parquetFuturesContractPriceData,
     FUTURES_MULTIPLE_PRICE_DATA: parquetFuturesMultiplePricesData,

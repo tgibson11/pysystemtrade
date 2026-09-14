@@ -1,4 +1,5 @@
 import copy
+import sqlite3
 
 from sysbrokers.IB.ib_connection import connectionIB
 from syscore.objects import get_class_name
@@ -6,6 +7,7 @@ from syscore.constants import arg_not_supplied
 from syscore.text import camel_case_split
 from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
+from sysdata.sqlite.sqlite_data import get_sqlite_connection
 from syslogging.logger import *
 from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 from sysdata.parquet.parquet_access import ParquetAccess
@@ -20,6 +22,7 @@ class dataBlob(object):
         parquet_store_path: str = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
         mongo_db: mongoDb = arg_not_supplied,
+        sqlite_conn: sqlite3.Connection = arg_not_supplied,
         log=arg_not_supplied,
         keep_original_prefix: bool = False,
     ):
@@ -27,7 +30,7 @@ class dataBlob(object):
         Set up of a data pipeline with standard attribute names, logging, links to DB etc
 
         Class names we know how to handle are:
-        'ib*', 'mongo*', 'arctic*', 'csv*'
+        'ib*', 'mongo*', 'arctic*', 'csv*', 'sqlite*', 'parquet*'
 
             data = dataBlob([arcticFuturesContractPriceData, arcticFuturesContractPriceData, mongoFuturesContractData])
 
@@ -56,6 +59,7 @@ class dataBlob(object):
         """
 
         self._mongo_db = mongo_db
+        self._sqlite_conn = sqlite_conn
         self._ib_conn = ib_conn
         self._log = log
         self._log_name = log_name
@@ -102,6 +106,7 @@ class dataBlob(object):
             csv=self._add_csv_class,
             arctic=self._add_arctic_class,
             mongo=self._add_mongo_class,
+            sqlite=self._add_sqlite_class,
             parquet=self._add_parquet_class,
         )
 
@@ -130,6 +135,22 @@ class dataBlob(object):
             msg = (
                 "Error %s couldn't evaluate %s(self.ib_conn, self) This might be because (a) IB gateway not running, or (b) import is missing\
                          or (c) arguments don't follow pattern"
+                % (str(e), class_name)
+            )
+            self._raise_and_log_error(msg)
+
+        return resolved_instance
+
+    def _add_sqlite_class(self, class_object):
+        log = self._get_specific_logger(class_object)
+        try:
+            resolved_instance = class_object(sqlite_conn=self.sqlite_conn, log=log)
+        except Exception as e:
+            class_name = get_class_name(class_object)
+            msg = (
+                "Error '%s' couldn't evaluate %s(sqlite_conn=self.sqlite_conn) \
+                        This might be because import is missing\
+                         or arguments don't follow pattern"
                 % (str(e), class_name)
             )
             self._raise_and_log_error(msg)
@@ -278,6 +299,8 @@ class dataBlob(object):
         if self._ib_conn is not arg_not_supplied:
             self.ib_conn.close_connection()
             self.db_ib_broker_client_id.release_clientid(self.ib_conn.client_id())
+        if self._sqlite_conn is not arg_not_supplied:
+            self.sqlite_conn.close()
 
         # No need to explicitly close Mongo connections; handled by Python garbage collection
 
@@ -327,6 +350,15 @@ class dataBlob(object):
         return mongo_db
 
     @property
+    def sqlite_conn(self):
+        sqlite_conn = getattr(self, "_sqlite_conn", arg_not_supplied)
+        if sqlite_conn is arg_not_supplied:
+            sqlite_conn = self._get_new_sqlite_conn()
+            self._sqlite_conn = sqlite_conn
+
+        return sqlite_conn
+
+    @property
     def parquet_access(self) -> ParquetAccess:
         parquet_access = getattr(self, "_parquet_access", arg_not_supplied)
         if parquet_access is arg_not_supplied:
@@ -350,6 +382,11 @@ class dataBlob(object):
         mongo_db = mongoDb()
 
         return mongo_db
+
+    def _get_new_sqlite_conn(self) -> sqlite3.Connection:
+        sqlite_conn = get_sqlite_connection()
+
+        return sqlite_conn
 
     @property
     def config(self) -> Config:
@@ -378,7 +415,9 @@ class dataBlob(object):
         return log_name
 
 
-source_dict = dict(arctic="db", mongo="db", csv="db", parquet="db", ib="broker")
+source_dict = dict(
+    arctic="db", mongo="db", csv="db", parquet="db", sqlite="db", ib="broker"
+)
 
 
 def identifying_name(
