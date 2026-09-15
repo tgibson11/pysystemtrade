@@ -15,7 +15,7 @@ from sysproduction.data.positions import diagPositions
 from sysproduction.data.prices import modify_price_when_contract_has_changed
 from sysproduction.data.controls import dataLocks
 
-from sysexecution.order_stacks.order_stack import orderStackData
+from sysexecution.order_stacks.order_stack import orderStackData, missingOrder
 from sysexecution.orders.base_orders import Order
 from sysexecution.orders.contract_orders import contractOrder, contractOrderType
 from sysexecution.trade_qty import tradeQuantity
@@ -42,10 +42,11 @@ class stackHandlerForSpawning(stackHandlerCore):
             self.spawn_children_from_instrument_order_id(instrument_order_id)
 
     def spawn_children_from_instrument_order_id(self, instrument_order_id: int):
-        instrument_order = self.instrument_stack.get_order_with_id_from_stack(
-            instrument_order_id
-        )
-        if instrument_order is missing_order:
+        try:
+            instrument_order = self.instrument_stack.get_order_with_id_from_stack(
+                instrument_order_id
+            )
+        except missingOrder:
             return None
 
         data_locks = dataLocks(self.data)

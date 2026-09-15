@@ -2,6 +2,7 @@ from copy import copy
 from syscore.objects import (
     resolve_function,
 )
+from sysexecution.order_stacks.order_stack import missingOrder
 from sysexecution.orders.named_order_objects import missing_order
 from sysproduction.data.controls import dataTradeLimits
 
@@ -41,9 +42,12 @@ class stackHandlerCreateBrokerOrders(stackHandlerForFills):
             self.create_broker_order_for_contract_order(contract_order_id)
 
     def create_broker_order_for_contract_order(self, contract_order_id: int):
-        original_contract_order = self.contract_stack.get_order_with_id_from_stack(
-            contract_order_id
-        )
+        try:
+            original_contract_order = self.contract_stack.get_order_with_id_from_stack(
+                contract_order_id
+            )
+        except missingOrder:
+            return None
 
         contract_order_to_trade = self.preprocess_contract_order(
             original_contract_order
@@ -83,10 +87,6 @@ class stackHandlerCreateBrokerOrders(stackHandlerForFills):
     def preprocess_contract_order(
         self, original_contract_order: contractOrder
     ) -> contractOrder:
-        if original_contract_order is missing_order:
-            # weird race condition
-            return missing_order
-
         if original_contract_order.fill_equals_desired_trade():
             return missing_order
 

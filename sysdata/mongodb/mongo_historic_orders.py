@@ -2,7 +2,7 @@ import datetime
 
 from syscore.exceptions import missingData
 from syscore.constants import arg_not_supplied
-from sysexecution.orders.named_order_objects import missing_order
+from sysexecution.order_stacks.order_stack import missingOrder
 from sysdata.mongodb.mongo_generic import mongoDataWithSingleKey
 
 from sysexecution.orders.base_orders import Order
@@ -85,7 +85,7 @@ class mongoGenericHistoricOrdersData(genericOrdersData):
         try:
             result_dict = self.mongo_data.get_result_dict_for_key(order_id)
         except missingData:
-            return missing_order
+            raise missingOrder
 
         order_class = self._order_class()
         order = order_class.from_dict(result_dict)

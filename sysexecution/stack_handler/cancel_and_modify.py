@@ -55,9 +55,9 @@ class stackHandlerCancelAndModify(stackHandlerCore):
     def cancel_broker_order_with_id_and_return_order(
         self, broker_order_id: int
     ) -> brokerOrder:
-        broker_order = self.broker_stack.get_order_with_id_from_stack(broker_order_id)
-
-        if broker_order is missing_order:
+        try:
+            broker_order = self.broker_stack.get_order_with_id_from_stack(broker_order_id)
+        except missingOrder:
             return missing_order
 
         if broker_order.fill_equals_desired_trade():

@@ -183,8 +183,9 @@ class orderStackData(object):
         return new_order_ids
 
     def is_new_order(self, order_id: int) -> bool:
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             return False
         if existing_order.children is not no_children:
             return False
@@ -222,12 +223,12 @@ class orderStackData(object):
         allow_zero_completions=False,
         treat_inactive_as_complete=False,
     ) -> bool:
-        existing_order = self.get_order_with_id_from_stack(order_id)
-
         if allow_zero_completions:
             return True
 
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             return False
 
         order_inactive = not existing_order.active
@@ -249,8 +250,9 @@ class orderStackData(object):
     def add_children_to_order_without_existing_children(
         self, order_id: int, new_children: list
     ):
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't add children to non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -274,8 +276,9 @@ class orderStackData(object):
         self._change_order_on_stack(order_id, new_order)
 
     def add_another_child_to_order(self, order_id: int, new_child: int):
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't add children to non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -285,8 +288,9 @@ class orderStackData(object):
         self._change_order_on_stack(order_id, existing_order)
 
     def remove_children_from_order(self, order_id: int):
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't remove children from non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -309,8 +313,9 @@ class orderStackData(object):
         filled_price: float = None,
         fill_datetime: datetime.datetime = None,
     ):
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't apply fill to non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -340,9 +345,9 @@ class orderStackData(object):
 
     def zero_out(self, order_id: int):
         # zero out an order, i.e. remove its trades and fills and deactivate it
-
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't zero out non existent order" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -365,8 +370,9 @@ class orderStackData(object):
     # DEACTIVATE ORDER (Because filled or cancelled)
 
     def deactivate_order(self, order_id: int):
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't deactivate non existent order" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -397,8 +403,9 @@ class orderStackData(object):
         return order_ids
 
     def remove_order_with_id_from_stack(self, order_id: int):
-        order_on_stack = self.get_order_with_id_from_stack(order_id)
-        if order_on_stack is missing_order:
+        try:
+            order_on_stack = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             raise missingOrder(
                 "Can't remove non existent order %s from stack" % order_id
             )
@@ -419,8 +426,9 @@ class orderStackData(object):
         # Make any kind of general change to an order, checking for locks
         # Doesn't check for other conditions, eg beingactive or not
 
-        existing_order = self.get_order_with_id_from_stack(order_id)
-        if existing_order is missing_order:
+        try:
+            existing_order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't change non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -443,8 +451,9 @@ class orderStackData(object):
         self._change_order_on_stack_no_checking(order_id, new_order)
 
     def unlock_order_on_stack(self, order_id: int):
-        order = self.get_order_with_id_from_stack(order_id)
-        if order is missing_order:
+        try:
+            order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't unlock non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -453,8 +462,9 @@ class orderStackData(object):
         self._change_order_on_stack_no_checking(order_id, order)
 
     def lock_order_on_stack(self, order_id: int):
-        order = self.get_order_with_id_from_stack(order_id)
-        if order is missing_order:
+        try:
+            order = self.get_order_with_id_from_stack(order_id)
+        except missingOrder:
             error_msg = "Can't lock non existent order %d" % order_id
             self.log.warning(error_msg)
             raise missingOrder(error_msg)
@@ -544,7 +554,7 @@ class orderStackData(object):
 
     def get_order_with_id_from_stack(self, order_id: int) -> Order:
         # probably will be overridden in data implementation
-        # return missing_order if not found
+        # raise missingOrder if not found
         raise NotImplementedError
 
     def _put_order_on_stack_no_checking(self, order: Order):

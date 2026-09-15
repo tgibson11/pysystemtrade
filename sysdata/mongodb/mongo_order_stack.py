@@ -2,8 +2,7 @@ from syscore.exceptions import missingData
 from sysdata.mongodb.mongo_generic import mongoDataWithSingleKey
 from syslogging.logger import *
 
-from sysexecution.order_stacks.order_stack import orderStackData
-from sysexecution.orders.named_order_objects import missing_order
+from sysexecution.order_stacks.order_stack import orderStackData, missingOrder
 from sysexecution.orders.base_orders import Order
 from sysexecution.orders.instrument_orders import instrumentOrder
 from sysexecution.order_stacks.instrument_order_stack import instrumentOrderStackData
@@ -55,7 +54,7 @@ class mongoOrderStackData(orderStackData):
         try:
             result_dict = self.mongo_data.get_result_dict_for_key(order_id)
         except missingData:
-            return missing_order
+            raise missingOrder
 
         order_class = self._order_class()
         order = order_class.from_dict(result_dict)

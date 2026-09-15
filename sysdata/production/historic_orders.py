@@ -38,9 +38,7 @@ class genericOrdersData(baseData):
         return "genericOrdersData object"
 
     def delete_order_with_orderid(self, order_id: int):
-        order = self.get_order_with_orderid(order_id)
-        if order is missing_order:
-            raise missingOrder
+        self.get_order_with_orderid(order_id)
         self._delete_order_with_orderid_without_checking(order_id)
 
     def add_order_to_data(self, order: Order, ignore_duplication=False):
@@ -50,7 +48,7 @@ class genericOrdersData(baseData):
         raise NotImplementedError
 
     def get_order_with_orderid(self, order_id: int):
-        # return missing_order if not found
+        # raise missingOrder if not found
         raise NotImplementedError
 
     def _delete_order_with_orderid_without_checking(self, order_id: int):

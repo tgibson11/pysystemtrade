@@ -1,5 +1,6 @@
 import datetime
 from syscore.exceptions import fillExceedsTrade
+from sysexecution.order_stacks.order_stack import missingOrder
 from sysexecution.orders.named_order_objects import (
     missing_order,
     no_children,
@@ -38,10 +39,11 @@ class stackHandlerForFills(stackHandlerForCompletions):
             self.apply_broker_fill_from_broker_to_broker_database(broker_order_id)
 
     def apply_broker_fill_from_broker_to_broker_database(self, broker_order_id: int):
-        db_broker_order = self.broker_stack.get_order_with_id_from_stack(
-            broker_order_id
-        )
-        if db_broker_order is missing_order:
+        try:
+            db_broker_order = self.broker_stack.get_order_with_id_from_stack(
+                broker_order_id
+            )
+        except missingOrder:
             return None
 
         if db_broker_order.fill_equals_desired_trade():
@@ -205,10 +207,11 @@ class stackHandlerForFills(stackHandlerForCompletions):
         )
 
     def apply_contract_fill_to_instrument_order(self, contract_order_id: int):
-        contract_order = self.contract_stack.get_order_with_id_from_stack(
-            contract_order_id
-        )
-        if contract_order is missing_order:
+        try:
+            contract_order = self.contract_stack.get_order_with_id_from_stack(
+                contract_order_id
+            )
+        except missingOrder:
             return None
 
         if contract_order.fill_equals_zero():

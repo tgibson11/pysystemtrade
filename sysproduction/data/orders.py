@@ -1,5 +1,6 @@
 import datetime
 from syscore.constants import arg_not_supplied
+from sysexecution.order_stacks.order_stack import missingOrder
 from sysexecution.orders.named_order_objects import missing_order, no_parent
 
 from sysdata.production.historic_orders import (
@@ -215,8 +216,6 @@ class dataOrders(object):
         contract_order = self.get_parent_contract_order_for_historic_broker_order_id(
             order_id
         )
-        if contract_order is missing_order:
-            return missing_order
 
         instrument_order_id = contract_order.parent
         if instrument_order_id is no_parent:
