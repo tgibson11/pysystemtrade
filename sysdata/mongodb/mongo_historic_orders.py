@@ -201,27 +201,12 @@ class mongoBrokerHistoricOrdersData(
             futuresContractStrategy.from_key(key) for key in key_list
         ]
 
-        def _contains_both(
-            futures_contract_strategy: futuresContractStrategy,
-            instrument_code: str,
-            contract_str: str,
-        ):
-            list_of_date_str = futures_contract_strategy.contract_date.list_of_date_str
-            if (
-                futures_contract_strategy.instrument_code == instrument_code
-                and contract_str in list_of_date_str
-            ):
-                return True
-            else:
-                return False
-
         order_ids = [
             orderid
             for orderid, futures_contract_strategy in zip(
                 order_id_list, contract_strategies
             )
-            if _contains_both(
-                futures_contract_strategy,
+            if futures_contract_strategy.contains_both(
                 instrument_code=instrument_code,
                 contract_str=contract_str,
             )

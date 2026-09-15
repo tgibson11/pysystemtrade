@@ -243,3 +243,14 @@ class futuresContractStrategy(tradeableObject):
 
     def sort_contracts_with_idx(self, idx_list: list):
         self.contract_date.sort_with_idx(idx_list)
+
+    def contains_both(self, instrument_code: str, contract_str: str):
+        list_of_date_str = self.contract_date.list_of_date_str
+        if (
+            self.instrument_code == instrument_code
+            and contract_str in list_of_date_str
+        ):
+            return True
+        else:
+            return False
+
