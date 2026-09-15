@@ -42,6 +42,22 @@ class genericOrdersData(baseData):
         self._delete_order_with_orderid_without_checking(order_id)
 
     def add_order_to_data(self, order: Order, ignore_duplication=False):
+        # Duplicates will be overridden, so be careful
+        order_id = order.order_id
+        try:
+            self.get_order_with_orderid(order_id)
+        except missingOrder:
+            return self._add_order_to_data_no_checking(order)
+        else:
+            if ignore_duplication:
+                return self.update_order_with_orderid(order_id, order)
+            else:
+                raise Exception(
+                    "Can't add order %s as order id %d already exists!"
+                    % (str(order), order_id)
+                )
+
+    def _add_order_to_data_no_checking(self, order: Order):
         raise NotImplementedError
 
     def get_list_of_order_ids(self) -> list:

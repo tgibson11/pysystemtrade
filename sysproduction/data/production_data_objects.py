@@ -13,7 +13,13 @@ from sysdata.parquet.parquet_historic_strategy_positions import (
 from sysdata.parquet.parquet_historic_contract_positions import (
     parquetContractPositionData,
 )
+from sysdata.sqlite.sqlite_IB_client_id import sqliteIbBrokerClientIdData
 from sysdata.sqlite.sqlite_futures_contracts import sqliteFuturesContractData
+from sysdata.sqlite.sqlite_historic_orders import (
+    sqliteStrategyHistoricOrdersData, sqliteContractHistoricOrdersData, sqliteBrokerHistoricOrdersData
+)
+from sysdata.sqlite.sqlite_lock_data import sqliteLockData
+from sysdata.sqlite.sqlite_margin import sqliteMarginData
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -29,17 +35,17 @@ from sysdata.arctic.arctic_historic_strategy_positions import arcticStrategyPosi
 
 """
 from sysdata.mongodb.mongo_futures_contracts import mongoFuturesContractData
+from sysdata.mongodb.mongo_historic_orders import (
+    mongoStrategyHistoricOrdersData,
+    mongoContractHistoricOrdersData,
+    mongoBrokerHistoricOrdersData,
+)
 """
 from sysdata.mongodb.mongo_process_control import mongoControlProcessData
 from sysdata.mongodb.mongo_order_stack import (
     mongoInstrumentOrderStackData,
     mongoContractOrderStackData,
     mongoBrokerOrderStackData,
-)
-from sysdata.mongodb.mongo_historic_orders import (
-    mongoStrategyHistoricOrdersData,
-    mongoContractHistoricOrdersData,
-    mongoBrokerHistoricOrdersData,
 )
 from sysdata.mongodb.mongo_roll_state_storage import mongoRollStateData
 from sysdata.mongodb.mongo_spread_costs import mongoSpreadCostData
@@ -68,6 +74,9 @@ STRATEGY_HISTORIC_ORDERS_DATA = "strategy_historic_orders_data"
 CONTRACT_HISTORIC_ORDERS_DATA = "contract_historic_orders_data"
 BROKER_HISTORIC_ORDERS_DATA = "broker_historic_orders_data"
 ROLL_STATE_DATA = "roll_state_data"
+IB_CLIENT_IDS = "ib_client_id_data"
+LOCK_DATA = "lock_data"
+MARGIN_DATA = "margin_data"
 
 use_production_classes = {
     FX_DATA: parquetFxPricesData,
@@ -83,14 +92,17 @@ use_production_classes = {
     STRATEGY_POSITION_DATA: parquetStrategyPositionData,
     OPTIMAL_POSITION_DATA: parquetOptimalPositionData,
     HISTORIC_SPREAD_DATA: parquetSpreadsForInstrumentData,
-    STRATEGY_HISTORIC_ORDERS_DATA: mongoStrategyHistoricOrdersData,
-    CONTRACT_HISTORIC_ORDERS_DATA: mongoContractHistoricOrdersData,
-    BROKER_HISTORIC_ORDERS_DATA: mongoBrokerHistoricOrdersData,
+    STRATEGY_HISTORIC_ORDERS_DATA: sqliteStrategyHistoricOrdersData,
+    CONTRACT_HISTORIC_ORDERS_DATA: sqliteContractHistoricOrdersData,
+    BROKER_HISTORIC_ORDERS_DATA: sqliteBrokerHistoricOrdersData,
     INSTRUMENT_ORDER_STACK_DATA: mongoInstrumentOrderStackData,
     CONTRACT_ORDER_STACK_DATA: mongoContractOrderStackData,
     BROKER_ORDER_STACK_DATA: mongoBrokerOrderStackData,
     ROLL_STATE_DATA: mongoRollStateData,
     PROCESS_CONTROL_DATA: mongoControlProcessData,
+    IB_CLIENT_IDS: sqliteIbBrokerClientIdData,
+    LOCK_DATA: sqliteLockData,
+    MARGIN_DATA: sqliteMarginData,
 }
 
 

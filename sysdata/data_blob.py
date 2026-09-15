@@ -9,8 +9,8 @@ from sysdata.config.production_config import get_production_config, Config
 from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.sqlite.sqlite_data import get_sqlite_connection
 from syslogging.logger import *
-from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 from sysdata.parquet.parquet_access import ParquetAccess
+from sysproduction.data.production_data_objects import get_class_for_data_type, IB_CLIENT_IDS
 
 
 class dataBlob(object):
@@ -335,7 +335,7 @@ class dataBlob(object):
 
     def _get_next_client_id_for_ib(self) -> int:
         ## default to tracking ID through mongo change if required
-        self.add_class_object(mongoIbBrokerClientIdData)
+        self.add_class_object(get_class_for_data_type(IB_CLIENT_IDS))
         client_id = self.db_ib_broker_client_id.return_valid_client_id()
 
         return int(client_id)

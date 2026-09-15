@@ -8,11 +8,9 @@ from sysdata.config.instruments import (
     get_list_of_untradeable_instruments_in_config,
     get_list_of_ignored_instruments_in_config,
 )
-from sysdata.mongodb.mongo_lock_data import mongoLockData
 from sysdata.mongodb.mongo_position_limits import mongoPositionLimitData
 from sysdata.mongodb.mongo_trade_limits import mongoTradeLimitData
 from sysdata.mongodb.mongo_temporary_override import mongoTemporaryOverrideData
-from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 from sysdata.mongodb.mongo_temporary_close import mongoTemporaryCloseData
 from sysdata.mongodb.mongo_override import mongoOverrideData
 from sysdata.production.broker_client_id import brokerClientIdData
@@ -63,8 +61,11 @@ from sysobjects.production.override import (
 
 from sysproduction.data.positions import diagPositions
 from sysproduction.data.generic_production_data import productionDataLayerGeneric
-
-OVERRIDE_FOR_BAD = REDUCE_ONLY_OVERRIDE
+from sysproduction.data.production_data_objects import (
+    get_class_for_data_type,
+    LOCK_DATA,
+    IB_CLIENT_IDS,
+)
 OVERRIDE_FOR_BAD = REDUCE_ONLY_OVERRIDE
 OVERRIDE_FOR_UNTRADEABLE = NO_TRADE_OVERRIDE
 OVERRIDE_FOR_IGNORED = REDUCE_ONLY_OVERRIDE
@@ -82,7 +83,7 @@ class OverrideWithReason:
 
 class dataBrokerClientIDs(productionDataLayerGeneric):
     def _add_required_classes_to_data(self, data) -> dataBlob:
-        data.add_class_object(mongoIbBrokerClientIdData)
+        data.add_class_object(get_class_for_data_type(IB_CLIENT_IDS))
 
         return data
 
@@ -96,7 +97,7 @@ class dataBrokerClientIDs(productionDataLayerGeneric):
 
 class dataLocks(productionDataLayerGeneric):
     def _add_required_classes_to_data(self, data) -> dataBlob:
-        data.add_class_object(mongoLockData)
+        data.add_class_object(get_class_for_data_type(LOCK_DATA))
 
         return data
 

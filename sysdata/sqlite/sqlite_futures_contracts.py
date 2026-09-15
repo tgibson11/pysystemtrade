@@ -103,7 +103,7 @@ class sqliteFuturesContractData(futuresContractData, sqliteData):
             EXPIRY_DATE: contract_object.expiry_date.date(),
             SAMPLING: contract_object.currently_sampling,
         }
-        self._insert(params)
+        self._insert(params, allow_replace=True)
 
     def _delete_contract_data_without_any_warning_be_careful(
         self, instrument_code: str, contract_date: str

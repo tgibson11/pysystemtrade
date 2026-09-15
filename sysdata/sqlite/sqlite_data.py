@@ -32,7 +32,9 @@ class sqliteData(object):
     def _row_factory(self) -> Callable:
         raise NotImplementedError()
 
-    def _select_one(self, params: dict):
+    def _select_one(self, params: dict = None):
+        if params is None:
+            params = {}
         where_clause = _params_dict_to_where_clause(params)
         sql = f"SELECT * FROM {self.table_name} {where_clause}"
 
@@ -43,7 +45,9 @@ class sqliteData(object):
             raise missingData
         return result
 
-    def _select_many(self, params: dict) -> list:
+    def _select_many(self, params: dict = None) -> list:
+        if params is None:
+            params = {}
         where_clause = _params_dict_to_where_clause(params)
         sql = f"SELECT * FROM {self.table_name} {where_clause}"
         cursor = self.sqlite_conn.cursor()
@@ -51,19 +55,50 @@ class sqliteData(object):
         results = cursor.execute(sql, params).fetchall()
         return results
 
-    def _insert(self, params: dict):
+    def _select_all(self) -> list:
+        return self._select_many()
+
+    def _insert(self, params: dict, allow_replace: bool = False):
+        if allow_replace:
+            replace = "OR REPLACE"
+        else:
+            replace = ""
+
         columns = params.keys()
         placeholders = [f":{col}" for col in columns]
 
         sql = (
-            f"INSERT OR REPLACE INTO {self.table_name} ({','.join(columns)}) "
+            f"INSERT {replace} INTO {self.table_name} ({','.join(columns)}) "
             f"VALUES ({','.join(placeholders)})"
         )
 
         with self.sqlite_conn:
             self.sqlite_conn.execute(sql, params)
 
-    def _update(self, set_params: dict, where_params: dict):
+    def _insert_many(self, params: list, allow_replace: bool = False):
+        if len(params) == 0:
+            return
+
+        if allow_replace:
+            replace = "OR REPLACE"
+        else:
+            replace = ""
+
+        columns = params[0].keys()
+        placeholders = [f":{col}" for col in columns]
+
+        sql = (
+            f"INSERT {replace} INTO {self.table_name} ({','.join(columns)}) "
+            f"VALUES ({','.join(placeholders)})"
+        )
+
+        with self.sqlite_conn:
+            self.sqlite_conn.executemany(sql, params)
+
+    def _update(self, set_params: dict, where_params: dict = None):
+        if where_params is None:
+            where_params = {}
+
         # If this assertion fails, we'll need to be more clever
         assert (set_key not in where_params for set_key in set_params.keys())
 
@@ -77,7 +112,9 @@ class sqliteData(object):
         with self.sqlite_conn:
             self.sqlite_conn.execute(sql, merged_params)
 
-    def _delete(self, params: dict):
+    def _delete(self, params: dict = None):
+        if params is None:
+            params = {}
         where_clause = _params_dict_to_where_clause(params)
         sql = f"DELETE FROM {self.table_name} {where_clause}"
         with self.sqlite_conn:
@@ -113,12 +150,14 @@ def get_sqlite_connection(db_file_name: str = arg_not_supplied) -> Connection:
         db_file_name = config.get_element("sqlite_database")
 
     sqlite_conn = sqlite3.connect(
-        db_file_name, autocommit=False, detect_types=sqlite3.PARSE_DECLTYPES
+        db_file_name, detect_types=sqlite3.PARSE_DECLTYPES, autocommit=True
     )
     return sqlite_conn
 
 
 def _params_dict_to_where_clause(params: dict) -> str:
+    if len(params) == 0:
+        return ""
     conditions = [f"{col} = :{col}" for col in params.keys()]
     where_clause = f"WHERE {' and '.join(conditions)}"
     return where_clause
@@ -150,7 +189,7 @@ def _adapt_datetime_iso(val):
 
 def _adapt_list(val):
     """Adapt list to string"""
-    return ",".join(val)
+    return ",".join(str(item) for item in val)
 
 
 sqlite3.register_adapter(dt.date, _adapt_date_iso)
@@ -177,12 +216,12 @@ def _convert_bool(val):
 
 def _convert_list_of_int(val):
     """Convert string of comma separated integers to list."""
-    return [int(item) for item in val.split(",")]
+    return [int(item) for item in val.decode().split(",")]
 
 
 def _convert_list_of_float(val):
     """Convert string of comma separated floats to list."""
-    return [float(item) for item in val.split(",")]
+    return [float(item) for item in val.decode().split(",")]
 
 
 sqlite3.register_converter("date", _convert_date)
