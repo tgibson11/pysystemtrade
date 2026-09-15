@@ -34,7 +34,7 @@ class mongoMarginData(marginData):
     def mongo_data(self):
         return self._mongo_data
 
-    def _repr__(self):
+    def __repr__(self):
         return "Margin data, mongodb %s" % (str(self.mongo_data))
 
     def get_series_of_strategy_margin(self, strategy_name: str) -> seriesOfMargin:
