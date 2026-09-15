@@ -106,7 +106,7 @@ class futuresContractData(baseData):
         )
 
     def get_list_of_contract_dates_for_instrument_code(
-        self, instrument_code: str, allow_expired: bool = False
+        self, instrument_code: str
     ) -> listOfContractDateStr:
         raise NotImplementedError
 

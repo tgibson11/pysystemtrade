@@ -77,10 +77,8 @@ class sqliteFuturesContractData(futuresContractData, sqliteData):
         return instruments
 
     def get_list_of_contract_dates_for_instrument_code(
-        self, instrument_code: str, allow_expired: bool = True
+        self, instrument_code: str
     ) -> list:
-        # allow_expired param is intentionally ignored: they are always included
-        # TODO this matches the MongoDB behavior, but should be fixed
         contracts = self.get_all_contract_objects_for_instrument_code(instrument_code)
         contract_dates = [contract.contract_date.date_str for contract in contracts]
         return contract_dates
