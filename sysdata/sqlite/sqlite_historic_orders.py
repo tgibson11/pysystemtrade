@@ -3,16 +3,26 @@ from typing import Callable
 
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
-from sysdata.production.historic_orders import genericOrdersData, strategyHistoricOrdersData, \
-    contractHistoricOrdersData, brokerHistoricOrdersData
-from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from sysdata.sqlite.sqlite_order_stack import ORDER_ID, FILL_DATETIME, ORDER_COLUMN_DEFS, KEY, CHILDREN
+from sysdata.production.historic_orders import (
+    genericOrdersData,
+    strategyHistoricOrdersData,
+    contractHistoricOrdersData,
+    brokerHistoricOrdersData,
+)
+from sysdata.sqlite.sqlite_data import sqliteData
+from sysdata.sqlite.sqlite_order_stack import (
+    ORDER_ID,
+    FILL_DATETIME,
+    KEY,
+    INSTRUMENT_COLUMN_DEFS,
+    _instrument_order_factory,
+    CONTRACT_COLUMN_DEFS,
+    _contract_order_factory,
+    BROKER_COLUMN_DEFS,
+    _broker_order_factory,
+)
 from sysexecution.order_stacks.order_stack import missingOrder
 from sysexecution.orders.base_orders import Order
-from sysexecution.orders.broker_orders import brokerOrder
-from sysexecution.orders.contract_orders import contractOrder
-from sysexecution.orders.instrument_orders import instrumentOrder
-from sysexecution.orders.named_order_objects import no_children
 from syslogging.logger import get_logger
 from sysobjects.production.tradeable_object import instrumentStrategy, futuresContractStrategy
 
@@ -73,24 +83,6 @@ class sqliteGenericHistoricOrdersData(genericOrdersData, sqliteData):
 
 STRATEGY_TABLE_NAME = "STRATEGY_HISTORIC_ORDER"
 
-# Strategy-specific columns
-LIMIT_CONTRACT = "limit_contract"
-REFERENCE_CONTRACT = "reference_contract"
-REFERENCE_DATETIME = "reference_datetime"
-REFERENCE_PRICE = "reference_price"
-MANUAL_TRADE = "manual_trade"
-GENERATED_DATETIME = "generated_datetime"
-
-STRATEGY_ONLY_DEFS = [
-    f"{LIMIT_CONTRACT} TEXT",
-    f"{REFERENCE_CONTRACT} TEXT",
-    f"{REFERENCE_DATETIME} DATETIME",
-    f"{REFERENCE_PRICE} FLOAT",
-    f"{MANUAL_TRADE} INTEGER",
-    f"{GENERATED_DATETIME} DATETIME",
-]
-STRATEGY_COLUMN_DEFS = ORDER_COLUMN_DEFS + STRATEGY_ONLY_DEFS
-
 
 class sqliteStrategyHistoricOrdersData(
     sqliteGenericHistoricOrdersData, strategyHistoricOrdersData
@@ -101,11 +93,11 @@ class sqliteStrategyHistoricOrdersData(
 
     @property
     def column_defs(self) -> list:
-        return STRATEGY_COLUMN_DEFS
+        return INSTRUMENT_COLUMN_DEFS
 
     @property
     def _row_factory(self) -> Callable:
-        return _strategy_order_factory
+        return _instrument_order_factory
 
     def __repr__(self):
         return "Historic instrument/strategy orders"
@@ -124,34 +116,7 @@ class sqliteStrategyHistoricOrdersData(
         return order_ids
 
 
-def _strategy_order_factory(cursor, row) -> instrumentOrder:
-    row_dict = _row_to_dict(cursor, row)
-    if row_dict[CHILDREN] is None:
-        row_dict[CHILDREN] = no_children
-    order = instrumentOrder.from_dict(row_dict)
-    return order
-
-
 CONTRACT_TABLE_NAME = "CONTRACT_HISTORIC_ORDER"
-
-# Contract-specific columns
-ALGO_TO_USE = "algo_to_use"
-MANUAL_FILL = "manual_fill"
-CALENDAR_SPREAD_ORDER = "calendar_spread_order"
-INTER_SPREAD_ORDER = "inter_spread_order"
-REFERENCE_OF_CONTROLLING_ALGO = "reference_of_controlling_algo"
-
-CONTRACT_ONLY_DEFS = [
-    f"{ALGO_TO_USE} TEXT",
-    f"{MANUAL_FILL} BOOL",
-    f"{CALENDAR_SPREAD_ORDER} BOOL",
-    f"{INTER_SPREAD_ORDER} BOOL",
-    f"{REFERENCE_OF_CONTROLLING_ALGO} TEXT",
-    f"{REFERENCE_PRICE} FLOAT",  # Also used by strategy orders
-    f"{MANUAL_TRADE} INTEGER",  # Also used by strategy orders
-    f"{GENERATED_DATETIME} DATETIME",  # Also used by strategy orders
-]
-CONTRACT_COLUMN_DEFS = ORDER_COLUMN_DEFS + CONTRACT_ONLY_DEFS
 
 
 class sqliteContractHistoricOrdersData(
@@ -173,49 +138,7 @@ class sqliteContractHistoricOrdersData(
         return _contract_order_factory
 
 
-def _contract_order_factory(cursor, row) -> contractOrder:
-    row_dict = _row_to_dict(cursor, row)
-    if row_dict[CHILDREN] is None:
-        row_dict[CHILDREN] = no_children
-    order = contractOrder.from_dict(row_dict)
-    return order
-
-
 BROKER_TABLE_NAME = "BROKER_HISTORIC_ORDER"
-
-# Broker-specific columns
-ALGO_USED = "algo_used"
-SUBMIT_DATETIME = "submit_datetime"
-SIDE_PRICE = "side_price"
-MID_PRICE = "mid_price"
-OFFSIDE_PRICE = "offside_price"
-ALGO_COMMENT = "algo_comment"
-BROKER = "broker"
-BROKER_ACCOUNT = "broker_account"
-BROKER_PERMID = "broker_permid"
-BROKER_TEMPID = "broker_tempid"
-BROKER_CLIENTID = "broker_clientid"
-COMMISSION = "commission"
-LEG_FILLED_PRICE = "leg_filled_price"
-
-BROKER_ONLY_DEFS = [
-    f"{ALGO_USED} TEXT",
-    f"{SUBMIT_DATETIME} DATETIME",
-    f"{MANUAL_FILL} BOOL",  # Also used for contract orders
-    f"{CALENDAR_SPREAD_ORDER} BOOL",  # Also used for contract orders
-    f"{SIDE_PRICE} FLOAT",
-    f"{MID_PRICE} FLOAT",
-    f"{OFFSIDE_PRICE} FLOAT",
-    f"{ALGO_COMMENT} TEXT",
-    f"{BROKER} TEXT",
-    f"{BROKER_ACCOUNT} TEXT",
-    f"{BROKER_PERMID} TEXT",
-    f"{BROKER_TEMPID} TEXT",
-    f"{BROKER_CLIENTID} TEXT",
-    f"{COMMISSION} FLOAT",
-    f"{LEG_FILLED_PRICE} LIST_OF_FLOAT",
-]
-BROKER_COLUMN_DEFS = ORDER_COLUMN_DEFS + BROKER_ONLY_DEFS
 
 
 class sqliteBrokerHistoricOrdersData(
@@ -265,13 +188,3 @@ class sqliteBrokerHistoricOrdersData(
         ]
 
         return order_ids
-
-
-def _broker_order_factory(cursor, row) -> brokerOrder:
-    row_dict = _row_to_dict(cursor, row)
-    if row_dict[CHILDREN] is None:
-        row_dict[CHILDREN] = no_children
-    if row_dict[LEG_FILLED_PRICE] is None:
-        row_dict[LEG_FILLED_PRICE] = []
-    order = brokerOrder.from_dict(row_dict)
-    return order

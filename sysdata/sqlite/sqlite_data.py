@@ -4,6 +4,8 @@ import sqlite3
 from sqlite3 import Connection
 from typing import Callable
 
+import pandas as pd
+
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
 from sysdata.config.production_config import get_production_config
@@ -187,6 +189,12 @@ def _adapt_datetime_iso(val):
     return val.replace(tzinfo=None).isoformat()
 
 
+def _adapt_timestamp_iso(val):
+    """Adapt pandas.Timestamp to timezone-naive ISO 8601 date."""
+    python_datetime = val.to_pydatetime()
+    return _adapt_datetime_iso(python_datetime)
+
+
 def _adapt_list(val):
     """Adapt list to string"""
     return ",".join(str(item) for item in val)
@@ -194,6 +202,7 @@ def _adapt_list(val):
 
 sqlite3.register_adapter(dt.date, _adapt_date_iso)
 sqlite3.register_adapter(dt.datetime, _adapt_datetime_iso)
+sqlite3.register_adapter(pd.Timestamp, _adapt_datetime_iso)
 sqlite3.register_adapter(list, _adapt_list)
 
 

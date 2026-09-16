@@ -16,10 +16,17 @@ from sysdata.parquet.parquet_historic_contract_positions import (
 from sysdata.sqlite.sqlite_IB_client_id import sqliteIbBrokerClientIdData
 from sysdata.sqlite.sqlite_futures_contracts import sqliteFuturesContractData
 from sysdata.sqlite.sqlite_historic_orders import (
-    sqliteStrategyHistoricOrdersData, sqliteContractHistoricOrdersData, sqliteBrokerHistoricOrdersData
+    sqliteStrategyHistoricOrdersData,
+    sqliteContractHistoricOrdersData,
+    sqliteBrokerHistoricOrdersData,
 )
 from sysdata.sqlite.sqlite_lock_data import sqliteLockData
 from sysdata.sqlite.sqlite_margin import sqliteMarginData
+from sysdata.sqlite.sqlite_order_stack import (
+    sqliteInstrumentOrderStackData,
+    sqliteContractOrderStackData,
+    sqliteBrokerOrderStackData,
+)
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -40,13 +47,13 @@ from sysdata.mongodb.mongo_historic_orders import (
     mongoContractHistoricOrdersData,
     mongoBrokerHistoricOrdersData,
 )
-"""
-from sysdata.mongodb.mongo_process_control import mongoControlProcessData
 from sysdata.mongodb.mongo_order_stack import (
     mongoInstrumentOrderStackData,
     mongoContractOrderStackData,
     mongoBrokerOrderStackData,
 )
+"""
+from sysdata.mongodb.mongo_process_control import mongoControlProcessData
 from sysdata.mongodb.mongo_roll_state_storage import mongoRollStateData
 from sysdata.mongodb.mongo_spread_costs import mongoSpreadCostData
 
@@ -95,9 +102,9 @@ use_production_classes = {
     STRATEGY_HISTORIC_ORDERS_DATA: sqliteStrategyHistoricOrdersData,
     CONTRACT_HISTORIC_ORDERS_DATA: sqliteContractHistoricOrdersData,
     BROKER_HISTORIC_ORDERS_DATA: sqliteBrokerHistoricOrdersData,
-    INSTRUMENT_ORDER_STACK_DATA: mongoInstrumentOrderStackData,
-    CONTRACT_ORDER_STACK_DATA: mongoContractOrderStackData,
-    BROKER_ORDER_STACK_DATA: mongoBrokerOrderStackData,
+    INSTRUMENT_ORDER_STACK_DATA: sqliteInstrumentOrderStackData,
+    CONTRACT_ORDER_STACK_DATA: sqliteContractOrderStackData,
+    BROKER_ORDER_STACK_DATA: sqliteBrokerOrderStackData,
     ROLL_STATE_DATA: mongoRollStateData,
     PROCESS_CONTROL_DATA: mongoControlProcessData,
     IB_CLIENT_IDS: sqliteIbBrokerClientIdData,
