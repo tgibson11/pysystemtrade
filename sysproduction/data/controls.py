@@ -12,7 +12,6 @@ from sysdata.mongodb.mongo_position_limits import mongoPositionLimitData
 from sysdata.mongodb.mongo_trade_limits import mongoTradeLimitData
 from sysdata.mongodb.mongo_temporary_override import mongoTemporaryOverrideData
 from sysdata.mongodb.mongo_temporary_close import mongoTemporaryCloseData
-from sysdata.mongodb.mongo_override import mongoOverrideData
 from sysdata.production.broker_client_id import brokerClientIdData
 from sysproduction.data.config import (
     remove_stale_instruments_and_strategies_from_list_of_instrument_strategies,
@@ -64,7 +63,7 @@ from sysproduction.data.generic_production_data import productionDataLayerGeneri
 from sysproduction.data.production_data_objects import (
     get_class_for_data_type,
     LOCK_DATA,
-    IB_CLIENT_IDS,
+    IB_CLIENT_IDS, OVERRIDE_DATA,
 )
 OVERRIDE_FOR_BAD = REDUCE_ONLY_OVERRIDE
 OVERRIDE_FOR_UNTRADEABLE = NO_TRADE_OVERRIDE
@@ -224,7 +223,7 @@ OVERRIDE_REASON_IN_DATABASE = "in database"
 
 class diagOverrides(productionDataLayerGeneric):
     def _add_required_classes_to_data(self, data) -> dataBlob:
-        data.add_class_object(mongoOverrideData)
+        data.add_class_object(get_class_for_data_type(OVERRIDE_DATA))
         return data
 
     @property
@@ -430,7 +429,8 @@ class diagOverrides(productionDataLayerGeneric):
 
 class updateOverrides(productionDataLayerGeneric):
     def _add_required_classes_to_data(self, data: dataBlob) -> dataBlob:
-        data.add_class_list([mongoOverrideData, mongoTemporaryOverrideData])
+        override_class = get_class_for_data_type(OVERRIDE_DATA)
+        data.add_class_list([override_class, mongoTemporaryOverrideData])
         return data
 
     @property

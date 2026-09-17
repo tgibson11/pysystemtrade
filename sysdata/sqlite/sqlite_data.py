@@ -114,9 +114,13 @@ class sqliteData(object):
         with self.sqlite_conn:
             self.sqlite_conn.execute(sql, merged_params)
 
-    def _delete(self, params: dict = None):
+    def _delete(self, params: dict = None, delete_all_rows: bool = False):
         if params is None:
             params = {}
+        if len(params) == 0 and not delete_all_rows:
+            raise Exception(
+                "You must pass a non-empty params dict or specify delete_all_rows=True"
+            )
         where_clause = _params_dict_to_where_clause(params)
         sql = f"DELETE FROM {self.table_name} {where_clause}"
         with self.sqlite_conn:
