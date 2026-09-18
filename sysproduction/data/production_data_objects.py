@@ -28,6 +28,7 @@ from sysdata.sqlite.sqlite_order_stack import (
     sqliteBrokerOrderStackData,
 )
 from sysdata.sqlite.sqlite_override import sqliteOverrideData
+from sysdata.sqlite.sqlite_position_limits import sqlitePositionLimitData
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -86,6 +87,7 @@ IB_CLIENT_IDS = "ib_client_id_data"
 LOCK_DATA = "lock_data"
 MARGIN_DATA = "margin_data"
 OVERRIDE_DATA = "override_data"
+POSITION_LIMIT_DATA = "position_limit_data"
 
 use_production_classes = {
     FX_DATA: parquetFxPricesData,
@@ -113,6 +115,7 @@ use_production_classes = {
     LOCK_DATA: sqliteLockData,
     MARGIN_DATA: sqliteMarginData,
     OVERRIDE_DATA: sqliteOverrideData,
+    POSITION_LIMIT_DATA: sqlitePositionLimitData,
 }
 
 
