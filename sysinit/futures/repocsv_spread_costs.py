@@ -4,14 +4,14 @@ Populate a mongo DB collection with spread costs
 """
 from syscore.genutils import new_removing_existing
 from syscore.interactive.input import true_if_answer_is_yes
-from sysdata.mongodb.mongo_spread_costs import mongoSpreadCostData
 from sysdata.csv.csv_spread_costs import csvSpreadCostData
 from sysdata.futures.spread_costs import spreadCostData
 from sysdata.data_blob import dataBlob
+from sysdata.sqlite.sqlite_spread_costs import sqliteSpreadCostData
 
 
 def copy_spread_costs_from_csv_to_mongo(data: dataBlob):
-    data_out = mongoSpreadCostData(data.mongo_db)
+    data_out = sqliteSpreadCostData(data.sqlite_conn)
     data_in = csvSpreadCostData()
 
     print("Transferring from %s to %s" % (str(data_in), str(data_out)))

@@ -8,6 +8,7 @@ from syscore.constants import arg_not_supplied
 from sysdata.parquet.parquet_adjusted_prices import parquetFuturesAdjustedPricesData
 from sysdata.parquet.parquet_multiple_prices import parquetFuturesMultiplePricesData
 from sysdata.parquet.parquet_spotfx_prices import parquetFxPricesData
+from sysdata.sqlite.sqlite_spread_costs import sqliteSpreadCostData
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -17,7 +18,6 @@ from sysdata.arctic.arctic_spotfx_prices import arcticFxPricesData
 
 from sysdata.csv.csv_instrument_data import csvFuturesInstrumentData
 from sysdata.csv.csv_roll_parameters import csvRollParametersData
-from sysdata.mongodb.mongo_spread_costs import mongoSpreadCostData
 from sysdata.data_blob import dataBlob
 from sysdata.sim.futures_sim_data_with_data_blob import genericBlobUsingFuturesSimData
 
@@ -72,7 +72,7 @@ use_sim_classes = {
     FUTURES_INSTRUMENT_DATA: csvFuturesInstrumentData,
     FUTURES_MULTIPLE_PRICE_DATA: parquetFuturesMultiplePricesData,
     FUTURES_ADJUSTED_PRICE_DATA: parquetFuturesAdjustedPricesData,
-    STORED_SPREAD_DATA: mongoSpreadCostData,
+    STORED_SPREAD_DATA: sqliteSpreadCostData,
 }
 
 
