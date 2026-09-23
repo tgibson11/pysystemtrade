@@ -33,6 +33,7 @@ from sysdata.sqlite.sqlite_process_control import sqliteControlProcessData
 from sysdata.sqlite.sqlite_roll_state_storage import sqliteRollStateData
 from sysdata.sqlite.sqlite_spread_costs import sqliteSpreadCostData
 from sysdata.sqlite.sqlite_temporary_close import sqliteTemporaryCloseData
+from sysdata.sqlite.sqlite_temporary_override import sqliteTemporaryOverrideData
 
 """
 from sysdata.arctic.arctic_adjusted_prices import arcticFuturesAdjustedPricesData
@@ -93,6 +94,7 @@ MARGIN_DATA = "margin_data"
 OVERRIDE_DATA = "override_data"
 POSITION_LIMIT_DATA = "position_limit_data"
 TEMPORARY_CLOSE_DATA = "temporary_close_data"
+TEMPORARY_OVERRIDE_DATA = "temporary_override_data"
 
 use_production_classes = {
     FX_DATA: parquetFxPricesData,
@@ -122,6 +124,7 @@ use_production_classes = {
     OVERRIDE_DATA: sqliteOverrideData,
     POSITION_LIMIT_DATA: sqlitePositionLimitData,
     TEMPORARY_CLOSE_DATA: sqliteTemporaryCloseData,
+    TEMPORARY_OVERRIDE_DATA: sqliteTemporaryOverrideData,
 }
 
 
