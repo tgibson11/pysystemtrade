@@ -8,7 +8,6 @@ from sysdata.config.instruments import (
     get_list_of_untradeable_instruments_in_config,
     get_list_of_ignored_instruments_in_config,
 )
-from sysdata.mongodb.mongo_trade_limits import mongoTradeLimitData
 from sysdata.production.broker_client_id import brokerClientIdData
 from sysproduction.data.config import (
     remove_stale_instruments_and_strategies_from_list_of_instrument_strategies,
@@ -60,7 +59,7 @@ from sysproduction.data.generic_production_data import productionDataLayerGeneri
 from sysproduction.data.production_data_objects import (
     get_class_for_data_type,
     LOCK_DATA,
-    IB_CLIENT_IDS, OVERRIDE_DATA, POSITION_LIMIT_DATA, TEMPORARY_CLOSE_DATA, TEMPORARY_OVERRIDE_DATA,
+    IB_CLIENT_IDS, OVERRIDE_DATA, POSITION_LIMIT_DATA, TEMPORARY_CLOSE_DATA, TEMPORARY_OVERRIDE_DATA, TRADE_LIMIT_DATA,
 )
 OVERRIDE_FOR_BAD = REDUCE_ONLY_OVERRIDE
 OVERRIDE_FOR_UNTRADEABLE = NO_TRADE_OVERRIDE
@@ -117,7 +116,7 @@ class dataLocks(productionDataLayerGeneric):
 
 class dataTradeLimits(productionDataLayerGeneric):
     def _add_required_classes_to_data(self, data) -> dataBlob:
-        data.add_class_object(mongoTradeLimitData)
+        data.add_class_object(get_class_for_data_type(TRADE_LIMIT_DATA))
         return data
 
     @property
