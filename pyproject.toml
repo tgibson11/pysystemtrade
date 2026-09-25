@@ -25,7 +25,6 @@ dependencies = [
     "PyYAML==6.0.1",
     "numpy>=1.24.0",
     "scipy>=1.0.0",
-    "pymongo==3.11.3",
     "ib_async>=2,<3",
     "psutil==7.2.1",
     "Flask>=2.0.1",
@@ -40,6 +39,7 @@ dependencies = [
 [project.optional-dependencies]
 arctic = ["arctic @ git+https://github.com/man-group/arctic.git"]
 dev = ["pytest>6.2", "black==23.11.0"]
+mongodb = ["pymongo==3.11.3"]
 
 [project.urls]
 "Homepage" = "https://github.com/pst-group/pysystemtrade"
