@@ -14,6 +14,7 @@ from sysdata.parquet.parquet_historic_contract_positions import (
     parquetContractPositionData,
 )
 from sysdata.sqlite.sqlite_IB_client_id import sqliteIbBrokerClientIdData
+from sysdata.sqlite.sqlite_email_control import sqliteEmailControlData
 from sysdata.sqlite.sqlite_futures_contracts import sqliteFuturesContractData
 from sysdata.sqlite.sqlite_historic_orders import (
     sqliteStrategyHistoricOrdersData,
@@ -97,6 +98,7 @@ POSITION_LIMIT_DATA = "position_limit_data"
 TEMPORARY_CLOSE_DATA = "temporary_close_data"
 TEMPORARY_OVERRIDE_DATA = "temporary_override_data"
 TRADE_LIMIT_DATA = "trade_limit_data"
+EMAIL_CONTROL_DATA = "email_control_data"
 
 use_production_classes = {
     FX_DATA: parquetFxPricesData,
@@ -128,6 +130,7 @@ use_production_classes = {
     TEMPORARY_CLOSE_DATA: sqliteTemporaryCloseData,
     TEMPORARY_OVERRIDE_DATA: sqliteTemporaryOverrideData,
     TRADE_LIMIT_DATA: sqliteTradeLimitData,
+    EMAIL_CONTROL_DATA: sqliteEmailControlData
 }
 
 

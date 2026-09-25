@@ -3,12 +3,12 @@ import datetime
 
 from syscore.dateutils import SECONDS_PER_DAY
 from syscore.exceptions import missingData
-from syslogdiag.mongo_email_control import mongoEmailControlData
 
 from syslogdiag.emailing import send_mail_msg, send_mail_pdfs
 
 from syscore.fileutils import resolve_path_and_filename_for_package
 from syscore.interactive.display import landing_strip
+from sysproduction.data.production_data_objects import get_class_for_data_type, EMAIL_CONTROL_DATA
 
 
 def send_production_mail_msg_attachment(body: str, subject: str, filename: str):
@@ -173,7 +173,8 @@ class dataEmailControl:
         # Check data has the right elements to do this
         # uniquely, we don't allow a default data or this causes circular
         # imports
-        data.add_class_list([mongoEmailControlData])
+        email_control_class = get_class_for_data_type(EMAIL_CONTROL_DATA)
+        data.add_class_list([email_control_class])
         self.data = data
 
     def get_time_last_email_sent_with_this_subject(self, subject):
