@@ -187,7 +187,7 @@ class dataForObjectiveInstance:
     @property
     def maximum_position_weights(self) -> portfolioWeights:
         return get_weights_given_positions(
-            self.previous_positions, self.per_contract_value
+            self.maximum_position_contracts, self.per_contract_value
         )
 
     @property
@@ -246,8 +246,6 @@ def get_data_for_objective_instance(
         data, strategy_name=strategy_name, list_of_instruments=list_of_instruments
     )
 
-    data.log.debug("Getting covariance matrix")
-
     data.log.debug("Getting per contract values")
     per_contract_value = get_per_contract_values(
         data, strategy_name=strategy_name, list_of_instruments=list_of_instruments
@@ -265,6 +263,7 @@ def get_data_for_objective_instance(
         data, strategy_name=strategy_name, list_of_instruments=list_of_instruments
     )
 
+    data.log.debug("Getting covariance matrix")
     covariance_matrix = get_covariance_matrix_for_instrument_returns_for_optimisation(
         data, list_of_instruments=list_of_instruments
     )
@@ -434,7 +433,7 @@ def get_no_trade_keys(
 def get_reduce_only_keys(
     data: dataBlob, strategy_name: str, list_of_instruments: list
 ) -> list:
-    no_trade_keys = [
+    reduce_only_keys = [
         instrument_code
         for instrument_code in list_of_instruments
         if get_override_for_instrument_strategy(
@@ -446,7 +445,7 @@ def get_reduce_only_keys(
         == REDUCE_ONLY_OVERRIDE
     ]
 
-    return no_trade_keys
+    return reduce_only_keys
 
 
 def get_override_for_instrument_strategy(

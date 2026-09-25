@@ -209,7 +209,7 @@ class dataForOptimisation(object):
 
     def per_contract_value_for_code(self, instrument_code: str) -> float:
         per_contract_value = self.per_contract_value
-        return per_contract_value.get(instrument_code, np.isnan)
+        return per_contract_value.get(instrument_code, np.nan)
 
     ## not cached as not used by outside functions
     @property
