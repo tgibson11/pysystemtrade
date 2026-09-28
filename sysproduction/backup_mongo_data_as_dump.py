@@ -14,7 +14,7 @@ from sysdata.data_blob import dataBlob
 def backup_mongo_data_as_dump():
     data = dataBlob(log_name="backup_mongo_data_as_dump")
     backup_object = backupMongo(data)
-    backup_object.backup_mongo_data_as_dump()
+    backup_object.backup_db_as_dump()
 
     return None
 
@@ -23,7 +23,7 @@ class backupMongo(object):
     def __init__(self, data):
         self.data = data
 
-    def backup_mongo_data_as_dump(self):
+    def backup_db_as_dump(self):
         data = self.data
         log = data.log
         log.debug("Exporting mongo data")

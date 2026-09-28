@@ -43,6 +43,18 @@ def get_mongo_backup_directory():
     return ans
 
 
+def get_sqlite_dump_directory():
+    ans = production_config.get_element("sqlite_dump_directory")
+    return get_resolved_pathname(ans)
+
+
+def get_sqlite_backup_directory():
+    main_backup = get_main_backup_directory()
+    ans = os.path.join(main_backup, "sqlite")
+
+    return ans
+
+
 def get_statefile_directory():
     ans = get_directory_store_backtests()
     return get_resolved_pathname(ans)

@@ -1,6 +1,6 @@
 from syscontrol.run_process import processToRun
 from sysproduction.backup_db_to_csv import backupDbToCsv
-from sysproduction.backup_mongo_data_as_dump import backupMongo
+from sysproduction.backup_sqlite_data_as_dump import backupSqlite
 from sysproduction.backup_state_files import backupStateFiles
 from sysproduction.backup_parquet_data_to_remote import backupParquet
 from sysdata.data_blob import dataBlob
@@ -17,17 +17,17 @@ def run_backups():
 def get_list_of_timer_functions_for_backup():
     data_db_backups = dataBlob(log_name="backup_db_to_csv")
     data_state_files = dataBlob(log_name="backup_files")
-    data_mongo_dump = dataBlob(log_name="backup_mongo_data_as_dump")
+    data_db_dump = dataBlob(log_name="backup_db_data_as_dump")
     data_parquet_backup = dataBlob(log_name="backup_parquet_to_remote")
 
     db_backup_object = backupDbToCsv(data_db_backups)
     statefile_backup_object = backupStateFiles(data_state_files)
-    mongodump_backup_object = backupMongo(data_mongo_dump)
+    db_dump_backup_object = backupSqlite(data_db_dump)
     parquet_backup_object = backupParquet(data_parquet_backup)
 
     list_of_timer_names_and_functions = [
         ("backup_db_to_csv", db_backup_object),
-        ("backup_mongo_data_as_dump", mongodump_backup_object),
+        ("backup_db_as_dump", db_dump_backup_object),
         ("backup_files", statefile_backup_object),
         ("backup_parquet", parquet_backup_object),
     ]
