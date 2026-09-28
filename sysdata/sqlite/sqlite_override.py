@@ -19,7 +19,7 @@ COLUMN_DEFS = [
     f"{TYPE} TEXT",
     f"{KEY} TEXT",
     f"{VALUE} FLOAT",
-    f"PRIMARY KEY (TYPE, KEY)",
+    f"PRIMARY KEY ({TYPE}, {KEY})",
 ]
 
 

@@ -9,7 +9,7 @@ from syscore.constants import arg_not_supplied
 from syslogging.logger import *
 
 PROCESS_TABLE_NAME = "process_control"
-METHODS_TABLE_NAME = "process_methods"
+METHODS_TABLE_NAME = "process_method"
 
 # Columns
 PROCESS_NAME = "process_name"
@@ -37,6 +37,7 @@ METHODS_COLUMN_DEFS = [
     f"{METHOD_NAME} TEXT",
     f"{LAST_START_TIME} DATETIME",
     f"{LAST_END_TIME} DATETIME",
+    f"PRIMARY KEY ({PROCESS_NAME}, {METHOD_NAME})",
 ]
 
 
