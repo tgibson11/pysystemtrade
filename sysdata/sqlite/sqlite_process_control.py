@@ -2,7 +2,7 @@ import sqlite3
 from typing import Callable
 
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from sysobjects.production.process_control import controlProcess, start_run_idx, end_run_idx
+from sysobjects.production.process_control import controlProcess, start_run_idx, end_run_idx, missing_date_str
 from sysdata.production.process_control_data import controlProcessData
 from syscore.constants import arg_not_supplied
 
@@ -167,6 +167,13 @@ class sqliteProcessMethodData(sqliteData):
 
 def _process_method_factory(cursor, row) -> tuple[str, list]:
     row_dict = _row_to_dict(cursor, row)
+
+    # Methods are not expected to None for start/end times
+    if row_dict[LAST_START_TIME] is None:
+        row_dict[LAST_START_TIME] = missing_date_str
+    if row_dict[LAST_END_TIME] is None:
+        row_dict[LAST_END_TIME] = missing_date_str
+
     method = (
         row_dict[METHOD_NAME], [row_dict[LAST_START_TIME], row_dict[LAST_END_TIME]]
     )
