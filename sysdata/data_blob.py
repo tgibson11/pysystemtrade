@@ -56,7 +56,6 @@ class dataBlob(object):
 
         """
 
-        self._mongo_db = mongo_db
         self._sqlite_conn = sqlite_conn
         self._ib_conn = ib_conn
         self._log = log
@@ -102,8 +101,6 @@ class dataBlob(object):
         class_dict = dict(
             ib=self._add_ib_class,
             csv=self._add_csv_class,
-            arctic=self._add_arctic_class,
-            mongo=self._add_mongo_class,
             sqlite=self._add_sqlite_class,
             parquet=self._add_parquet_class,
         )
@@ -147,38 +144,6 @@ class dataBlob(object):
             class_name = get_class_name(class_object)
             msg = (
                 "Error '%s' couldn't evaluate %s(sqlite_conn=self.sqlite_conn) \
-                        This might be because import is missing\
-                         or arguments don't follow pattern"
-                % (str(e), class_name)
-            )
-            self._raise_and_log_error(msg)
-
-        return resolved_instance
-
-    def _add_mongo_class(self, class_object):
-        log = self._get_specific_logger(class_object)
-        try:
-            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
-        except Exception as e:
-            class_name = get_class_name(class_object)
-            msg = (
-                "Error '%s' couldn't evaluate %s(mongo_db=self.mongo_db) \
-                        This might be because import is missing\
-                         or arguments don't follow pattern"
-                % (str(e), class_name)
-            )
-            self._raise_and_log_error(msg)
-
-        return resolved_instance
-
-    def _add_arctic_class(self, class_object):
-        log = self._get_specific_logger(class_object)
-        try:
-            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
-        except Exception as e:
-            class_name = get_class_name(class_object)
-            msg = (
-                "Error %s couldn't evaluate %s(mongo_db=self.mongo_db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -300,8 +265,6 @@ class dataBlob(object):
         if self._sqlite_conn is not arg_not_supplied:
             self.sqlite_conn.close()
 
-        # No need to explicitly close Mongo connections; handled by Python garbage collection
-
     @property
     def ib_conn(self) -> connectionIB:
         ib_conn = getattr(self, "_ib_conn", arg_not_supplied)
@@ -332,7 +295,6 @@ class dataBlob(object):
                     raise e
 
     def _get_next_client_id_for_ib(self) -> int:
-        ## default to tracking ID through mongo change if required
         self.add_class_object(get_class_for_data_type(IB_CLIENT_IDS))
         client_id = self.db_ib_broker_client_id.return_valid_client_id()
 
@@ -400,7 +362,7 @@ class dataBlob(object):
 
 
 source_dict = dict(
-    arctic="db", mongo="db", csv="db", parquet="db", sqlite="db", ib="broker"
+    csv="db", parquet="db", sqlite="db", ib="broker"
 )
 
 
@@ -419,7 +381,7 @@ def identifying_name(
     data_label = lower_split_up_name.pop(-1)  # always 'data'
     original_source_label = lower_split_up_name.pop(
         0
-    )  # always the source, eg csv, ib, mongo or arctic
+    )  # always the source, eg csv, ib
 
     try:
         assert data_label == "data"
