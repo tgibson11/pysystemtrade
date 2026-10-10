@@ -6,7 +6,6 @@ from syscore.objects import get_class_name
 from syscore.constants import arg_not_supplied
 from syscore.text import camel_case_split
 from sysdata.config.production_config import get_production_config, Config
-from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.sqlite.sqlite_data import get_sqlite_connection
 from syslogging.logger import *
 from sysdata.parquet.parquet_access import ParquetAccess
@@ -21,7 +20,6 @@ class dataBlob(object):
         csv_data_paths: dict = arg_not_supplied,
         parquet_store_path: str = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
-        mongo_db: mongoDb = arg_not_supplied,
         sqlite_conn: sqlite3.Connection = arg_not_supplied,
         log=arg_not_supplied,
         keep_original_prefix: bool = False,
@@ -341,15 +339,6 @@ class dataBlob(object):
         return int(client_id)
 
     @property
-    def mongo_db(self) -> mongoDb:
-        mongo_db = getattr(self, "_mongo_db", arg_not_supplied)
-        if mongo_db is arg_not_supplied:
-            mongo_db = self._get_new_mongo_db()
-            self._mongo_db = mongo_db
-
-        return mongo_db
-
-    @property
     def sqlite_conn(self):
         sqlite_conn = getattr(self, "_sqlite_conn", arg_not_supplied)
         if sqlite_conn is arg_not_supplied:
@@ -377,11 +366,6 @@ class dataBlob(object):
                 raise Exception("Need to define parquet_store in config to use parquet")
 
         return path
-
-    def _get_new_mongo_db(self) -> mongoDb:
-        mongo_db = mongoDb()
-
-        return mongo_db
 
     def _get_new_sqlite_conn(self) -> sqlite3.Connection:
         sqlite_conn = get_sqlite_connection()
