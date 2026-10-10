@@ -20,15 +20,13 @@ license = {file = "LICENSE"}
 requires-python = ">=3.10"
 keywords = ["systematic trading", "interactive brokers"]
 dependencies = [
-    "pandas==2.2.3",
+    "pandas==2.3.3",
     "matplotlib>=3.0.0",
     "PyYAML==6.0.1",
     "numpy>=1.24.0",
     "scipy>=1.0.0",
     "ib_async>=2,<3",
     "psutil==7.2.1",
-    "Flask>=2.0.1",
-    "Werkzeug>=2.0.1",
     "statsmodels>=0.14.5",
     "PyPDF2>=2.5.0",
     "pytz==2023.3",
