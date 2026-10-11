@@ -491,6 +491,7 @@ def backup_csv_dump(data):
     if platform.system() == "Windows":
         os.system(f"robocopy \"{source_path}\" \"{destination_path}\" {options}")
     else:
+        source_path = os.path.join(source_path, "")
         os.system(f"rsync {options} {source_path} {destination_path}")
 
 
