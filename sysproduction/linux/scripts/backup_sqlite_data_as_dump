@@ -1,0 +1,3 @@
+#!/bin/bash
+. ~/.profile
+. p sysproduction.backup_sqlite_data_as_dump.backup_sqlite_data_as_dump
