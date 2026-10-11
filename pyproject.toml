@@ -47,7 +47,7 @@ find = {}
 
 [tool.setuptools.package-data]
 "data" = ["*.csv"]
-"data.futures" = ["*.csv"]
+"data.futures.csvconfig" = ["*.csv"]
 "private" = ["*.yaml"]
 "sysbrokers" = ["*.csv"]
 "sysbrokers.IB" = ["*.yaml"]
