@@ -340,12 +340,12 @@ def wait_for_next_method_run_time(process_to_run: processToRun):
     seconds_to_next_run = list_of_timer_functions.seconds_until_next_method_runs()
     if seconds_to_next_run > 10.0:
         sleep_time = min(seconds_to_next_run, 60)
-        msg = (
-            "Sleeping for %d seconds as %d seconds until next method ready to run (will react to STOP or PAUSE at that point)"
-            % (sleep_time, seconds_to_next_run)
-        )
-        process_to_run.log.debug(msg)
-        sys.stdout.flush()
+        # msg = (
+        #     "Sleeping for %d seconds as %d seconds until next method ready to run (will react to STOP or PAUSE at that point)"
+        #     % (sleep_time, seconds_to_next_run)
+        # )
+        # process_to_run.log.debug(msg)
+        # sys.stdout.flush()
         time.sleep(sleep_time)
 
 
