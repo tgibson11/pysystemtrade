@@ -123,18 +123,21 @@ def raw_slippage_row(order_row):
     ) = price_calculations_for_order_row(order_row)
     new_order_row = copy(order_row)
     new_order_row = new_order_row[NEW_ORDER_ROW_COLS]
-    new_order_row = new_order_row._append(
-        pd.Series(
-            [
-                delay,
-                bid_ask,
-                execution,
-                versus_limit,
-                versus_parent_limit,
-                total_trading,
-            ],
-            index=NEW_ORDER_ROW_INDEX_COLS,
-        )
+    new_order_row = pd.concat(
+        [
+            new_order_row,
+            pd.Series(
+                [
+                    delay,
+                    bid_ask,
+                    execution,
+                    versus_limit,
+                    versus_parent_limit,
+                    total_trading,
+                ],
+                index=NEW_ORDER_ROW_INDEX_COLS,
+            )
+        ]
     )
 
     return new_order_row
@@ -225,27 +228,30 @@ def cash_slippage_row(slippage_row, data):
             "trade",
         ]
     ]
-    new_slippage_row = new_slippage_row._append(
-        pd.Series(
-            [
-                value_of_price_point,
-                delay_cash,
-                bid_ask_cash,
-                execution_cash,
-                versus_limit_cash,
-                versus_parent_limit_cash,
-                total_trading_cash,
-            ],
-            index=[
-                "value_of_price_point",
-                "delay_cash",
-                "bid_ask_cash",
-                "execution_cash",
-                "versus_limit_cash",
-                "versus_parent_limit_cash",
-                "total_trading_cash",
-            ],
-        )
+    new_slippage_row = pd.concat(
+        [
+            new_slippage_row,
+            pd.Series(
+                [
+                    value_of_price_point,
+                    delay_cash,
+                    bid_ask_cash,
+                    execution_cash,
+                    versus_limit_cash,
+                    versus_parent_limit_cash,
+                    total_trading_cash,
+                ],
+                index=[
+                    "value_of_price_point",
+                    "delay_cash",
+                    "bid_ask_cash",
+                    "execution_cash",
+                    "versus_limit_cash",
+                    "versus_parent_limit_cash",
+                    "total_trading_cash",
+                ],
+            )
+        ]
     )
 
     return new_slippage_row
@@ -307,27 +313,30 @@ def vol_slippage_row(slippage_row, data):
             "trade",
         ]
     ]
-    new_slippage_row = new_slippage_row._append(
-        pd.Series(
-            [
-                last_annual_vol,
-                vol_delay,
-                vol_bid_ask,
-                vol_execution,
-                vol_versus_limit,
-                vol_versus_parent_limit,
-                total_trading_vol,
-            ],
-            index=[
-                "last_annual_vol",
-                "delay_vol",
-                "bid_ask_vol",
-                "execution_vol",
-                "versus_limit_vol",
-                "versus_parent_limit_vol",
-                "total_trading_vol",
-            ],
-        )
+    new_slippage_row = pd.concat(
+        [
+            new_slippage_row,
+            pd.Series(
+                [
+                    last_annual_vol,
+                    vol_delay,
+                    vol_bid_ask,
+                    vol_execution,
+                    vol_versus_limit,
+                    vol_versus_parent_limit,
+                    total_trading_vol,
+                ],
+                index=[
+                    "last_annual_vol",
+                    "delay_vol",
+                    "bid_ask_vol",
+                    "execution_vol",
+                    "versus_limit_vol",
+                    "versus_parent_limit_vol",
+                    "total_trading_vol",
+                ],
+            )
+        ]
     )
 
     return new_slippage_row
@@ -401,11 +410,14 @@ def delay_row(order_row):
             "fill_datetime",
         ]
     ]
-    new_order_row = new_order_row._append(
-        pd.Series(
-            [submit_minus_generated, filled_minus_submit],
-            index=["submit_minus_generated", "filled_minus_submit"],
-        )
+    new_order_row = pd.concat(
+        [
+            new_order_row,
+            pd.Series(
+                [submit_minus_generated, filled_minus_submit],
+                index=["submit_minus_generated", "filled_minus_submit"],
+            )
+        ]
     )
 
     return new_order_row
