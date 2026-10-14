@@ -487,6 +487,20 @@ def extract_single_fill(single_fill):
 
     # move to local time and strip TZ info
     time = single_fill.execution.time.astimezone(tz.tzlocal())
+
+    # Due to a bug in ib_async, the time variable at this point is a UTC time,
+    # but with an incorrect local timezone attached to it
+    # See https://github.com/ib-api-reloaded/ib_async/pull/232
+
+    # We will workaround this by setting the correct timzone (UTC),
+    # Then converting to the correct local time
+    # This will have to be removed when ib_async fixes their bug
+
+    time = time.replace(tzinfo=datetime.timezone.utc)
+    time = time.astimezone(tz.tzlocal())
+
+    # End workaround
+
     time = datetime.datetime.fromtimestamp(time.timestamp())
     temp_id = single_fill.execution.orderId
     client_id = single_fill.execution.clientId
