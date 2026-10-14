@@ -10,19 +10,25 @@ from sysproduction.run_strategy_order_generator import run_strategy_order_genera
 from sysproduction.run_systems import run_systems
 from sysproduction.startup import startup
 
-startup()
 
-run_capital_update()
-run_daily_fx_and_contract_updates()
-run_daily_price_updates()
-run_daily_update_multiple_adjusted_prices()
+def run_daily_processes():
+    startup()
 
-run_systems()
-run_strategy_order_generator()
-run_stack_handler()
+    run_capital_update()
+    run_daily_fx_and_contract_updates()
+    run_daily_price_updates()
+    run_daily_update_multiple_adjusted_prices()
 
-run_cleaners()
-run_backups()
+    run_systems()
+    run_strategy_order_generator()
+    run_stack_handler()
 
-run_reports()
+    run_cleaners()
+    run_backups()
+
+    run_reports()
+
+if __name__ == "__main__":
+    run_daily_processes()
+
 
