@@ -642,7 +642,7 @@ class reportingApi(object):
         return result_pd
 
     def roll_data_dict(self, instrument_code: str = ALL_ROLL_INSTRUMENTS):
-        return self.cache.get(self._get_roll_data_dict, instrument_code)
+        return self._get_roll_data_dict(instrument_code)
 
     def _get_roll_data_dict(self, instrument_code: str = ALL_ROLL_INSTRUMENTS):
         if instrument_code is ALL_ROLL_INSTRUMENTS:
