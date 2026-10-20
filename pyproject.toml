@@ -42,6 +42,9 @@ mongodb = ["pymongo==3.11.3"]
 "Homepage" = "https://github.com/pst-group/pysystemtrade"
 "Bug Tracker" = "https://github.com/pst-group/pysystemtrade/issues"
 
+[tool.setuptools]
+py-modules = ["sitecustomize"]
+
 [tool.setuptools.packages]
 find = {}
 

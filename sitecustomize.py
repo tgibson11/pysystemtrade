@@ -1,11 +1,10 @@
 import pandas as pd
 
-# Show all columns when printing a DataFrame
-pd.options.display.max_columns = None
+# Display all columns when printing a DataFrame
+pd.set_option("display.max_columns", 0)
 
-# Show more rows when printing a DataFrame
-# Default is 10: the first 5 and last 5
-pd.options.display.max_rows = None
+# Display all rows when printing a DataFrame
+pd.set_option("display.max_rows", 0)
 
-# Display all columns horizontally
-pd.options.display.width = 1000
+# Display all columns if width exceeds display width
+pd.set_option("display.expand_frame_repr", False)
