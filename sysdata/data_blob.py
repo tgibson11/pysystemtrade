@@ -11,7 +11,6 @@ from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.sqlite.sqlite_data import get_sqlite_connection
 from syslogging import COMPONENT_LOG_LABEL
 from syslogging.logger import get_logger
-from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 from sysdata.parquet.parquet_access import ParquetAccess
 from sysproduction.data.production_data_objects import get_class_for_data_type, IB_CLIENT_IDS
 
