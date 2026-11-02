@@ -1,13 +1,17 @@
-import copy
 import sqlite3
+
+from copy import copy
 
 from sysbrokers.IB.ib_connection import connectionIB
 from syscore.objects import get_class_name
 from syscore.constants import arg_not_supplied
 from syscore.text import camel_case_split
 from sysdata.config.production_config import get_production_config, Config
+from sysdata.mongodb.mongo_connection import mongoDb
 from sysdata.sqlite.sqlite_data import get_sqlite_connection
-from syslogging.logger import *
+from syslogging import COMPONENT_LOG_LABEL
+from syslogging.logger import get_logger
+from sysdata.mongodb.mongo_IB_client_id import mongoIbBrokerClientIdData
 from sysdata.parquet.parquet_access import ParquetAccess
 from sysproduction.data.production_data_objects import get_class_for_data_type, IB_CLIENT_IDS
 
@@ -20,6 +24,7 @@ class dataBlob(object):
         csv_data_paths: dict = arg_not_supplied,
         parquet_store_path: str = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
+        mongo_db: mongoDb = arg_not_supplied,
         sqlite_conn: sqlite3.Connection = arg_not_supplied,
         log=arg_not_supplied,
         keep_original_prefix: bool = False,
@@ -56,6 +61,7 @@ class dataBlob(object):
 
         """
 
+        self._mongo_db = mongo_db
         self._sqlite_conn = sqlite_conn
         self._ib_conn = ib_conn
         self._log = log
@@ -101,6 +107,8 @@ class dataBlob(object):
         class_dict = dict(
             ib=self._add_ib_class,
             csv=self._add_csv_class,
+            arctic=self._add_arctic_class,
+            mongo=self._add_mongo_class,
             sqlite=self._add_sqlite_class,
             parquet=self._add_parquet_class,
         )
@@ -130,6 +138,38 @@ class dataBlob(object):
             msg = (
                 "Error %s couldn't evaluate %s(self.ib_conn, self) This might be because (a) IB gateway not running, or (b) import is missing\
                          or (c) arguments don't follow pattern"
+                % (str(e), class_name)
+            )
+            self._raise_and_log_error(msg)
+
+        return resolved_instance
+
+    def _add_mongo_class(self, class_object):
+        log = self._get_specific_logger(class_object)
+        try:
+            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
+        except Exception as e:
+            class_name = get_class_name(class_object)
+            msg = (
+                "Error '%s' couldn't evaluate %s(mongo_db=self.mongo_db) \
+                        This might be because import is missing\
+                         or arguments don't follow pattern"
+                % (str(e), class_name)
+            )
+            self._raise_and_log_error(msg)
+
+        return resolved_instance
+
+    def _add_arctic_class(self, class_object):
+        log = self._get_specific_logger(class_object)
+        try:
+            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
+        except Exception as e:
+            class_name = get_class_name(class_object)
+            msg = (
+                "Error %s couldn't evaluate %s(mongo_db=self.mongo_db) \
+                        This might be because import is missing\
+                         or arguments don't follow pattern"
                 % (str(e), class_name)
             )
             self._raise_and_log_error(msg)
@@ -262,8 +302,11 @@ class dataBlob(object):
         if self._ib_conn is not arg_not_supplied:
             self.ib_conn.close_connection()
             self.db_ib_broker_client_id.release_clientid(self.ib_conn.client_id())
+
         if self._sqlite_conn is not arg_not_supplied:
             self.sqlite_conn.close()
+
+        # No need to explicitly close Mongo connections; handled by Python garbage collection
 
     @property
     def ib_conn(self) -> connectionIB:
@@ -301,6 +344,15 @@ class dataBlob(object):
         return int(client_id)
 
     @property
+    def mongo_db(self) -> mongoDb:
+        mongo_db = getattr(self, "_mongo_db", arg_not_supplied)
+        if mongo_db is arg_not_supplied:
+            mongo_db = self._get_new_mongo_db()
+            self._mongo_db = mongo_db
+
+        return mongo_db
+
+    @property
     def sqlite_conn(self):
         sqlite_conn = getattr(self, "_sqlite_conn", arg_not_supplied)
         if sqlite_conn is arg_not_supplied:
@@ -328,6 +380,11 @@ class dataBlob(object):
                 raise Exception("Need to define parquet_store in config to use parquet")
 
         return path
+
+    def _get_new_mongo_db(self) -> mongoDb:
+        mongo_db = mongoDb()
+
+        return mongo_db
 
     def _get_new_sqlite_conn(self) -> sqlite3.Connection:
         sqlite_conn = get_sqlite_connection()
@@ -362,7 +419,7 @@ class dataBlob(object):
 
 
 source_dict = dict(
-    csv="db", parquet="db", sqlite="db", ib="broker"
+    arctic="db", mongo="db", sqlite="db", csv="db", parquet="db", ib="broker"
 )
 
 
@@ -381,7 +438,7 @@ def identifying_name(
     data_label = lower_split_up_name.pop(-1)  # always 'data'
     original_source_label = lower_split_up_name.pop(
         0
-    )  # always the source, eg csv, ib
+    )  # always the source, eg csv, ib, mongo or arctic
 
     try:
         assert data_label == "data"

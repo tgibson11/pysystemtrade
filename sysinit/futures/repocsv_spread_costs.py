@@ -2,6 +2,7 @@
 Populate a mongo DB collection with spread costs
 
 """
+
 from syscore.genutils import new_removing_existing
 from syscore.interactive.input import true_if_answer_is_yes
 from sysdata.csv.csv_spread_costs import csvSpreadCostData
