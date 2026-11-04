@@ -141,11 +141,11 @@ class dataBlob(object):
     def _add_mongo_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(mongo_db=self.db, log=log)
+            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error '%s' couldn't evaluate %s(mongo_db=self.db) \
+                "Error '%s' couldn't evaluate %s(mongo_db=self.mongo_db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -157,11 +157,11 @@ class dataBlob(object):
     def _add_arctic_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(mongo_db=self.db, log=log)
+            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error %s couldn't evaluate %s(mongo_db=self.db) \
+                "Error %s couldn't evaluate %s(mongo_db=self.mongo_db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -173,7 +173,7 @@ class dataBlob(object):
     def _add_sqlite_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(sqlite_db=self.db, log=log)
+            resolved_instance = class_object(sqlite_db=self.sqlite_db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
