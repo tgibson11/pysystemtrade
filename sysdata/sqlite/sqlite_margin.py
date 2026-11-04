@@ -6,7 +6,8 @@ import pandas as pd
 from syscore.constants import arg_not_supplied
 from sysdata.production.margin import marginData, seriesOfMargin
 from sysdata.sqlite.sqlite_data import sqliteData
-from syslogging.logger import *
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 
 TABLE_NAME = "margin"
 
@@ -26,10 +27,10 @@ class sqliteMarginData(marginData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteMarginData"),
     ):
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
         self._log = log
 
     def __repr__(self):

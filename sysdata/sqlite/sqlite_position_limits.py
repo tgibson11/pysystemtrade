@@ -1,10 +1,10 @@
-import sqlite3
 from typing import Callable
 
 from syscore.constants import arg_not_supplied
 from sysdata.production.position_limits import positionLimitData
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from syslogging.logger import *
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 from sysobjects.production.tradeable_object import (
     listOfInstrumentStrategies,
     instrumentStrategy,
@@ -35,12 +35,12 @@ class sqlitePositionLimitData(positionLimitData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqlitePositionLimitData")
     ):
         super().__init__(log=log)
-        self._strategy_data = _sqliteStrategyPositionLimitData(sqlite_conn)
-        self._instrument_data = _sqliteInstrumentPositionLimitData(sqlite_conn)
+        self._strategy_data = _sqliteStrategyPositionLimitData(sqlite_db)
+        self._instrument_data = _sqliteInstrumentPositionLimitData(sqlite_db)
 
     def __repr__(self):
         return "Data connection for position limit data"
@@ -99,9 +99,9 @@ class sqlitePositionLimitData(positionLimitData):
 class _sqliteInstrumentPositionLimitData(sqliteData):
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
     ):
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "Data connection for instrument position limit data"
@@ -149,9 +149,9 @@ class _sqliteInstrumentPositionLimitData(sqliteData):
 class _sqliteStrategyPositionLimitData(sqliteData):
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
     ):
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "Data connection for strategy position limit data"

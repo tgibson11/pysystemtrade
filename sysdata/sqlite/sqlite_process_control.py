@@ -1,12 +1,11 @@
-import sqlite3
 from typing import Callable
 
-from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from sysobjects.production.process_control import controlProcess, start_run_idx, end_run_idx, missing_date_str
-from sysdata.production.process_control_data import controlProcessData
 from syscore.constants import arg_not_supplied
-
-from syslogging.logger import *
+from sysdata.production.process_control_data import controlProcessData
+from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
+from sysobjects.production.process_control import controlProcess, start_run_idx, end_run_idx, missing_date_str
 
 PROCESS_TABLE_NAME = "process_control"
 METHODS_TABLE_NAME = "process_method"
@@ -50,12 +49,12 @@ class sqliteControlProcessData(controlProcessData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteControlProcessData")
     ):
         controlProcessData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
-        self._method_data = sqliteProcessMethodData(sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
+        self._method_data = sqliteProcessMethodData(sqlite_db)
 
     def __repr__(self):
         return "SQLite data connection for process control"
@@ -145,9 +144,9 @@ def _process_control_factory(cursor, row) -> dict:
 class sqliteProcessMethodData(sqliteData):
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
     ):
-        super().__init__(sqlite_conn=sqlite_conn)
+        super().__init__(sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "SQLite data connection for process methods"

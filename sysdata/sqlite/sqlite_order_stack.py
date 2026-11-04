@@ -3,6 +3,7 @@ from typing import Callable
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
+from sysdata.sqlite.sqlite_db import sqliteDb
 from sysexecution.order_stacks.broker_order_stack import brokerOrderStackData
 from sysexecution.order_stacks.contract_order_stack import contractOrderStackData
 from sysexecution.order_stacks.instrument_order_stack import instrumentOrderStackData
@@ -12,7 +13,7 @@ from sysexecution.orders.broker_orders import brokerOrder
 from sysexecution.orders.contract_orders import contractOrder
 from sysexecution.orders.instrument_orders import instrumentOrder
 from sysexecution.orders.named_order_objects import no_children
-from syslogging.logger import *
+from syslogging.logger import get_logger
 
 # Columns common to all orders
 ORDER_ID = "order_id"
@@ -49,11 +50,13 @@ ORDER_COLUMN_DEFS = [
 class sqliteOrderStackData(orderStackData, sqliteData):
 
     def __init__(
-        self, sqlite_conn=arg_not_supplied, log=get_logger("sqliteOrderStackData")
+        self,
+        sqlite_db: sqliteDb = arg_not_supplied,
+        log=get_logger("sqliteOrderStackData")
     ):
         orderStackData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
-        self._order_id_data = sqliteMaxOrderIdData(self.sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
+        self._order_id_data = sqliteMaxOrderIdData(sqlite_db)
 
     def __repr__(self):
         return f"{self._name} with {self.number_of_orders_on_stack()} active orders"
@@ -268,9 +271,9 @@ ORDER_ID_COLUMN_DEFS = [
 
 class sqliteMaxOrderIdData(sqliteData):
     def __init__(
-        self, sqlite_conn=arg_not_supplied
+        self, sqlite_db: sqliteDb = arg_not_supplied
     ):
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     @property
     def table_name(self) -> str:

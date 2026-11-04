@@ -10,6 +10,7 @@ from sysdata.production.historic_orders import (
     brokerHistoricOrdersData,
 )
 from sysdata.sqlite.sqlite_data import sqliteData
+from sysdata.sqlite.sqlite_db import sqliteDb
 from sysdata.sqlite.sqlite_order_stack import (
     ORDER_ID,
     FILL_DATETIME,
@@ -31,11 +32,11 @@ class sqliteGenericHistoricOrdersData(genericOrdersData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn=arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteGenericHistoricOrdersData")
     ):
         genericOrdersData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def _add_order_to_data_no_checking(self, order: Order):
         # Duplicates will be overridden, so be careful

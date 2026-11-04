@@ -1,9 +1,9 @@
 import datetime
-import sqlite3
 from typing import Callable
 
 from syscore.constants import arg_not_supplied
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
+from sysdata.sqlite.sqlite_db import sqliteDb
 from syslogdiag.email_control import emailControlData
 from syslogging.logger import get_logger
 
@@ -32,11 +32,11 @@ COLUMN_DEFS = [
 class sqliteEmailControlData(emailControlData, sqliteData):
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteEmailControlData")
     ):
         emailControlData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "sqliteEmailControlData"

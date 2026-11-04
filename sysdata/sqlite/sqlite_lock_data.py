@@ -1,11 +1,11 @@
-import sqlite3
 from typing import Callable
 
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
 from sysdata.production.locks import lockData, lock_on, lock_off
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from syslogging.logger import *
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 
 TABLE_NAME = "locked_instrument"
 
@@ -26,11 +26,11 @@ class sqliteLockData(lockData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteLockData")
     ):
         lockData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "sqliteLockData"

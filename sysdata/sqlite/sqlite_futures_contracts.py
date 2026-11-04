@@ -1,11 +1,11 @@
-import sqlite3
 from typing import Callable
 
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
 from sysdata.futures.contracts import futuresContractData
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from syslogging.logger import *
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 from sysobjects.contract_dates_and_expiries import contractDate, expiryDate, EXPIRY_DATE_FORMAT
 from sysobjects.contracts import (
     futuresContract,
@@ -33,11 +33,11 @@ class sqliteFuturesContractData(futuresContractData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteFuturesContractData")
     ):
         futuresContractData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "sqliteFuturesContractData"

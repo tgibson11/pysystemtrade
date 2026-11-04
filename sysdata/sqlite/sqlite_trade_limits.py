@@ -1,4 +1,3 @@
-import sqlite3
 from typing import Callable
 
 from syscore.constants import arg_not_supplied
@@ -8,8 +7,9 @@ from sysdata.production.trade_limits import (
     instrumentStrategyKeyAndDays,
 )
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 from sysobjects.production.tradeable_object import instrumentStrategy
-from syslogging.logger import *
 
 TABLE_NAME = "trade_limit"
 
@@ -34,11 +34,11 @@ class sqliteTradeLimitData(tradeLimitData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteTradeLimitData")
     ):
         tradeLimitData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "SQLite data connection for trade limit data"

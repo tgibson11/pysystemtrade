@@ -5,6 +5,7 @@ import re
 
 from syscore.constants import arg_not_supplied
 from sysdata.config.production_config import get_production_config
+from sysdata.generic_db import genericDb
 
 LIST_OF_MONGO_PARAMS = ["mongo_db", "mongo_host", "mongo_port"]
 
@@ -84,7 +85,7 @@ class MongoClientFactory(object):
 mongo_client_factory = MongoClientFactory()
 
 
-class mongoDb:
+class mongoDb(genericDb):
     """
     Keeps track of mongo database we are connected to
 

@@ -1,17 +1,14 @@
-import sqlite3
-
 from copy import copy
 
 from sysbrokers.IB.ib_connection import connectionIB
-from syscore.objects import get_class_name
 from syscore.constants import arg_not_supplied
+from syscore.objects import get_class_name
 from syscore.text import camel_case_split
 from sysdata.config.production_config import get_production_config, Config
-from sysdata.mongodb.mongo_connection import mongoDb
-from sysdata.sqlite.sqlite_data import get_sqlite_connection
+from sysdata.generic_db import genericDb
+from sysdata.parquet.parquet_access import ParquetAccess
 from syslogging import COMPONENT_LOG_LABEL
 from syslogging.logger import get_logger
-from sysdata.parquet.parquet_access import ParquetAccess
 from sysproduction.data.production_data_objects import get_class_for_data_type, IB_CLIENT_IDS
 
 
@@ -23,8 +20,7 @@ class dataBlob(object):
         csv_data_paths: dict = arg_not_supplied,
         parquet_store_path: str = arg_not_supplied,
         ib_conn: connectionIB = arg_not_supplied,
-        mongo_db: mongoDb = arg_not_supplied,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        db: genericDb = arg_not_supplied,
         log=arg_not_supplied,
         keep_original_prefix: bool = False,
     ):
@@ -60,8 +56,7 @@ class dataBlob(object):
 
         """
 
-        self._mongo_db = mongo_db
-        self._sqlite_conn = sqlite_conn
+        self._db = db
         self._ib_conn = ib_conn
         self._log = log
         self._log_name = log_name
@@ -146,11 +141,11 @@ class dataBlob(object):
     def _add_mongo_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
+            resolved_instance = class_object(mongo_db=self.db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error '%s' couldn't evaluate %s(mongo_db=self.mongo_db) \
+                "Error '%s' couldn't evaluate %s(mongo_db=self.db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -162,11 +157,11 @@ class dataBlob(object):
     def _add_arctic_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(mongo_db=self.mongo_db, log=log)
+            resolved_instance = class_object(mongo_db=self.db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error %s couldn't evaluate %s(mongo_db=self.mongo_db) \
+                "Error %s couldn't evaluate %s(mongo_db=self.db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -178,11 +173,11 @@ class dataBlob(object):
     def _add_sqlite_class(self, class_object):
         log = self._get_specific_logger(class_object)
         try:
-            resolved_instance = class_object(sqlite_conn=self.sqlite_conn, log=log)
+            resolved_instance = class_object(sqlite_db=self.db, log=log)
         except Exception as e:
             class_name = get_class_name(class_object)
             msg = (
-                "Error '%s' couldn't evaluate %s(sqlite_conn=self.sqlite_conn) \
+                "Error '%s' couldn't evaluate %s(sqlite_db=self.db) \
                         This might be because import is missing\
                          or arguments don't follow pattern"
                 % (str(e), class_name)
@@ -302,8 +297,8 @@ class dataBlob(object):
             self.ib_conn.close_connection()
             self.db_ib_broker_client_id.release_clientid(self.ib_conn.client_id())
 
-        if self._sqlite_conn is not arg_not_supplied:
-            self.sqlite_conn.close()
+        if self._db is not arg_not_supplied:
+            self._db.close_connection()
 
         # No need to explicitly close Mongo connections; handled by Python garbage collection
 
@@ -343,22 +338,35 @@ class dataBlob(object):
         return int(client_id)
 
     @property
-    def mongo_db(self) -> mongoDb:
-        mongo_db = getattr(self, "_mongo_db", arg_not_supplied)
-        if mongo_db is arg_not_supplied:
-            mongo_db = self._get_new_mongo_db()
-            self._mongo_db = mongo_db
-
-        return mongo_db
+    def db(self):
+        db = getattr(self, "_db", arg_not_supplied)
+        return db
 
     @property
-    def sqlite_conn(self):
-        sqlite_conn = getattr(self, "_sqlite_conn", arg_not_supplied)
-        if sqlite_conn is arg_not_supplied:
-            sqlite_conn = self._get_new_sqlite_conn()
-            self._sqlite_conn = sqlite_conn
+    def mongo_db(self):
+        db = self.db
+        if db is arg_not_supplied:
+            db = self._get_new_mongo_db()
+            self._db = db
 
-        return sqlite_conn
+        from sysdata.mongodb.mongo_connection import mongoDb
+        if not isinstance(db, mongoDb):
+            raise TypeError("db is not an instance of mongoDb")
+
+        return db
+
+    @property
+    def sqlite_db(self):
+        db = self.db
+        if db is arg_not_supplied:
+            db = self._get_new_sqlite_db()
+            self._db = db
+
+        from sysdata.sqlite.sqlite_db import sqliteDb
+        if not isinstance(db, sqliteDb):
+            raise TypeError("db is not an instance of sqliteDb")
+
+        return db
 
     @property
     def parquet_access(self) -> ParquetAccess:
@@ -380,15 +388,17 @@ class dataBlob(object):
 
         return path
 
-    def _get_new_mongo_db(self) -> mongoDb:
+    def _get_new_mongo_db(self):
+        from sysdata.mongodb.mongo_connection import mongoDb
         mongo_db = mongoDb()
 
         return mongo_db
 
-    def _get_new_sqlite_conn(self) -> sqlite3.Connection:
-        sqlite_conn = get_sqlite_connection()
+    def _get_new_sqlite_db(self):
+        from sysdata.sqlite.sqlite_db import sqliteDb
+        sqlite_db = sqliteDb()
 
-        return sqlite_conn
+        return sqlite_db
 
     @property
     def config(self) -> Config:

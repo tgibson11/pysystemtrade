@@ -1,6 +1,5 @@
 import datetime as dt
 import sqlite3
-
 from sqlite3 import Connection
 from typing import Callable
 
@@ -8,15 +7,15 @@ import pandas as pd
 
 from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
-from sysdata.config.production_config import get_production_config
+from sysdata.sqlite.sqlite_db import sqliteDb
 
 
 class sqliteData(object):
 
-    def __init__(self, sqlite_conn: Connection = arg_not_supplied):
-        if sqlite_conn is arg_not_supplied:
-            sqlite_conn = get_sqlite_connection()
-        self._sqlite_conn = sqlite_conn
+    def __init__(self, sqlite_db: sqliteDb = arg_not_supplied):
+        if sqlite_db is arg_not_supplied:
+            sqlite_db = sqliteDb()
+        self._sqlite_conn = sqlite_db.sqlite_conn
 
     @property
     def sqlite_conn(self) -> Connection:
@@ -148,17 +147,6 @@ class sqliteData(object):
     def _drop_table(self):
         with self.sqlite_conn:
             self.sqlite_conn.execute(f"DROP TABLE IF EXISTS {self.table_name}")
-
-
-def get_sqlite_connection(db_file_name: str = arg_not_supplied) -> Connection:
-    if db_file_name is arg_not_supplied:
-        config = get_production_config()
-        db_file_name = config.get_element("sqlite_database")
-
-    sqlite_conn = sqlite3.connect(
-        db_file_name, detect_types=sqlite3.PARSE_DECLTYPES, autocommit=True
-    )
-    return sqlite_conn
 
 
 def _params_dict_to_where_clause(params: dict) -> str:

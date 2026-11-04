@@ -1,4 +1,3 @@
-import sqlite3
 from typing import Callable
 
 import pandas as pd
@@ -7,7 +6,8 @@ from syscore.constants import arg_not_supplied
 from syscore.exceptions import missingData
 from sysdata.futures.spread_costs import spreadCostData
 from sysdata.sqlite.sqlite_data import sqliteData, _row_to_dict
-from syslogging.logger import *
+from sysdata.sqlite.sqlite_db import sqliteDb
+from syslogging.logger import get_logger
 
 TABLE_NAME = "spread_cost"
 
@@ -30,11 +30,11 @@ class sqliteSpreadCostData(spreadCostData, sqliteData):
 
     def __init__(
         self,
-        sqlite_conn: sqlite3.Connection = arg_not_supplied,
+        sqlite_db: sqliteDb = arg_not_supplied,
         log=get_logger("sqliteSpreadCostData")
     ):
         spreadCostData.__init__(self, log=log)
-        sqliteData.__init__(self, sqlite_conn=sqlite_conn)
+        sqliteData.__init__(self, sqlite_db=sqlite_db)
 
     def __repr__(self):
         return "SQLite data connection for spread cost data"
